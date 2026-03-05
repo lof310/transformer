@@ -1,3 +1,31 @@
+Metadata-Version: 2.4
+Name: transformer
+Version: 0.1.0
+Summary: A polished PyTorch implementation of the current State-Of-The-Art(SOTA) Transformer
+Author-email: Leinier Orama <lof310w@gmail.com>
+Maintainer-email: Leinier Orama <lof310w@gmail.com>
+License: Apache-2.0
+Project-URL: Homepage, https://github.com/lof310/transformer
+Project-URL: Repository, https://github.com/lof310/transformer.git
+Keywords: llm,transformers,pytorch,deep-learning,machine-learning
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Science/Research
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+Requires-Dist: torch>=1.12.0
+Requires-Dist: transformers>=4.30.0
+
 # Transformer
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/lof310/transformer/actions)

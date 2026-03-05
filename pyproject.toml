@@ -1,0 +1,63 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "transformer"
+version = "0.1.0"
+description = "A polished PyTorch implementation of the current State-Of-The-Art(SOTA) Transformer"
+readme = "README.md"
+authors = [
+    {name = "Leinier Orama", email = "lof310w@gmail.com"}
+]
+maintainers = [
+    { name = "Leinier Orama", email = "lof310w@gmail.com" }
+]
+license = {text = "Apache-2.0"}
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Operating System :: OS Independent"
+]
+keywords = [
+    "llm", "transformers", "pytorch", "deep-learning", "machine-learning"
+]
+requires-python = ">=3.9"
+dependencies = [
+    "torch>=1.12.0",
+    "transformers>=4.30.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/lof310/transformer"
+Repository = "https://github.com/lof310/transformer.git"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["transformer*"]
+
+[tool.black]
+line-length = 120
+target-version = ['py38', 'py39', 'py310', 'py311', 'py312', 'py313']
+include = '\.pyi?$'
+
+[tool.coverage.run]
+source = ["transformer"]
+omit = ["*/tests/*", "*/test_*"]
+
+[tool.mypy]
+ignore_missing_imports = true
+warn_return_any = true
+warn_unused_configs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
