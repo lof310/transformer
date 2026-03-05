@@ -11,7 +11,7 @@ class TransformerConfig(PretrainedConfig):
         vocab_size: int = 50000,
         d_model: int = 1536,
         d_ff: int = None,
-        attn: str = "MHA"
+        attn: str = "MHA",
         attn_bias: bool = False,
         ffn_bias: bool = True,
         attn_qk_norm: bool = False,

@@ -91,7 +91,7 @@ class CrossAttention(nn.Module):
         q, k = (self.q_norm(q), self.k_norm(k)) if self.qk_norm else (q,k)
         q, k = self.rope(q, k, pos, pos) if pos is not None else (q, k)
         A_weights = torch.matmul(q, k.transpose(-1, -2)) * self.scale
-        A_scores = F.softmax(A_weights.masked_fill_(mask, float('-inf')), dim=-1) if mask is not None else F.softmax(A_weights dim=-1)
+        A_scores = F.softmax(A_weights.masked_fill_(mask, float('-inf')), dim=-1) if mask is not None else F.softmax(A_weights, dim=-1)
         y = torch.matmul(A_scores, v).transpose(1, 2).contiguous().view(B, Lq, D)
         if return_states:
             return {"output": self.out_proj(y), "queries": q, "keys": k, "values": v, "attn_weights": A_weights, "attn_scores": A_scores, "output_before_proj": y, "input": (queries, kv)}

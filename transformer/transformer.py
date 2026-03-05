@@ -5,10 +5,10 @@ from transformers import PreTrainedModel, PretrainedConfig, GenerationMixin
 from transformers.modeling_outputs import CausalLMOutput
 import math
 
-from config import TransformerConfig
-from attns import MHA
-from pos import RoPE
-from ffn import SwiGLU
+from .config import TransformerConfig
+from .attns import MHA
+from .pos import RoPE
+from .ffn import SwiGLU
 
 class TransformerBlock(nn.Module):
     def __init__(self, config, layer_idx: int = 0):
