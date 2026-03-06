@@ -2,8 +2,8 @@ name: Deploy Documentation
 
 on:
   push:
-    branches: [ main ]  # or master
-  workflow_dispatch:      # allow manual trigger
+    branches: [ main ]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -26,7 +26,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -e .
-          pip install -r docs/requirements-docs.txt
+          pip install -r ./docs/requirements-docs.txt
 
       - name: Build Sphinx documentation
         run: |
