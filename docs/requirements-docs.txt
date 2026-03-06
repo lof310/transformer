@@ -1,0 +1,5 @@
+sphinx>=5.0
+myst-parser>=0.18
+furo>=2023.0.0
+sphinx-rtd-theme
+sphinx-autobuild
