@@ -50,7 +50,7 @@ class TransformerBlock(nn.Module):
 
         Returns:
             Union[torch.Tensor, Dict]: Output tensor (batch_size, seq_len, d_model) if not return_states,
-                                        else a dict containing Final Output with Attention and FFN Outputs.
+                else a dict containing the keys: "output", "attn_output" and "ffn_output".
         """
         attn = self.attn(self.norm_attn(x), attn_mask, pos, return_states)
         x = x + attn["output"] if return_states else x + attn
@@ -101,7 +101,8 @@ class Transformer(PreTrainedModel):
             return_states (bool, optional): If True, return hidden states of all layers. Default: False
 
         Returns:
-            CausalLMOutput: Contains loss (if labels given), logits, and optionally hidden states.
+            CausalLMOutput: Contains loss (if labels given), logits, and optionally hidden states being a tuple of (input_embd, hidden_states)
+                where `hidden_states` is a list of dictionaries for the output of each layer.
         """
         B, N = input_ids.shape
 

@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-
 class SwiGLU(nn.Module):
     """
     SwiGLU feed-forward module (used in LLaMA, etc.).
@@ -28,7 +27,8 @@ class SwiGLU(nn.Module):
             return_states (bool, optional): If True, return intermediate activations and input. Default: False
 
         Returns:
-            Union[torch.Tensor, Dict]: Output tensor (..., d_model) or dict with intermediates.
+            Union[torch.Tensor, Dict]: Output tensor (..., d_model) or dict with intermediates states
+                containing the keys: 'output', 'y1', 'y2' and 'input'.
         """
         y1, y2 = self.W1(x).chunk(2, dim=-1)
         if return_states:
@@ -62,7 +62,8 @@ class MLP(nn.Module):
             return_states (bool, optional): If True, return intermediate activations. Default: False
 
         Returns:
-            Union[torch.Tensor, Dict]: Output tensor (..., d_model) or dict with intermediates states.
+            Union[torch.Tensor, Dict]: Output tensor (..., d_model) or dict with intermediates states
+                containing the keys: 'output', 'h1', 'h2' and 'input'.
         """
         if return_states:
             h1 = self.net[0](x)

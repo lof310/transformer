@@ -17,7 +17,7 @@ We welcome contributions! Please follow these guidelines to ensure a smooth coll
 We use [Black](https://black.readthedocs.io/) for code formatting and [isort](https://pycqa.github.io/isort/) for import sorting. Please run these before committing:
 
 ```bash
-#black transformer/ tests/
+black transformer/ tests/
 isort transformer/ tests/
 ```
 
@@ -48,4 +48,4 @@ make html
 
 ## Code of Conduct
 
-Please note that this project adheres to a [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code.
+Please note that this project adheres to a [Contributor Covenant Code of Conduct]. By participating, you are expected to uphold this code.

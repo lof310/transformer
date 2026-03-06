@@ -44,7 +44,7 @@ class MHA(nn.Module):
 
         Returns:
             Union[torch.Tensor, Dict]: Output tensor (batch_size, seq_len, d_model) if not return_states,
-                                        else a dict containing output, queries, keys, values, attention weights, etc.
+                else a dict containing the keys: 'output', 'queries', 'keys', 'values', 'attn_weights', 'attn_scores', 'output_before_proj' and 'input'.
         """
         B, N, D, H, d = *x.shape, self.n_heads, self.d_head
 
@@ -101,7 +101,8 @@ class GQA(nn.Module):
             return_states (bool, optional): If True, return a dictionary of intermediate tensors. Default: False
 
         Returns:
-            Union[torch.Tensor, Dict]: Output tensor (batch_size, seq_len, d_model) or dict with intermediates states.
+            Union[torch.Tensor, Dict]: Output tensor (batch_size, seq_len, d_model) or dict with intermediates states
+                containing the keys: 'output', 'queries', 'keys', 'values', 'attn_weights', 'attn_scores', 'output_before_proj' and 'input'.
         """
         B, N, D, H_q, H_kv, G, d = *x.shape, self.n_heads, self.n_kv_heads, self.groups, self.d_head
 
@@ -161,7 +162,8 @@ class CrossAttention(nn.Module):
             return_states (bool, optional): If True, return dictionary of intermediates. Default: False
 
         Returns:
-            Union[torch.Tensor, Dict]: Output tensor (batch_size, seq_len_q, d_model) or dict.
+            Union[torch.Tensor, Dict]: Output tensor (batch_size, seq_len_q, d_model) or a dict
+                containing the keys: 'output', 'queries', 'keys', 'values', 'attn_weights', 'attn_scores', 'output_before_proj' and 'input' which is a tuple of (queries, kv).
         """
         B, Lq, D, Lk, H, d = *q.shape, kv.shape[1], self.n_heads, self.d_head
 

@@ -20,7 +20,6 @@ api
 :caption: Project Info
 
 contributing
-license
 ```
 
 ## Overview

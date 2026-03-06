@@ -45,7 +45,7 @@ This section provides detailed documentation of all public modules and classes.
 ### RoPE (Rotary Position Embedding)
 
 ```{eval-rst}
-.. automodule:: transformer.pos
+.. autoclass:: transformer.pos.RoPE
    :members:
    :undoc-members:
    :show-inheritance:
@@ -82,7 +82,7 @@ This section provides detailed documentation of all public modules and classes.
    :show-inheritance:
 ```
 
-### Transformer (Main Model)
+### Transformer Class (Main Model)
 
 ```{eval-rst}
 .. autoclass:: transformer.transformer.Transformer
