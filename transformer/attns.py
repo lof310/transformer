@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from .pos import RoPE
+
 class MHA(nn.Module):
     r"""
     **Multi-Head Attention** ``MHA`` module using the optimized implementation of

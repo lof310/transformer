@@ -200,7 +200,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Usage Examples</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../examples.html"></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Usage Examples</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Project Info</span></p>
 <ul>
@@ -240,6 +240,7 @@
           <h1>Source code for transformer.config</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">PretrainedConfig</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 
 <div class="viewcode-block" id="TransformerConfig">
 <a class="viewcode-back" href="../../api.html#transformer.config.TransformerConfig">[docs]</a>
@@ -295,7 +296,7 @@
         <span class="n">vocab_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50000</span><span class="p">,</span>
         <span class="n">d_model</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1536</span><span class="p">,</span>
         <span class="n">d_ff</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">attn</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;MHA&quot;</span><span class="p">,</span>
+        <span class="n">attn_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;MHA&quot;</span><span class="p">,</span>
         <span class="n">attn_bias</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">ffn_bias</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">attn_qk_norm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -308,8 +309,8 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_layer</span> <span class="o">=</span> <span class="n">n_layers</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_heads</span> <span class="o">=</span> <span class="n">n_heads</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">attn</span> <span class="o">=</span> <span class="n">attn</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_kv_heads</span> <span class="o">=</span> <span class="n">n_kv_heads</span> <span class="k">if</span> <span class="n">attn</span> <span class="o">==</span> <span class="s2">&quot;GQA&quot;</span> <span class="k">else</span> <span class="n">n_heads</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attn_type</span> <span class="o">=</span> <span class="n">attn_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_kv_heads</span> <span class="o">=</span> <span class="n">n_kv_heads</span> <span class="k">if</span> <span class="n">attn_type</span> <span class="o">==</span> <span class="s2">&quot;GQA&quot;</span> <span class="k">else</span> <span class="n">n_heads</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vocab_size</span> <span class="o">=</span> <span class="n">vocab_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">attn_bias</span> <span class="o">=</span> <span class="n">attn_bias</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ffn_bias</span> <span class="o">=</span> <span class="n">ffn_bias</span>

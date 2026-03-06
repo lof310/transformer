@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Contributing" href="contributing.html"><link rel="prev" title="API Reference" href="api.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title> - transformer 0.1.0 documentation</title>
+        <title>Usage Examples - transformer 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
@@ -172,7 +172,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
@@ -201,7 +201,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Usage Examples</span></p>
 <ul class="current">
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#"></a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Usage Examples</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Project Info</span></p>
 <ul>
@@ -239,13 +239,139 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="id1">
-<h1><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h1>
+          <section id="usage-examples">
+<h1>Usage Examples<a class="headerlink" href="#usage-examples" title="Link to this heading">¶</a></h1>
+<p><strong>This section provides complete and diverse usage examples of all modules and classes</strong></p>
+<section id="basic-usage">
+<h2>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nn</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn.functional</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">F</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">transformer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Transformer</span><span class="p">,</span> <span class="n">TransformerConfig</span>
+
+<span class="c1"># Define configuration</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">TransformerConfig</span><span class="p">(</span>
+    <span class="n">n_layers</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+    <span class="n">n_heads</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+    <span class="n">d_model</span><span class="o">=</span><span class="mi">384</span><span class="p">,</span>
+    <span class="n">vocab_size</span><span class="o">=</span><span class="mi">65</span><span class="p">,</span>
+    <span class="n">seq_len</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
+    <span class="n">max_seq_len</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span>
+    <span class="n">tied_weights</span><span class="o">=</span><span class="kc">False</span>
+<span class="p">)</span>
+
+<span class="c1"># Create model</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">Transformer</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+<span class="c1"># Prepare input</span>
+<span class="n">batch_size</span><span class="p">,</span> <span class="n">seq_len</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">128</span>
+<span class="n">input_ids</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">vocab_size</span><span class="p">,</span> <span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">seq_len</span><span class="p">))</span>
+
+<span class="c1"># Forward pass</span>
+<span class="n">outputs</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">input_ids</span><span class="p">)</span>
+<span class="n">logits</span> <span class="o">=</span> <span class="n">outputs</span><span class="o">.</span><span class="n">logits</span> <span class="c1"># shape: [B, N, V]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">logits</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="visualization">
+<h2>Visualization<a class="headerlink" href="#visualization" title="Link to this heading">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nn</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn.functional</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">F</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">transformer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Transformer</span><span class="p">,</span> <span class="n">TransformerConfig</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="c1"># Define configuration</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">TransformerConfig</span><span class="p">(</span>
+    <span class="n">n_layers</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+    <span class="n">n_heads</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+    <span class="n">d_model</span><span class="o">=</span><span class="mi">384</span><span class="p">,</span>
+    <span class="n">vocab_size</span><span class="o">=</span><span class="mi">65</span><span class="p">,</span>
+    <span class="n">seq_len</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
+    <span class="n">max_seq_len</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span>
+    <span class="n">tied_weights</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+
+<span class="c1"># Create model</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">Transformer</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+<span class="c1"># Prepare input</span>
+<span class="n">batch_size</span><span class="p">,</span> <span class="n">seq_len</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">128</span>
+<span class="n">input_ids</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">vocab_size</span><span class="p">,</span> <span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">seq_len</span><span class="p">))</span>
+
+<span class="c1"># Forward pass</span>
+<span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">input_ids</span><span class="p">,</span> <span class="n">return_states</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">logits</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">logits</span> <span class="c1"># shape: [batch_size, seq_len, vocab_size]</span>
+<span class="n">hidden_states</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">hidden_states</span> <span class="c1"># Tuple: (input_embs, hidden_states)</span>
+<span class="n">hidden_states</span> <span class="o">=</span> <span class="n">hidden_states</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># The hidden_states</span>
+
+<span class="c1"># The hidden_states is a list of Dictionaries for each layer containing the following dictionary structure for each layer:</span>
+<span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">{</span>
+<span class="sd">    &quot;output&quot;: torch.Tensor,  # Shape: [B, N, D]</span>
+<span class="sd">    &quot;attn_output&quot;: {</span>
+<span class="sd">        &quot;output&quot;: torch.Tensor,       # Shape: [B, N, D]</span>
+<span class="sd">        &quot;queries&quot;: torch.Tensor,      # Shape: [B, H, N, d]</span>
+<span class="sd">        &quot;keys&quot;: torch.Tensor,         # Shape: [B, H, N, d]</span>
+<span class="sd">        &quot;values&quot;: torch.Tensor,       # Shape: [B, H, N, d]</span>
+<span class="sd">        &quot;attn_weights&quot;: torch.Tensor, # Shape: [B, H, N, N] or [B, H, Lq, Lk] depending on if you use the Cross Attention module</span>
+<span class="sd">        &quot;attn_scores&quot;: torch.Tensor,  # Shape: [B, H, N, N] or [B, H, Lq, Lk] depending on if you use the Cross Attention module</span>
+<span class="sd">        &quot;output_before_proj&quot;: torch.Tensor, # Shape: [B, N, D]</span>
+<span class="sd">        &quot;input&quot;: Union[torch.Tensor, Tuple] # Can be Tensor of shape [B, N, D] or Tuple (query, kv) both of shape [B, N, D]</span>
+<span class="sd">                                             # depending on if you use the Cross Attention module</span>
+<span class="sd">    },</span>
+<span class="sd">    &quot;ffn_output&quot;: {</span>
+<span class="sd">        &quot;output&quot;: torch.Tensor, # Shape: [B, N, D]</span>
+<span class="sd">        &quot;y1&quot;: torch.Tensor, # Shape: [B, N, D_ff//2]</span>
+<span class="sd">        &quot;y2&quot;: torch.Tensor, # Shape: [B, N, D_ff//2]</span>
+<span class="sd">        &quot;input&quot;: torch.Tensor # Shape: [B, N, D]</span>
+<span class="sd">    }</span>
+<span class="sd">}</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">layer</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">head</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># Visualization of Attention Scores</span>
+<span class="c1"># Note: Use .detach() always to avoid RuntimeError</span>
+<span class="n">attn_matrix</span> <span class="o">=</span> <span class="n">hidden_states</span><span class="p">[</span><span class="n">layer</span><span class="p">][</span><span class="s2">&quot;attn_output&quot;</span><span class="p">][</span><span class="s2">&quot;attn_scores&quot;</span><span class="p">][</span><span class="n">batch</span><span class="p">,</span> <span class="n">head</span><span class="p">]</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span> <span class="c1"># Shape [N, N]</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">attn_matrix</span><span class="p">)</span> <span class="c1"># No need to convert to numpy this is handled automatically</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c1"># Visualization of Attention Weights</span>
+<span class="n">attn_matrix</span> <span class="o">=</span> <span class="n">hidden_states</span><span class="p">[</span><span class="n">layer</span><span class="p">][</span><span class="s2">&quot;attn_output&quot;</span><span class="p">][</span><span class="s2">&quot;attn_weights&quot;</span><span class="p">][</span><span class="n">batch</span><span class="p">,</span> <span class="n">head</span><span class="p">]</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span> <span class="c1"># Shape [N, N]</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">attn_matrix</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c1"># Visualization of the weights of the first linear layer of SwiGLU as a HeatMap</span>
+<span class="n">weights</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">blocks</span><span class="p">[</span><span class="n">layer</span><span class="p">]</span><span class="o">.</span><span class="n">ffn</span><span class="o">.</span><span class="n">W1</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">mT</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span> <span class="c1"># Shape [d_ff, d_model]</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c1"># Visualization of the weights of the first linear layer of SwiGLU as lines</span>
+<span class="n">weights</span> <span class="o">=</span> <span class="n">weights</span><span class="o">.</span><span class="n">mT</span> <span class="c1"># Shape [d_model, d_ff]</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
 </section>
 
         </article>
@@ -291,8 +417,28 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Usage Examples</a><ul>
+<li><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
+<li><a class="reference internal" href="#visualization">Visualization</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>

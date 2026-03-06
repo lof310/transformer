@@ -1,5 +1,6 @@
 from transformers import PretrainedConfig
 
+import math
 
 class TransformerConfig(PretrainedConfig):
     r"""
@@ -51,7 +52,7 @@ class TransformerConfig(PretrainedConfig):
         vocab_size: int = 50000,
         d_model: int = 1536,
         d_ff: int = None,
-        attn: str = "MHA",
+        attn_type: str = "MHA",
         attn_bias: bool = False,
         ffn_bias: bool = True,
         attn_qk_norm: bool = False,
@@ -64,8 +65,8 @@ class TransformerConfig(PretrainedConfig):
         super().__init__(**kwargs)
         self.n_layer = n_layers
         self.n_heads = n_heads
-        self.attn = attn
-        self.n_kv_heads = n_kv_heads if attn == "GQA" else n_heads
+        self.attn_type = attn_type
+        self.n_kv_heads = n_kv_heads if attn_type == "GQA" else n_heads
         self.vocab_size = vocab_size
         self.attn_bias = attn_bias
         self.ffn_bias = ffn_bias

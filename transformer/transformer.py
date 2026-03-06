@@ -52,9 +52,9 @@ class TransformerBlock(nn.Module):
             Union[torch.Tensor, Dict]: Output tensor (batch_size, seq_len, d_model) if not return_states,
                 else a dict containing the keys: "output", "attn_output" and "ffn_output".
         """
-        attn = self.attn(self.norm_attn(x), attn_mask, pos, return_states)
+        attn = self.attn(self.norm_attn(x), attn_mask, pos, return_states=return_states)
         x = x + attn["output"] if return_states else x + attn
-        ffn = self.ffn(self.norm_ffn(x), return_states)
+        ffn = self.ffn(self.norm_ffn(x), return_states=return_states)
         x = x + ffn["output"] if return_states else x + ffn
         if return_states:
             return {"output": x, "attn_output": attn, "ffn_output": ffn}
@@ -88,7 +88,7 @@ class Transformer(PreTrainedModel):
         else:
             self.lm_head.weight.data.normal_(mean=0.0, std=0.025)
 
-    def forward(self, input_ids: torch.Tensor, labels: torch.Tensor = None, is_causal: bool = True, attn_mask: torch.Tensor = None, pos: torch.Tensor = None, return_states=False, **kwargs):
+    def forward(self, input_ids: torch.Tensor, labels: torch.Tensor = None, is_causal: bool = True, attn_mask: torch.Tensor = None, pos: torch.Tensor = None, return_states: bool = False, **kwargs):
         """
         Forward pass of the Transformer model.
 
@@ -115,10 +115,10 @@ class Transformer(PreTrainedModel):
         hidden_states = [] if return_states else None
 
         for block in self.blocks:
-            output_dict = block(out, attn_mask, pos, return_states)
+            output_dict = block(out, attn_mask, pos, return_states=return_states)
             out = output_dict["output"] if return_states else output_dict
             if return_states:
-                hidden_states.append(out)
+                hidden_states.append(output_dict)
 
         logits = self.lm_head(self.norm_out(out))
 

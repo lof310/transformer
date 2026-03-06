@@ -63,7 +63,7 @@ output = model(input_ids, return_states=False)
 
 ## Documentation
 
-Full Documentation available at [![Documentation](https://lof310.github.io/transformer)](https://lof310.github.io/transformer)
+Full Documentation available at [This Page](https://lof310.github.io/transformer)
 
 ## Contributing
 
