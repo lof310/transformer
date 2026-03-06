@@ -255,25 +255,25 @@
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PreTrainedConfig</span></code></p>
 <p>Configuration class for Transformer models.
 Inherits from <cite>PretrainedConfig</cite> for HuggingFace compatibility.</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>n_layers (int): Number of Transformer Blocks (layers).
-n_heads (int): Number of Attention Heads.
-vocab_size (int): Vocabulary size of the model. Defines the number of different tokens.
-d_model (int): Model Dimension.
-d_ff (int, optional): Dimension of the Feed-Forward Hidden Layer.
-seq_len (int): Sequence Length.
-max_seq_len (int): Maximum sequence length for positional embeddings.
-attn_bias (bool): Whether to use bias in attention Linear Projections.
-attn_qk_norm (bool): Whether to apply Normalization to Queries and Keys before the Attention Computation.
-ffn_bias (bool): Whether to use bias in Feed-Forward Linear layers.
-lm_head_bias (bool): Whether to use bias in the Language Modeling Head.
-tied_weights (bool): If True, tie the input embedding and output projection weights.
-rope_base (float, optional): Base for the RoPE frequency computation.
-attn_type (str): Attention type, one of “MHA”, “GQA”. For GQA, also specify <cite>n_kv_heads</cite>. Default: “MHA”
-n_kv_heads (int, optional): Number of key/value heads for Grouped-Query Attention(GQA).
-<a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs: Additional keyword arguments passed to <cite>PretrainedConfig</cite>.</p>
-</dd>
-</dl>
+<p>Args:</p>
+<blockquote>
+<div><p>n_layers (int): Number of Transformer Blocks (layers).</p>
+<p>n_heads (int): Number of Attention Heads.</p>
+<p>vocab_size (int): Vocabulary size of the model. Defines the number of different tokens.</p>
+<p>d_model (int): Model Dimension.</p>
+<p>d_ff (int, optional): Dimension of the Feed-Forward Hidden Layer.</p>
+<p>seq_len (int): Sequence Length.</p>
+<p>max_seq_len (int): Maximum sequence length for positional embeddings.</p>
+<p>attn_bias (bool, optional): Whether to use bias in attention Linear Projections. Default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+<p>attn_qk_norm (bool, optional): Whether to apply Normalization to Queries and Keys before the Attention Computation. Default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p>
+<p>ffn_bias (bool, optional): Whether to use bias in Feed-Forward Linear layers. Default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p>
+<p>lm_head_bias (bool, optional): Whether to use bias in the Language Modeling Head. Default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+<p>tied_weights (bool, optional): If True, tie the input embedding and output projection weights. Default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+<p>rope_base (float, optional): Base for the RoPE frequency computation. Default: <code class="docutils literal notranslate"><span class="pre">10000.0</span></code></p>
+<p>attn_type (str, optional): Attention type, one of <code class="docutils literal notranslate"><span class="pre">MHA</span></code>, <code class="docutils literal notranslate"><span class="pre">GQA</span></code>, <code class="docutils literal notranslate"><span class="pre">CrossAttention</span></code>. For <code class="docutils literal notranslate"><span class="pre">GQA</span></code>, also specify <cite>n_kv_heads</cite>. Default: <code class="docutils literal notranslate"><span class="pre">MHA</span></code></p>
+<p>n_kv_heads (int, optional): Number of key/value heads for Grouped-Query Attention(GQA). Default: <code class="docutils literal notranslate"><span class="pre">n_heads</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">**kwargs</span></code> (dict, optional): Additional keyword arguments passed to <cite>PretrainedConfig</cite></p>
+</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -339,19 +339,19 @@ n_kv_heads (int, optional): Number of key/value heads for Grouped-Query Attentio
 <code class="docutils literal notranslate"><span class="pre">torch.nn.functional.scaled_dot_product_attention()</span></code> when possible.</p>
 <dl>
 <dt>Args:</dt><dd><p>d_model (int): Model dimension.
-n_heads (int): Number of attention heads. Note that <code class="docutils literal notranslate"><span class="pre">d_model</span></code> will be split</p>
-<blockquote>
-<div><p>across <code class="docutils literal notranslate"><span class="pre">n_heads</span></code> (i.e. each head will have dimension <code class="docutils literal notranslate"><span class="pre">d_head//n_heads</span></code>).</p>
-</div></blockquote>
+n_heads (int): Number of attention heads. Note that <code class="docutils literal notranslate"><span class="pre">d_model</span></code> will be split
+across <code class="docutils literal notranslate"><span class="pre">n_heads</span></code> (i.e. each head will have dimension <code class="docutils literal notranslate"><span class="pre">d_head//n_heads</span></code>).</p>
 <dl class="simple">
-<dt>dropout: Dropout probability on <code class="docutils literal notranslate"><span class="pre">attn_output_weights</span></code>. Default: <code class="docutils literal notranslate"><span class="pre">0.0</span></code> (no dropout).</dt><dd><p>Note: Latest SOTA Architectures do not use Dropout at all and for Research Purposes it is recommended to never use it.</p>
+<dt>dropout (float): Dropout probability on <code class="docutils literal notranslate"><span class="pre">attn_output_weights</span></code>. Default: <code class="docutils literal notranslate"><span class="pre">0.0</span></code> (no dropout).</dt><dd><p><strong>Note: Latest SOTA Architectures do not use Dropout at all and for Research Purposes
+it is recommended to never use it.</strong></p>
 </dd>
 </dl>
-<p>attn_bias (bool, optional): Whether to use bias in linear projections. Default: <code class="docutils literal notranslate"><span class="pre">False</span></code>
-qk_norm (bool, optional): Whether to apply RMSNorm to queries and keys. Default: <code class="docutils literal notranslate"><span class="pre">True</span></code>
-layer_idx (int, optional): Index of the layer (used for debugging/logging).
-rope_base (int, optional): Base for the Exponential Frequency Calculation in RoPE. Default: <code class="docutils literal notranslate"><span class="pre">10000.0</span></code>
-max_seq_len (int): Maximum sequence length for RoPE.</p>
+<p>attn_bias (bool, optional): Whether to use bias in linear projections. Default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+<p>qk_norm (bool, optional): Whether to apply RMSNorm to queries and keys. Default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p>
+<p>layer_idx (int, optional): Index of the layer (used for debugging/logging).</p>
+<p>rope_base (int, optional): Base for the Exponential Frequency Calculation in RoPE.
+Default: <code class="docutils literal notranslate"><span class="pre">10000.0</span></code></p>
+<p>max_seq_len (int): Maximum sequence length for RoPE.</p>
 </dd>
 </dl>
 <dl class="field-list simple">
@@ -393,22 +393,20 @@ max_seq_len (int): Maximum sequence length for RoPE.</p>
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_states</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transformer/attns.html#MHA.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transformer.attns.MHA.forward" title="Link to this definition">¶</a></dt>
 <dd><p>Forward pass of MHA.</p>
 <dl>
-<dt>Args:</dt><dd><dl>
-<dt>x (torch.Tensor): Input tensor of shape <span class="math">(B, N, D)</span> where <span class="math">N</span> is the Sequence Length,</dt><dd><p><span class="math">B</span> is the batch size, and <span class="math">D</span> is the embedding dimension <code class="docutils literal notranslate"><span class="pre">d_model</span></code>.</p>
+<dt>Args:</dt><dd><dl class="simple">
+<dt>x (torch.Tensor): Input tensor of shape <img class="math" src="_images/math/5e9497fe6ab2dba65e61ea95f91b3c06a453136c.png" alt="(B, N, D)"/> where <img class="math" src="_images/math/3bfb3a64189a14b2704f4610827762d5e3145114.png" alt="N"/> is the Sequence Length,</dt><dd><p><img class="math" src="_images/math/4bc3e94a67870b41b7c20179693e889251e2c136.png" alt="B"/> is the batch size, and <img class="math" src="_images/math/0fcab9067b50b87e868c4fd70f213a086addb964.png" alt="D"/> is the embedding dimension <code class="docutils literal notranslate"><span class="pre">d_model</span></code>.</p>
 </dd>
-<dt>mask (torch.Tensor, optional): If specified, a 2D or 4D mask preventing attention to certain positions. Must be of shape</dt><dd><p><span class="math">(N, N)</span> or <span class="math">(B, H, N, N)</span>, where <span class="math">B</span> is the batch size, <span class="math">H</span> is the number of heads and
-<span class="math">N</span> is the Sequence Length. A 2D mask will be broadcasted across the batch while a 4D mask allows
-for a different mask for each entry in the batch and/or heads dimensions.</p>
-<blockquote>
-<div><p>Should be a boolean mask where True indicates masked positions.</p>
-</div></blockquote>
+<dt>mask (torch.Tensor, optional): If specified, a 2D or 4D mask preventing attention to certain positions. Must be of shape</dt><dd><p><img class="math" src="_images/math/7a046172b1a23c599258cc4d02bf7916c45c9151.png" alt="(N, N)"/> or <img class="math" src="_images/math/2265e69985f15f505f5a3475ada6c228b681e2a3.png" alt="(B, H, N, N)"/>, where <img class="math" src="_images/math/4bc3e94a67870b41b7c20179693e889251e2c136.png" alt="B"/> is the batch size, <img class="math" src="_images/math/cb5de54f699cf4b3c7c1a3e87313d11d536c0d88.png" alt="H"/> is the number of heads and
+<img class="math" src="_images/math/3bfb3a64189a14b2704f4610827762d5e3145114.png" alt="N"/> is the Sequence Length. A 2D mask will be broadcasted across the batch while a 4D mask allows
+for a different mask for each entry in the batch and/or heads dimensions.
+<strong>Note: Should be a boolean mask where True indicates masked positions.</strong></p>
 </dd>
 </dl>
-<p>pos (torch.Tensor, optional): Position indices for RoPE, shape <span class="math">(N)</span> or <span class="math">(B, N)</span>
-return_states (bool, optional): If <code class="docutils literal notranslate"><span class="pre">True</span></code>, return a dictionary of intermediate tensors. Default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+<p>pos (torch.Tensor, optional): Position indices for RoPE, shape <img class="math" src="_images/math/53c49d40851a9450d6838659cff1081c4065b1ce.png" alt="(N)"/> or <img class="math" src="_images/math/110692db5509f72ec3d13d4fdd5dc22556737f99.png" alt="(B, N)"/></p>
+<p>return_states (bool, optional): If <code class="docutils literal notranslate"><span class="pre">True</span></code>, return a dictionary of intermediate tensors. Default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
 </dd>
 <dt>Returns:</dt><dd><dl class="simple">
-<dt>Union[torch.Tensor, Dict]: Output tensor <span class="math">(B, N, D)</span> if not return_states, else a dict containing</dt><dd><p>The keys: {<cite>output</cite>, <cite>queries</cite>, <cite>keys</cite>, <cite>values</cite>, <cite>attn_weights</cite>, <cite>attn_scores</cite>, <cite>output_before_proj</cite> and <cite>input</cite>}</p>
+<dt>Union[torch.Tensor, Dict]: Output tensor <img class="math" src="_images/math/5e9497fe6ab2dba65e61ea95f91b3c06a453136c.png" alt="(B, N, D)"/> if not return_states, else a dict containing</dt><dd><p>The keys: {<cite>output</cite>, <cite>queries</cite>, <cite>keys</cite>, <cite>values</cite>, <cite>attn_weights</cite>, <cite>attn_scores</cite>, <cite>output_before_proj</cite> and <cite>input</cite>}</p>
 </dd>
 </dl>
 </dd>
@@ -438,20 +436,19 @@ return_states (bool, optional): If <code class="docutils literal notranslate"><s
 <code class="docutils literal notranslate"><span class="pre">torch.nn.functional.scaled_dot_product_attention()</span></code> when possible.</p>
 <dl>
 <dt>Args:</dt><dd><p>d_model (int): Model dimension.
-n_heads (int): Number of attention heads. Note that <code class="docutils literal notranslate"><span class="pre">d_model</span></code> will be split</p>
-<blockquote>
-<div><p>across <code class="docutils literal notranslate"><span class="pre">n_heads</span></code> (i.e. each head will have dimension <code class="docutils literal notranslate"><span class="pre">d_head//n_heads</span></code>).</p>
-</div></blockquote>
-<p>n_kv_heads (int): Number of key/value heads (must divide n_heads).
-dropout: Dropout probability on <code class="docutils literal notranslate"><span class="pre">attn_output_weights</span></code>. Default: <code class="docutils literal notranslate"><span class="pre">0.0</span></code> (no dropout).</p>
-<blockquote>
-<div><p><strong>Note: Latest SOTA Architectures do not use Dropout at all and for Research Purposes it is recommended to never use it.</strong></p>
-</div></blockquote>
-<p>attn_bias (bool, optional): Whether to use bias in linear projections. Default: <code class="docutils literal notranslate"><span class="pre">False</span></code>
-qk_norm (bool, optional): Whether to apply RMSNorm to queries and keys. Default: <code class="docutils literal notranslate"><span class="pre">True</span></code>
-layer_idx (int, optional): Index of the layer (used for debugging/logging).
-rope_base (int, optional): Base for the Exponential Frequency Calculation in RoPE. Default: <code class="docutils literal notranslate"><span class="pre">10000.0</span></code>
-max_seq_len (int): Maximum sequence length for RoPE.</p>
+n_heads (int): Number of attention heads. Note that <code class="docutils literal notranslate"><span class="pre">d_model</span></code> will be split
+across <code class="docutils literal notranslate"><span class="pre">n_heads</span></code> (i.e. each head will have dimension <code class="docutils literal notranslate"><span class="pre">d_head//n_heads</span></code>).</p>
+<p>n_kv_heads (int): Number of key/value heads (must divide n_heads).</p>
+<dl class="simple">
+<dt>dropout (float, optional): Dropout probability on <code class="docutils literal notranslate"><span class="pre">attn_output_weights</span></code>. Default: <code class="docutils literal notranslate"><span class="pre">0.0</span></code> (no dropout).</dt><dd><p><strong>Note: Latest SOTA Architectures do not use Dropout at all and for Research Purposes
+it is recommended to never use it.</strong></p>
+</dd>
+</dl>
+<p>attn_bias (bool, optional): Whether to use bias in linear projections. Default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+<p>qk_norm (bool, optional): Whether to apply RMSNorm to queries and keys. Default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p>
+<p>layer_idx (int, optional): Index of the layer (used for debugging/logging).</p>
+<p>rope_base (int, optional): Base for the Exponential Frequency Calculation in RoPE. Default: <code class="docutils literal notranslate"><span class="pre">10000.0</span></code></p>
+<p>max_seq_len (int): Maximum sequence length for RoPE.</p>
 </dd>
 </dl>
 <dl class="field-list simple">
@@ -493,22 +490,20 @@ max_seq_len (int): Maximum sequence length for RoPE.</p>
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_states</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transformer/attns.html#GQA.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transformer.attns.GQA.forward" title="Link to this definition">¶</a></dt>
 <dd><p>Forward pass of GQA.</p>
 <dl>
-<dt>Args:</dt><dd><dl>
-<dt>x (torch.Tensor): Input tensor of shape <span class="math">(B, N, D)</span> where <span class="math">N</span> is the Sequence Length,</dt><dd><p><span class="math">B</span> is the batch size, and <span class="math">D</span> is the embedding dimension <code class="docutils literal notranslate"><span class="pre">d_model</span></code>.</p>
+<dt>Args:</dt><dd><dl class="simple">
+<dt>x (torch.Tensor): Input tensor of shape <img class="math" src="_images/math/5e9497fe6ab2dba65e61ea95f91b3c06a453136c.png" alt="(B, N, D)"/> where <img class="math" src="_images/math/3bfb3a64189a14b2704f4610827762d5e3145114.png" alt="N"/> is the Sequence Length,</dt><dd><p><img class="math" src="_images/math/4bc3e94a67870b41b7c20179693e889251e2c136.png" alt="B"/> is the batch size, and <img class="math" src="_images/math/0fcab9067b50b87e868c4fd70f213a086addb964.png" alt="D"/> is the embedding dimension <code class="docutils literal notranslate"><span class="pre">d_model</span></code>.</p>
 </dd>
-<dt>mask (torch.Tensor, optional): If specified, a 2D or 4D mask preventing attention to certain positions. Must be of shape</dt><dd><p><span class="math">(N, N)</span> or <span class="math">(B, H, N, N)</span>, where <span class="math">B</span> is the batch size, <span class="math">H</span> is the number of heads and
-<span class="math">N</span> is the Sequence Length. A 2D mask will be broadcasted across the batch while a 4D mask allows
-for a different mask for each entry in the batch and/or heads dimensions.</p>
-<blockquote>
-<div><p>Should be a boolean mask where True indicates masked positions.</p>
-</div></blockquote>
+<dt>mask (torch.Tensor, optional): If specified, a 2D or 4D mask preventing attention to certain positions. Must be of shape</dt><dd><p><img class="math" src="_images/math/7a046172b1a23c599258cc4d02bf7916c45c9151.png" alt="(N, N)"/> or <img class="math" src="_images/math/2265e69985f15f505f5a3475ada6c228b681e2a3.png" alt="(B, H, N, N)"/>, where <img class="math" src="_images/math/4bc3e94a67870b41b7c20179693e889251e2c136.png" alt="B"/> is the batch size, <img class="math" src="_images/math/cb5de54f699cf4b3c7c1a3e87313d11d536c0d88.png" alt="H"/> is the number of heads and
+<img class="math" src="_images/math/3bfb3a64189a14b2704f4610827762d5e3145114.png" alt="N"/> is the Sequence Length. A 2D mask will be broadcasted across the batch while a 4D mask allows
+for a different mask for each entry in the batch and/or heads dimensions.
+<strong>Note: Should be a boolean mask where True indicates masked positions.</strong></p>
 </dd>
 </dl>
-<p>pos (torch.Tensor, optional): Position indices for RoPE, shape <span class="math">(N)</span> or <span class="math">(B, N)</span>
-return_states (bool, optional): If <code class="docutils literal notranslate"><span class="pre">True</span></code>, return a dictionary of intermediate tensors. Default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+<p>pos (torch.Tensor, optional): Position indices for RoPE, shape <img class="math" src="_images/math/53c49d40851a9450d6838659cff1081c4065b1ce.png" alt="(N)"/> or <img class="math" src="_images/math/110692db5509f72ec3d13d4fdd5dc22556737f99.png" alt="(B, N)"/></p>
+<p>return_states (bool, optional): If <code class="docutils literal notranslate"><span class="pre">True</span></code>, return a dictionary of intermediate tensors. Default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
 </dd>
 <dt>Returns:</dt><dd><dl class="simple">
-<dt>Union[torch.Tensor, Dict]: Output tensor of shape <span class="math">(B, N, D)</span> if not return_states, else a dict containing</dt><dd><p>The keys: {<cite>output</cite>, <cite>queries</cite>, <cite>keys</cite>, <cite>values</cite>, <cite>attn_weights</cite>, <cite>attn_scores</cite>, <cite>output_before_proj</cite> and <cite>input</cite>}</p>
+<dt>Union[torch.Tensor, Dict]: Output tensor of shape <img class="math" src="_images/math/5e9497fe6ab2dba65e61ea95f91b3c06a453136c.png" alt="(B, N, D)"/> if not return_states, else a dict containing</dt><dd><p>The keys: {<cite>output</cite>, <cite>queries</cite>, <cite>keys</cite>, <cite>values</cite>, <cite>attn_weights</cite>, <cite>attn_scores</cite>, <cite>output_before_proj</cite> and <cite>input</cite>}</p>
 </dd>
 </dl>
 </dd>
@@ -538,20 +533,19 @@ return_states (bool, optional): If <code class="docutils literal notranslate"><s
 <code class="docutils literal notranslate"><span class="pre">torch.nn.functional.scaled_dot_product_attention()</span></code> when possible.</p>
 <dl>
 <dt>Args:</dt><dd><p>d_model (int): Model dimension.
-n_heads (int): Number of attention heads. Note that <code class="docutils literal notranslate"><span class="pre">d_model</span></code> will be split</p>
-<blockquote>
-<div><p>across <code class="docutils literal notranslate"><span class="pre">n_heads</span></code> (i.e. each head will have dimension <code class="docutils literal notranslate"><span class="pre">d_head//n_heads</span></code>).</p>
-</div></blockquote>
-<p>n_kv_heads (int): Number of key/value heads (must divide n_heads).
-dropout: Dropout probability on <code class="docutils literal notranslate"><span class="pre">attn_output_weights</span></code>. Default: <code class="docutils literal notranslate"><span class="pre">0.0</span></code> (no dropout).</p>
-<blockquote>
-<div><p><strong>Note: Latest SOTA Architectures do not use Dropout at all and for Research Purposes it is recommended to never use it.</strong></p>
-</div></blockquote>
-<p>attn_bias (bool, optional): Whether to use bias in linear projections. Default: <code class="docutils literal notranslate"><span class="pre">False</span></code>
-qk_norm (bool, optional): Whether to apply RMSNorm to queries and keys. Default: <code class="docutils literal notranslate"><span class="pre">True</span></code>
-layer_idx (int, optional): Index of the layer (used for debugging/logging).
-rope_base (int, optional): Base for the Exponential Frequency Calculation in RoPE. Default: <code class="docutils literal notranslate"><span class="pre">10000.0</span></code>
-max_seq_len (int): Maximum sequence length for RoPE.</p>
+n_heads (int): Number of attention heads. Note that <code class="docutils literal notranslate"><span class="pre">d_model</span></code> will be split
+across <code class="docutils literal notranslate"><span class="pre">n_heads</span></code> (i.e. each head will have dimension <code class="docutils literal notranslate"><span class="pre">d_head//n_heads</span></code>).</p>
+<p>n_kv_heads (int): Number of key/value heads (must divide n_heads). Default: <code class="docutils literal notranslate"><span class="pre">n_heads</span></code></p>
+<dl class="simple">
+<dt>dropout (float, optional): Dropout probability on <code class="docutils literal notranslate"><span class="pre">attn_output_weights</span></code>. Default: <code class="docutils literal notranslate"><span class="pre">0.0</span></code> (no dropout).</dt><dd><p><strong>Note: Latest SOTA Architectures do not use Dropout at all and for Research Purposes
+it is recommended to never use it.</strong></p>
+</dd>
+</dl>
+<p>attn_bias (bool, optional): Whether to use bias in linear projections. Default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+<p>qk_norm (bool, optional): Whether to apply RMSNorm to queries and keys. Default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p>
+<p>layer_idx (int, optional): Index of the layer (used for debugging/logging).</p>
+<p>rope_base (int, optional): Base for the Exponential Frequency Calculation in RoPE. Default: <code class="docutils literal notranslate"><span class="pre">10000.0</span></code></p>
+<p>max_seq_len (int): Maximum sequence length for RoPE.</p>
 </dd>
 </dl>
 <dl class="field-list simple">
@@ -591,26 +585,24 @@ max_seq_len (int): Maximum sequence length for RoPE.</p>
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">queries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos_q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos_k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_states</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transformer/attns.html#CrossAttention.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transformer.attns.CrossAttention.forward" title="Link to this definition">¶</a></dt>
 <dd><p>Forward pass of CrossAttention.</p>
 <dl>
-<dt>Args:</dt><dd><dl>
-<dt>queries (torch.Tensor): Input tensor of shape <span class="math">(B, Lq, D)</span> where <span class="math">Lq</span> is the Sequence Length for the query sequence,</dt><dd><p><span class="math">B</span> is the batch size, and <span class="math">D</span> is the embedding dimension <code class="docutils literal notranslate"><span class="pre">d_model</span></code>.</p>
+<dt>Args:</dt><dd><dl class="simple">
+<dt>queries (torch.Tensor): Input tensor of shape <img class="math" src="_images/math/961c1f542d83d264390c06562a5183d2f996a7c3.png" alt="(B, Lq, D)"/> where <img class="math" src="_images/math/a35e78dfb308c283de6fbc2526c0c84144786c66.png" alt="Lq"/> is the Sequence Length for the query sequence,</dt><dd><p><img class="math" src="_images/math/4bc3e94a67870b41b7c20179693e889251e2c136.png" alt="B"/> is the batch size, and <img class="math" src="_images/math/0fcab9067b50b87e868c4fd70f213a086addb964.png" alt="D"/> is the embedding dimension <code class="docutils literal notranslate"><span class="pre">d_model</span></code>.</p>
 </dd>
-<dt>kv (torch.Tensor): Input tensor of shape <span class="math">(B, Lq, D)</span> where <span class="math">Lk</span> is the Sequence Length for the key/value sequence,</dt><dd><p><span class="math">B</span> is the batch size, and <span class="math">D</span> is the embedding dimension <code class="docutils literal notranslate"><span class="pre">d_model</span></code>.</p>
+<dt>kv (torch.Tensor): Input tensor of shape <img class="math" src="_images/math/961c1f542d83d264390c06562a5183d2f996a7c3.png" alt="(B, Lq, D)"/> where <img class="math" src="_images/math/46b2a12d126a79ec77a968c50989dc6f5b97d8c1.png" alt="Lk"/> is the Sequence Length for the key/value sequence,</dt><dd><p><img class="math" src="_images/math/4bc3e94a67870b41b7c20179693e889251e2c136.png" alt="B"/> is the batch size, and <img class="math" src="_images/math/0fcab9067b50b87e868c4fd70f213a086addb964.png" alt="D"/> is the embedding dimension <code class="docutils literal notranslate"><span class="pre">d_model</span></code>.</p>
 </dd>
-<dt>mask (torch.Tensor, optional): If specified, a 2D or 4D mask preventing attention to certain positions. Must be of shape</dt><dd><p><span class="math">(Lq, Lk)</span> or <span class="math">(B, H, Lq, Lk)</span>, where <span class="math">B</span> is the batch size, <span class="math">H</span> is the number of heads,
-<span class="math">Lq</span> is the Sequence Length of the query sequence and <span class="math">Lk</span> is the Sequence Length of the key/value sequence.
+<dt>mask (torch.Tensor, optional): If specified, a 2D or 4D mask preventing attention to certain positions. Must be of shape</dt><dd><p><img class="math" src="_images/math/6002471d6d17f8485fb5b1274f70320b2627d50c.png" alt="(Lq, Lk)"/> or <img class="math" src="_images/math/b46ea0adb2a37b75716509704cf5d874e743f176.png" alt="(B, H, Lq, Lk)"/>, where <img class="math" src="_images/math/4bc3e94a67870b41b7c20179693e889251e2c136.png" alt="B"/> is the batch size, <img class="math" src="_images/math/cb5de54f699cf4b3c7c1a3e87313d11d536c0d88.png" alt="H"/> is the number of heads,
+<img class="math" src="_images/math/a35e78dfb308c283de6fbc2526c0c84144786c66.png" alt="Lq"/> is the Sequence Length of the query sequence and <img class="math" src="_images/math/46b2a12d126a79ec77a968c50989dc6f5b97d8c1.png" alt="Lk"/> is the Sequence Length of the key/value sequence.
 A 2D mask will be broadcasted across the batch while a 4D mask allows for a different mask for each entry
-in the batch and/or heads dimensions.</p>
-<blockquote>
-<div><p>Should be a boolean mask where True indicates masked positions.</p>
-</div></blockquote>
+in the batch and/or heads dimensions.
+<strong>Note: Should be a boolean mask where True indicates masked positions.</strong></p>
 </dd>
 </dl>
-<p>pos_q (torch.Tensor, optional): Position indices for Queries, shape <span class="math">(Lq)</span> or <span class="math">(B, Lq)</span>
-pos_k (torch.Tensor, optional): Position indices for Keys, shape <span class="math">(Lk)</span> or <span class="math">(B, Lk)</span>
-return_states (bool, optional): If True, return dictionary of intermediates tensors. Default: False</p>
+<p>pos_q (torch.Tensor, optional): Position indices for Queries, shape <img class="math" src="_images/math/e26445c3127f0459187bc7e9901503d8e4c56135.png" alt="(Lq)"/> or <img class="math" src="_images/math/40189a0b33f86671401e1f50850267c8f9050ba4.png" alt="(B, Lq)"/></p>
+<p>pos_k (torch.Tensor, optional): Position indices for Keys, shape <img class="math" src="_images/math/17f593759064e6f1e261e2266dfe17791ca7a5a0.png" alt="(Lk)"/> or <img class="math" src="_images/math/624899c75bce9dd41bc7d925c353cba365dbccfa.png" alt="(B, Lk)"/></p>
+<p>return_states (bool, optional): If True, return dictionary of intermediates tensors. Default: False</p>
 </dd>
 <dt>Returns:</dt><dd><dl class="simple">
-<dt>Union[torch.Tensor, Dict]: Output tensor of shape <span class="math">(B, N, D)</span> if not return_states, else a dict containing</dt><dd><p>The keys: {<cite>output</cite>, <cite>queries</cite>, <cite>keys</cite>, <cite>values</cite>, <cite>attn_weights</cite>, <cite>attn_scores</cite>, <cite>output_before_proj</cite> and <cite>input</cite>} where <cite>input</cite> is a tuple (queries, kv)</p>
+<dt>Union[torch.Tensor, Dict]: Output tensor of shape <img class="math" src="_images/math/5e9497fe6ab2dba65e61ea95f91b3c06a453136c.png" alt="(B, N, D)"/> if not return_states, else a dict containing</dt><dd><p>The keys: {<cite>output</cite>, <cite>queries</cite>, <cite>keys</cite>, <cite>values</cite>, <cite>attn_weights</cite>, <cite>attn_scores</cite>, <cite>output_before_proj</cite> and <cite>input</cite>} where <cite>input</cite> is a tuple (queries, kv)</p>
 </dd>
 </dl>
 </dd>

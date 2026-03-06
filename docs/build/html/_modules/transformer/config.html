@@ -244,27 +244,44 @@
 <div class="viewcode-block" id="TransformerConfig">
 <a class="viewcode-back" href="../../api.html#transformer.config.TransformerConfig">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">TransformerConfig</span><span class="p">(</span><span class="n">PretrainedConfig</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Configuration class for Transformer models.</span>
 <span class="sd">    Inherits from `PretrainedConfig` for HuggingFace compatibility.</span>
 
 <span class="sd">    Args:</span>
+
 <span class="sd">        n_layers (int): Number of Transformer Blocks (layers).</span>
+
 <span class="sd">        n_heads (int): Number of Attention Heads.</span>
+
 <span class="sd">        vocab_size (int): Vocabulary size of the model. Defines the number of different tokens.</span>
+
 <span class="sd">        d_model (int): Model Dimension.</span>
+
 <span class="sd">        d_ff (int, optional): Dimension of the Feed-Forward Hidden Layer.</span>
+
 <span class="sd">        seq_len (int): Sequence Length.</span>
+
 <span class="sd">        max_seq_len (int): Maximum sequence length for positional embeddings.</span>
-<span class="sd">        attn_bias (bool): Whether to use bias in attention Linear Projections.</span>
-<span class="sd">        attn_qk_norm (bool): Whether to apply Normalization to Queries and Keys before the Attention Computation.</span>
-<span class="sd">        ffn_bias (bool): Whether to use bias in Feed-Forward Linear layers.</span>
-<span class="sd">        lm_head_bias (bool): Whether to use bias in the Language Modeling Head.</span>
-<span class="sd">        tied_weights (bool): If True, tie the input embedding and output projection weights.</span>
-<span class="sd">        rope_base (float, optional): Base for the RoPE frequency computation.</span>
-<span class="sd">        attn_type (str): Attention type, one of &quot;MHA&quot;, &quot;GQA&quot;. For GQA, also specify `n_kv_heads`. Default: &quot;MHA&quot;</span>
-<span class="sd">        n_kv_heads (int, optional): Number of key/value heads for Grouped-Query Attention(GQA).</span>
-<span class="sd">        **kwargs: Additional keyword arguments passed to `PretrainedConfig`.</span>
+
+<span class="sd">        attn_bias (bool, optional): Whether to use bias in attention Linear Projections. Default: ``False``</span>
+
+<span class="sd">        attn_qk_norm (bool, optional): Whether to apply Normalization to Queries and Keys before the Attention Computation. Default: ``True``</span>
+
+<span class="sd">        ffn_bias (bool, optional): Whether to use bias in Feed-Forward Linear layers. Default: ``True``</span>
+
+<span class="sd">        lm_head_bias (bool, optional): Whether to use bias in the Language Modeling Head. Default: ``False``</span>
+
+<span class="sd">        tied_weights (bool, optional): If True, tie the input embedding and output projection weights. Default: ``False``</span>
+
+<span class="sd">        rope_base (float, optional): Base for the RoPE frequency computation. Default: ``10000.0``</span>
+
+<span class="sd">        attn_type (str, optional): Attention type, one of ``MHA``, ``GQA``, ``CrossAttention``. For ``GQA``, also specify `n_kv_heads`. Default: ``MHA``</span>
+
+<span class="sd">        n_kv_heads (int, optional): Number of key/value heads for Grouped-Query Attention(GQA). Default: ``n_heads``</span>
+
+<span class="sd">        ``**kwargs`` (dict, optional): Additional keyword arguments passed to `PretrainedConfig`</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">model_type</span> <span class="o">=</span> <span class="s2">&quot;transformer&quot;</span>
 
@@ -296,7 +313,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">vocab_size</span> <span class="o">=</span> <span class="n">vocab_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">attn_bias</span> <span class="o">=</span> <span class="n">attn_bias</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ffn_bias</span> <span class="o">=</span> <span class="n">ffn_bias</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">attn_qk_norm</span> <span class="o">=</span> <span class="n">qk_norm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attn_qk_norm</span> <span class="o">=</span> <span class="n">attn_qk_norm</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lm_head_bias</span> <span class="o">=</span> <span class="n">lm_head_bias</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tied_weights</span> <span class="o">=</span> <span class="n">tied_weights</span>
 

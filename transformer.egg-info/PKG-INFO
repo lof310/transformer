@@ -32,7 +32,7 @@ Requires-Dist: transformers>=4.30.0
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE)
 [![PyTorch](https://img.shields.io/badge/pytorch-%3E%3D1.10-orange)](https://pytorch.org)
 [![HuggingFace Compatible](https://img.shields.io/badge/HF-compatible-ff69b4)](#)
-[![Stars](https://img.shields.io/github/stars/lof310/transformer?style=social)](#)
+[![Stars](https://img.shields.io/github/stars/lof310/transformer)](#)
 [![Downloads](https://img.shields.io/github/downloads/lof310/transformer/total)](https://github.com/lof310/transformer/releases)
 
 A polished PyTorch implementation of the current State-Of-The-Art(SOTA) Transformer. Designed for clarity, reproducibility, and interoperability with HuggingFace Transformers, this repository provides a robust baseline for research and engineering being fully configurable. The codebase emphasizes readable, well-documented components so you can iterate on attention mechanisms, Feed-Forward, Attention and Normalization blocks and other architectural variants with minimal friction.
@@ -91,7 +91,7 @@ output = model(input_ids, return_states=False)
 
 ## Documentation
 
-Documentation is under development.
+Full Documentation available at [![Documentation](https://lof310.github.io/transformer)](https://lof310.github.io/transformer)
 
 ## Contributing
 

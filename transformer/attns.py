@@ -10,14 +10,23 @@ class MHA(nn.Module):
     Args:
         d_model (int): Model dimension.
         n_heads (int): Number of attention heads. Note that ``d_model`` will be split
-            across ``n_heads`` (i.e. each head will have dimension ``d_head//n_heads``).
-        dropout: Dropout probability on ``attn_output_weights``. Default: ``0.0`` (no dropout).
-            Note: Latest SOTA Architectures do not use Dropout at all and for Research Purposes it is recommended to never use it.
+        across ``n_heads`` (i.e. each head will have dimension ``d_head//n_heads``).
+
+        dropout (float): Dropout probability on ``attn_output_weights``. Default: ``0.0`` (no dropout).
+            **Note: Latest SOTA Architectures do not use Dropout at all and for Research Purposes
+            it is recommended to never use it.**
+
         attn_bias (bool, optional): Whether to use bias in linear projections. Default: ``False``
+
         qk_norm (bool, optional): Whether to apply RMSNorm to queries and keys. Default: ``True``
+
         layer_idx (int, optional): Index of the layer (used for debugging/logging).
-        rope_base (int, optional): Base for the Exponential Frequency Calculation in RoPE. Default: ``10000.0``
+
+        rope_base (int, optional): Base for the Exponential Frequency Calculation in RoPE.
+        Default: ``10000.0``
+
         max_seq_len (int): Maximum sequence length for RoPE.
+
     """
     def __init__(self, d_model: int, n_heads: int, droput: float = 0.0, attn_bias: bool = False, qk_norm: bool = True, layer_idx: int = 0, rope_base: float = 10000.0, max_seq_len: int = 1024):
         super().__init__()
@@ -41,21 +50,26 @@ class MHA(nn.Module):
         Args:
             x (torch.Tensor): Input tensor of shape :math:`(B, N, D)` where :math:`N` is the Sequence Length,
                 :math:`B` is the batch size, and :math:`D` is the embedding dimension ``d_model``.
+
             mask (torch.Tensor, optional): If specified, a 2D or 4D mask preventing attention to certain positions. Must be of shape
                 :math:`(N, N)` or :math:`(B, H, N, N)`, where :math:`B` is the batch size, :math:`H` is the number of heads and
                 :math:`N` is the Sequence Length. A 2D mask will be broadcasted across the batch while a 4D mask allows
                 for a different mask for each entry in the batch and/or heads dimensions.
-                    Should be a boolean mask where True indicates masked positions.
+                **Note: Should be a boolean mask where True indicates masked positions.**
+
             pos (torch.Tensor, optional): Position indices for RoPE, shape :math:`(N)` or :math:`(B, N)`
+
             return_states (bool, optional): If ``True``, return a dictionary of intermediate tensors. Default: ``False``
+
         Returns:
             Union[torch.Tensor, Dict]: Output tensor :math:`(B, N, D)` if not return_states, else a dict containing
                 The keys: {`output`, `queries`, `keys`, `values`, `attn_weights`, `attn_scores`, `output_before_proj` and `input`}
+
         """
         B, N, D, H, d = *x.shape, self.n_heads, self.d_head
 
         q, k, v = self.qkv_proj(x).view(B, N, H, d*3).transpose(1,2).chunk(3, dim=-1)
-        q, k = (self.q_norm(q), self.k_norm(k)) if self.qk_norm else (q,k)
+        q, k = (self.q_norm(q), self.k_norm(k)) if self.qk_norm else (q, k)
         q, k = self.rope(q, k, pos, pos) if pos is not None else (q, k)
         A_weights = torch.matmul(q, k.transpose(-1, -2)) * self.scale
         A_scores = F.softmax(A_weights.masked_fill_(mask, float('-inf')), dim=-1) if mask is not None else F.softmax(A_weights, dim=-1)
@@ -73,15 +87,24 @@ class GQA(nn.Module):
     Args:
         d_model (int): Model dimension.
         n_heads (int): Number of attention heads. Note that ``d_model`` will be split
-            across ``n_heads`` (i.e. each head will have dimension ``d_head//n_heads``).
+        across ``n_heads`` (i.e. each head will have dimension ``d_head//n_heads``).
+
         n_kv_heads (int): Number of key/value heads (must divide n_heads).
-        dropout: Dropout probability on ``attn_output_weights``. Default: ``0.0`` (no dropout).
-            **Note: Latest SOTA Architectures do not use Dropout at all and for Research Purposes it is recommended to never use it.**
+
+        dropout (float, optional): Dropout probability on ``attn_output_weights``. Default: ``0.0`` (no dropout).
+            **Note: Latest SOTA Architectures do not use Dropout at all and for Research Purposes
+            it is recommended to never use it.**
+
         attn_bias (bool, optional): Whether to use bias in linear projections. Default: ``False``
+
         qk_norm (bool, optional): Whether to apply RMSNorm to queries and keys. Default: ``True``
+
         layer_idx (int, optional): Index of the layer (used for debugging/logging).
+
         rope_base (int, optional): Base for the Exponential Frequency Calculation in RoPE. Default: ``10000.0``
+
         max_seq_len (int): Maximum sequence length for RoPE.
+
     """
     def __init__(self, d_model: int, n_heads: int, n_kv_heads: int, attn_bias: bool = False, qk_norm: bool = True, layer_idx: int = 0, rope_base: float = 10000.0, max_seq_len: int = 1024):
         super().__init__()
@@ -107,22 +130,26 @@ class GQA(nn.Module):
         Args:
             x (torch.Tensor): Input tensor of shape :math:`(B, N, D)` where :math:`N` is the Sequence Length,
                 :math:`B` is the batch size, and :math:`D` is the embedding dimension ``d_model``.
+
             mask (torch.Tensor, optional): If specified, a 2D or 4D mask preventing attention to certain positions. Must be of shape
                 :math:`(N, N)` or :math:`(B, H, N, N)`, where :math:`B` is the batch size, :math:`H` is the number of heads and
                 :math:`N` is the Sequence Length. A 2D mask will be broadcasted across the batch while a 4D mask allows
                 for a different mask for each entry in the batch and/or heads dimensions.
-                    Should be a boolean mask where True indicates masked positions.
+                **Note: Should be a boolean mask where True indicates masked positions.**
+
             pos (torch.Tensor, optional): Position indices for RoPE, shape :math:`(N)` or :math:`(B, N)`
+
             return_states (bool, optional): If ``True``, return a dictionary of intermediate tensors. Default: ``False``
 
         Returns:
             Union[torch.Tensor, Dict]: Output tensor of shape :math:`(B, N, D)` if not return_states, else a dict containing
                 The keys: {`output`, `queries`, `keys`, `values`, `attn_weights`, `attn_scores`, `output_before_proj` and `input`}
+
         """
         B, N, D, H_q, H_kv, G, d = *x.shape, self.n_heads, self.n_kv_heads, self.groups, self.d_head
 
         q, k, v = self.qkv_proj(x).view(B, N, H_q+(H_kv*2), d).transpose(1,2).split([H_q, H_kv, H_kv], dim=1)
-        q, k = (self.q_norm(q), self.k_norm(k)) if qk_norm else q, k
+        q, k = (self.q_norm(q), self.k_norm(k)) if qk_norm else (q, k)
         q, k = self.rope(q, k, pos, pos) if pos is not None else (q, k)
         k, v = k.repeat_interleave(G, dim=1), v.repeat_interleave(G, dim=1)
         A_weights = torch.matmul(q, k.transpose(-1, -2)) * self.scale
@@ -141,14 +168,22 @@ class CrossAttention(nn.Module):
     Args:
         d_model (int): Model dimension.
         n_heads (int): Number of attention heads. Note that ``d_model`` will be split
-            across ``n_heads`` (i.e. each head will have dimension ``d_head//n_heads``).
-        n_kv_heads (int): Number of key/value heads (must divide n_heads).
-        dropout: Dropout probability on ``attn_output_weights``. Default: ``0.0`` (no dropout).
-            **Note: Latest SOTA Architectures do not use Dropout at all and for Research Purposes it is recommended to never use it.**
+        across ``n_heads`` (i.e. each head will have dimension ``d_head//n_heads``).
+
+        n_kv_heads (int): Number of key/value heads (must divide n_heads). Default: ``n_heads``
+
+        dropout (float, optional): Dropout probability on ``attn_output_weights``. Default: ``0.0`` (no dropout).
+            **Note: Latest SOTA Architectures do not use Dropout at all and for Research Purposes
+            it is recommended to never use it.**
+
         attn_bias (bool, optional): Whether to use bias in linear projections. Default: ``False``
+
         qk_norm (bool, optional): Whether to apply RMSNorm to queries and keys. Default: ``True``
+
         layer_idx (int, optional): Index of the layer (used for debugging/logging).
+
         rope_base (int, optional): Base for the Exponential Frequency Calculation in RoPE. Default: ``10000.0``
+
         max_seq_len (int): Maximum sequence length for RoPE.
     """
     def __init__(self, d_model: int, n_heads: int, attn_bias: bool = False, qk_norm: bool = True, layer_idx: int = 0, rope_base: float = 10000.0, max_seq_len: int = 1024):
@@ -176,27 +211,33 @@ class CrossAttention(nn.Module):
         Args:
             queries (torch.Tensor): Input tensor of shape :math:`(B, Lq, D)` where :math:`Lq` is the Sequence Length for the query sequence,
                 :math:`B` is the batch size, and :math:`D` is the embedding dimension ``d_model``.
+
             kv (torch.Tensor): Input tensor of shape :math:`(B, Lq, D)` where :math:`Lk` is the Sequence Length for the key/value sequence,
                 :math:`B` is the batch size, and :math:`D` is the embedding dimension ``d_model``.
+
             mask (torch.Tensor, optional): If specified, a 2D or 4D mask preventing attention to certain positions. Must be of shape
                 :math:`(Lq, Lk)` or :math:`(B, H, Lq, Lk)`, where :math:`B` is the batch size, :math:`H` is the number of heads,
                 :math:`Lq` is the Sequence Length of the query sequence and :math:`Lk` is the Sequence Length of the key/value sequence.
                 A 2D mask will be broadcasted across the batch while a 4D mask allows for a different mask for each entry
                 in the batch and/or heads dimensions.
-                    Should be a boolean mask where True indicates masked positions.
+                **Note: Should be a boolean mask where True indicates masked positions.**
+
             pos_q (torch.Tensor, optional): Position indices for Queries, shape :math:`(Lq)` or :math:`(B, Lq)`
+
             pos_k (torch.Tensor, optional): Position indices for Keys, shape :math:`(Lk)` or :math:`(B, Lk)`
+
             return_states (bool, optional): If True, return dictionary of intermediates tensors. Default: False
 
         Returns:
             Union[torch.Tensor, Dict]: Output tensor of shape :math:`(B, N, D)` if not return_states, else a dict containing
                 The keys: {`output`, `queries`, `keys`, `values`, `attn_weights`, `attn_scores`, `output_before_proj` and `input`} where `input` is a tuple (queries, kv)
+
         """
         B, Lq, D, Lk, H, d = *q.shape, kv.shape[1], self.n_heads, self.d_head
 
         q, k, v = self.q_proj(queries).view(B, Lq, H, d).transpose(1,2), *self.kv_proj(kv).view(B, Lk, H, d*2).transpose(1,2).chunk(2, dim=-1)
-        q, k = (self.q_norm(q), self.k_norm(k)) if self.qk_norm else (q,k)
-        q, k = self.rope(q, k, pos, pos) if pos is not None else (q, k)
+        q, k = (self.q_norm(q), self.k_norm(k)) if self.qk_norm else (q, k)
+        q, k = self.rope(q, k, pos_q, pos_k) if pos_q is not None and pos_k is not None else (q, k)
         A_weights = torch.matmul(q, k.transpose(-1, -2)) * self.scale
         A_scores = F.softmax(A_weights.masked_fill_(mask, float('-inf')), dim=-1) if mask is not None else F.softmax(A_weights, dim=-1)
         y = torch.matmul(A_scores, v).transpose(1, 2).contiguous().view(B, Lq, D)

@@ -252,14 +252,23 @@
 <span class="sd">    Args:</span>
 <span class="sd">        d_model (int): Model dimension.</span>
 <span class="sd">        n_heads (int): Number of attention heads. Note that ``d_model`` will be split</span>
-<span class="sd">            across ``n_heads`` (i.e. each head will have dimension ``d_head//n_heads``).</span>
-<span class="sd">        dropout: Dropout probability on ``attn_output_weights``. Default: ``0.0`` (no dropout).</span>
-<span class="sd">            Note: Latest SOTA Architectures do not use Dropout at all and for Research Purposes it is recommended to never use it.</span>
+<span class="sd">        across ``n_heads`` (i.e. each head will have dimension ``d_head//n_heads``).</span>
+
+<span class="sd">        dropout (float): Dropout probability on ``attn_output_weights``. Default: ``0.0`` (no dropout).</span>
+<span class="sd">            **Note: Latest SOTA Architectures do not use Dropout at all and for Research Purposes</span>
+<span class="sd">            it is recommended to never use it.**</span>
+
 <span class="sd">        attn_bias (bool, optional): Whether to use bias in linear projections. Default: ``False``</span>
+
 <span class="sd">        qk_norm (bool, optional): Whether to apply RMSNorm to queries and keys. Default: ``True``</span>
+
 <span class="sd">        layer_idx (int, optional): Index of the layer (used for debugging/logging).</span>
-<span class="sd">        rope_base (int, optional): Base for the Exponential Frequency Calculation in RoPE. Default: ``10000.0``</span>
+
+<span class="sd">        rope_base (int, optional): Base for the Exponential Frequency Calculation in RoPE.</span>
+<span class="sd">        Default: ``10000.0``</span>
+
 <span class="sd">        max_seq_len (int): Maximum sequence length for RoPE.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="MHA.__init__">
 <a class="viewcode-back" href="../../api.html#transformer.attns.MHA.__init__">[docs]</a>
@@ -288,21 +297,26 @@
 <span class="sd">        Args:</span>
 <span class="sd">            x (torch.Tensor): Input tensor of shape :math:`(B, N, D)` where :math:`N` is the Sequence Length,</span>
 <span class="sd">                :math:`B` is the batch size, and :math:`D` is the embedding dimension ``d_model``.</span>
+
 <span class="sd">            mask (torch.Tensor, optional): If specified, a 2D or 4D mask preventing attention to certain positions. Must be of shape</span>
 <span class="sd">                :math:`(N, N)` or :math:`(B, H, N, N)`, where :math:`B` is the batch size, :math:`H` is the number of heads and</span>
 <span class="sd">                :math:`N` is the Sequence Length. A 2D mask will be broadcasted across the batch while a 4D mask allows</span>
 <span class="sd">                for a different mask for each entry in the batch and/or heads dimensions.</span>
-<span class="sd">                    Should be a boolean mask where True indicates masked positions.</span>
+<span class="sd">                **Note: Should be a boolean mask where True indicates masked positions.**</span>
+
 <span class="sd">            pos (torch.Tensor, optional): Position indices for RoPE, shape :math:`(N)` or :math:`(B, N)`</span>
+
 <span class="sd">            return_states (bool, optional): If ``True``, return a dictionary of intermediate tensors. Default: ``False``</span>
+
 <span class="sd">        Returns:</span>
 <span class="sd">            Union[torch.Tensor, Dict]: Output tensor :math:`(B, N, D)` if not return_states, else a dict containing</span>
 <span class="sd">                The keys: {`output`, `queries`, `keys`, `values`, `attn_weights`, `attn_scores`, `output_before_proj` and `input`}</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">B</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="o">*</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_heads</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_head</span>
 
         <span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qkv_proj</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">d</span><span class="o">*</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">q</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">q_norm</span><span class="p">(</span><span class="n">q</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">k_norm</span><span class="p">(</span><span class="n">k</span><span class="p">))</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qk_norm</span> <span class="k">else</span> <span class="p">(</span><span class="n">q</span><span class="p">,</span><span class="n">k</span><span class="p">)</span>
+        <span class="n">q</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">q_norm</span><span class="p">(</span><span class="n">q</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">k_norm</span><span class="p">(</span><span class="n">k</span><span class="p">))</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qk_norm</span> <span class="k">else</span> <span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
         <span class="n">q</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rope</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span> <span class="k">if</span> <span class="n">pos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
         <span class="n">A_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">))</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span>
         <span class="n">A_scores</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">A_weights</span><span class="o">.</span><span class="n">masked_fill_</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;-inf&#39;</span><span class="p">)),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">A_weights</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
@@ -324,15 +338,24 @@
 <span class="sd">    Args:</span>
 <span class="sd">        d_model (int): Model dimension.</span>
 <span class="sd">        n_heads (int): Number of attention heads. Note that ``d_model`` will be split</span>
-<span class="sd">            across ``n_heads`` (i.e. each head will have dimension ``d_head//n_heads``).</span>
+<span class="sd">        across ``n_heads`` (i.e. each head will have dimension ``d_head//n_heads``).</span>
+
 <span class="sd">        n_kv_heads (int): Number of key/value heads (must divide n_heads).</span>
-<span class="sd">        dropout: Dropout probability on ``attn_output_weights``. Default: ``0.0`` (no dropout).</span>
-<span class="sd">            **Note: Latest SOTA Architectures do not use Dropout at all and for Research Purposes it is recommended to never use it.**</span>
+
+<span class="sd">        dropout (float, optional): Dropout probability on ``attn_output_weights``. Default: ``0.0`` (no dropout).</span>
+<span class="sd">            **Note: Latest SOTA Architectures do not use Dropout at all and for Research Purposes</span>
+<span class="sd">            it is recommended to never use it.**</span>
+
 <span class="sd">        attn_bias (bool, optional): Whether to use bias in linear projections. Default: ``False``</span>
+
 <span class="sd">        qk_norm (bool, optional): Whether to apply RMSNorm to queries and keys. Default: ``True``</span>
+
 <span class="sd">        layer_idx (int, optional): Index of the layer (used for debugging/logging).</span>
+
 <span class="sd">        rope_base (int, optional): Base for the Exponential Frequency Calculation in RoPE. Default: ``10000.0``</span>
+
 <span class="sd">        max_seq_len (int): Maximum sequence length for RoPE.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="GQA.__init__">
 <a class="viewcode-back" href="../../api.html#transformer.attns.GQA.__init__">[docs]</a>
@@ -363,22 +386,26 @@
 <span class="sd">        Args:</span>
 <span class="sd">            x (torch.Tensor): Input tensor of shape :math:`(B, N, D)` where :math:`N` is the Sequence Length,</span>
 <span class="sd">                :math:`B` is the batch size, and :math:`D` is the embedding dimension ``d_model``.</span>
+
 <span class="sd">            mask (torch.Tensor, optional): If specified, a 2D or 4D mask preventing attention to certain positions. Must be of shape</span>
 <span class="sd">                :math:`(N, N)` or :math:`(B, H, N, N)`, where :math:`B` is the batch size, :math:`H` is the number of heads and</span>
 <span class="sd">                :math:`N` is the Sequence Length. A 2D mask will be broadcasted across the batch while a 4D mask allows</span>
 <span class="sd">                for a different mask for each entry in the batch and/or heads dimensions.</span>
-<span class="sd">                    Should be a boolean mask where True indicates masked positions.</span>
+<span class="sd">                **Note: Should be a boolean mask where True indicates masked positions.**</span>
+
 <span class="sd">            pos (torch.Tensor, optional): Position indices for RoPE, shape :math:`(N)` or :math:`(B, N)`</span>
+
 <span class="sd">            return_states (bool, optional): If ``True``, return a dictionary of intermediate tensors. Default: ``False``</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Union[torch.Tensor, Dict]: Output tensor of shape :math:`(B, N, D)` if not return_states, else a dict containing</span>
 <span class="sd">                The keys: {`output`, `queries`, `keys`, `values`, `attn_weights`, `attn_scores`, `output_before_proj` and `input`}</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">B</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">H_q</span><span class="p">,</span> <span class="n">H_kv</span><span class="p">,</span> <span class="n">G</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="o">*</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_heads</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_kv_heads</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_head</span>
 
         <span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qkv_proj</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">H_q</span><span class="o">+</span><span class="p">(</span><span class="n">H_kv</span><span class="o">*</span><span class="mi">2</span><span class="p">),</span> <span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">([</span><span class="n">H_q</span><span class="p">,</span> <span class="n">H_kv</span><span class="p">,</span> <span class="n">H_kv</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">q</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">q_norm</span><span class="p">(</span><span class="n">q</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">k_norm</span><span class="p">(</span><span class="n">k</span><span class="p">))</span> <span class="k">if</span> <span class="n">qk_norm</span> <span class="k">else</span> <span class="n">q</span><span class="p">,</span> <span class="n">k</span>
+        <span class="n">q</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">q_norm</span><span class="p">(</span><span class="n">q</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">k_norm</span><span class="p">(</span><span class="n">k</span><span class="p">))</span> <span class="k">if</span> <span class="n">qk_norm</span> <span class="k">else</span> <span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
         <span class="n">q</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rope</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span> <span class="k">if</span> <span class="n">pos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
         <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">repeat_interleave</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">v</span><span class="o">.</span><span class="n">repeat_interleave</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">A_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">))</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span>
@@ -401,14 +428,22 @@
 <span class="sd">    Args:</span>
 <span class="sd">        d_model (int): Model dimension.</span>
 <span class="sd">        n_heads (int): Number of attention heads. Note that ``d_model`` will be split</span>
-<span class="sd">            across ``n_heads`` (i.e. each head will have dimension ``d_head//n_heads``).</span>
-<span class="sd">        n_kv_heads (int): Number of key/value heads (must divide n_heads).</span>
-<span class="sd">        dropout: Dropout probability on ``attn_output_weights``. Default: ``0.0`` (no dropout).</span>
-<span class="sd">            **Note: Latest SOTA Architectures do not use Dropout at all and for Research Purposes it is recommended to never use it.**</span>
+<span class="sd">        across ``n_heads`` (i.e. each head will have dimension ``d_head//n_heads``).</span>
+
+<span class="sd">        n_kv_heads (int): Number of key/value heads (must divide n_heads). Default: ``n_heads``</span>
+
+<span class="sd">        dropout (float, optional): Dropout probability on ``attn_output_weights``. Default: ``0.0`` (no dropout).</span>
+<span class="sd">            **Note: Latest SOTA Architectures do not use Dropout at all and for Research Purposes</span>
+<span class="sd">            it is recommended to never use it.**</span>
+
 <span class="sd">        attn_bias (bool, optional): Whether to use bias in linear projections. Default: ``False``</span>
+
 <span class="sd">        qk_norm (bool, optional): Whether to apply RMSNorm to queries and keys. Default: ``True``</span>
+
 <span class="sd">        layer_idx (int, optional): Index of the layer (used for debugging/logging).</span>
+
 <span class="sd">        rope_base (int, optional): Base for the Exponential Frequency Calculation in RoPE. Default: ``10000.0``</span>
+
 <span class="sd">        max_seq_len (int): Maximum sequence length for RoPE.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="CrossAttention.__init__">
@@ -441,27 +476,33 @@
 <span class="sd">        Args:</span>
 <span class="sd">            queries (torch.Tensor): Input tensor of shape :math:`(B, Lq, D)` where :math:`Lq` is the Sequence Length for the query sequence,</span>
 <span class="sd">                :math:`B` is the batch size, and :math:`D` is the embedding dimension ``d_model``.</span>
+
 <span class="sd">            kv (torch.Tensor): Input tensor of shape :math:`(B, Lq, D)` where :math:`Lk` is the Sequence Length for the key/value sequence,</span>
 <span class="sd">                :math:`B` is the batch size, and :math:`D` is the embedding dimension ``d_model``.</span>
+
 <span class="sd">            mask (torch.Tensor, optional): If specified, a 2D or 4D mask preventing attention to certain positions. Must be of shape</span>
 <span class="sd">                :math:`(Lq, Lk)` or :math:`(B, H, Lq, Lk)`, where :math:`B` is the batch size, :math:`H` is the number of heads,</span>
 <span class="sd">                :math:`Lq` is the Sequence Length of the query sequence and :math:`Lk` is the Sequence Length of the key/value sequence.</span>
 <span class="sd">                A 2D mask will be broadcasted across the batch while a 4D mask allows for a different mask for each entry</span>
 <span class="sd">                in the batch and/or heads dimensions.</span>
-<span class="sd">                    Should be a boolean mask where True indicates masked positions.</span>
+<span class="sd">                **Note: Should be a boolean mask where True indicates masked positions.**</span>
+
 <span class="sd">            pos_q (torch.Tensor, optional): Position indices for Queries, shape :math:`(Lq)` or :math:`(B, Lq)`</span>
+
 <span class="sd">            pos_k (torch.Tensor, optional): Position indices for Keys, shape :math:`(Lk)` or :math:`(B, Lk)`</span>
+
 <span class="sd">            return_states (bool, optional): If True, return dictionary of intermediates tensors. Default: False</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Union[torch.Tensor, Dict]: Output tensor of shape :math:`(B, N, D)` if not return_states, else a dict containing</span>
 <span class="sd">                The keys: {`output`, `queries`, `keys`, `values`, `attn_weights`, `attn_scores`, `output_before_proj` and `input`} where `input` is a tuple (queries, kv)</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">B</span><span class="p">,</span> <span class="n">Lq</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">Lk</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="o">*</span><span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">kv</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_heads</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_head</span>
 
         <span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">q_proj</span><span class="p">(</span><span class="n">queries</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">Lq</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">kv_proj</span><span class="p">(</span><span class="n">kv</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">Lk</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">d</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">q</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">q_norm</span><span class="p">(</span><span class="n">q</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">k_norm</span><span class="p">(</span><span class="n">k</span><span class="p">))</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qk_norm</span> <span class="k">else</span> <span class="p">(</span><span class="n">q</span><span class="p">,</span><span class="n">k</span><span class="p">)</span>
-        <span class="n">q</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rope</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span> <span class="k">if</span> <span class="n">pos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+        <span class="n">q</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">q_norm</span><span class="p">(</span><span class="n">q</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">k_norm</span><span class="p">(</span><span class="n">k</span><span class="p">))</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qk_norm</span> <span class="k">else</span> <span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+        <span class="n">q</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rope</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">pos_q</span><span class="p">,</span> <span class="n">pos_k</span><span class="p">)</span> <span class="k">if</span> <span class="n">pos_q</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pos_k</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
         <span class="n">A_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">))</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span>
         <span class="n">A_scores</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">A_weights</span><span class="o">.</span><span class="n">masked_fill_</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;-inf&#39;</span><span class="p">)),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">A_weights</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">A_scores</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">Lq</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
