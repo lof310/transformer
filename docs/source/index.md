@@ -16,6 +16,13 @@ api
 ```
 
 ```{toctree}
+:maxdepth: 2
+:caption: Usage Examples
+
+examples
+```
+
+```{toctree}
 :maxdepth: 1
 :caption: Project Info
 

@@ -198,6 +198,10 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Usage Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html"></a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Project Info</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
@@ -293,7 +297,7 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Union[torch.Tensor, Dict]: Output tensor (batch_size, seq_len, d_model) if not return_states,</span>
-<span class="sd">                                        else a dict containing Final Output with Attention and FFN Outputs.</span>
+<span class="sd">                else a dict containing the keys: &quot;output&quot;, &quot;attn_output&quot; and &quot;ffn_output&quot;.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">attn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norm_attn</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">attn_mask</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">return_states</span><span class="p">)</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">attn</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">return_states</span> <span class="k">else</span> <span class="n">x</span> <span class="o">+</span> <span class="n">attn</span>
@@ -353,7 +357,8 @@
 <span class="sd">            return_states (bool, optional): If True, return hidden states of all layers. Default: False</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            CausalLMOutput: Contains loss (if labels given), logits, and optionally hidden states.</span>
+<span class="sd">            CausalLMOutput: Contains loss (if labels given), logits, and optionally hidden states being a tuple of (input_embd, hidden_states)</span>
+<span class="sd">                where `hidden_states` is a list of dictionaries for the output of each layer.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">B</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="n">input_ids</span><span class="o">.</span><span class="n">shape</span>
 

@@ -198,6 +198,10 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Usage Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html"></a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Project Info</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
@@ -238,12 +242,11 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nn</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn.functional</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">F</span>
 
-
 <div class="viewcode-block" id="SwiGLU">
 <a class="viewcode-back" href="../../api.html#transformer.ffn.SwiGLU">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SwiGLU</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    SwiGLU feed-forward module (used in LLaMA, etc.).</span>
+<span class="sd">    SwiGLU feed-forward module</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        d_model (int): Input/output dimension.</span>
@@ -271,7 +274,8 @@
 <span class="sd">            return_states (bool, optional): If True, return intermediate activations and input. Default: False</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Union[torch.Tensor, Dict]: Output tensor (..., d_model) or dict with intermediates.</span>
+<span class="sd">            Union[torch.Tensor, Dict]: Output tensor (..., d_model) or dict with intermediates states</span>
+<span class="sd">                containing the keys: &#39;output&#39;, &#39;y1&#39;, &#39;y2&#39; and &#39;input&#39;.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">y1</span><span class="p">,</span> <span class="n">y2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">W1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">return_states</span><span class="p">:</span>
@@ -314,7 +318,8 @@
 <span class="sd">            return_states (bool, optional): If True, return intermediate activations. Default: False</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Union[torch.Tensor, Dict]: Output tensor (..., d_model) or dict with intermediates states.</span>
+<span class="sd">            Union[torch.Tensor, Dict]: Output tensor (..., d_model) or dict with intermediates states</span>
+<span class="sd">                containing the keys: &#39;output&#39;, &#39;h1&#39;, &#39;h2&#39; and &#39;input&#39;.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">return_states</span><span class="p">:</span>
             <span class="n">h1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">net</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span><span class="n">x</span><span class="p">)</span>

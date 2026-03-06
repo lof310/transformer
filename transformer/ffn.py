@@ -4,7 +4,7 @@ import torch.nn.functional as F
 
 class SwiGLU(nn.Module):
     """
-    SwiGLU feed-forward module (used in LLaMA, etc.).
+    SwiGLU feed-forward module
 
     Args:
         d_model (int): Input/output dimension.

@@ -2,21 +2,24 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-
 class MHA(nn.Module):
-    """
-    Multi-Head Attention (MHA) module.
+    r"""
+    **Multi-Head Attention** ``MHA`` module using the optimized implementation of
+    ``torch.nn.functional.scaled_dot_product_attention()`` when possible.
 
     Args:
         d_model (int): Model dimension.
-        n_heads (int): Number of attention heads.
-        attn_bias (bool, optional): Whether to use bias in linear projections. Default: False
-        qk_norm (bool, optional): Whether to apply RMSNorm to queries and keys. Default: True
+        n_heads (int): Number of attention heads. Note that ``d_model`` will be split
+            across ``n_heads`` (i.e. each head will have dimension ``d_head//n_heads``).
+        dropout: Dropout probability on ``attn_output_weights``. Default: ``0.0`` (no dropout).
+            Note: Latest SOTA Architectures do not use Dropout at all and for Research Purposes it is recommended to never use it.
+        attn_bias (bool, optional): Whether to use bias in linear projections. Default: ``False``
+        qk_norm (bool, optional): Whether to apply RMSNorm to queries and keys. Default: ``True``
         layer_idx (int, optional): Index of the layer (used for debugging/logging).
-        rope_base (int, optional): Base for the Exponential Frequency Calculation in RoPE. Default: 10000.0
+        rope_base (int, optional): Base for the Exponential Frequency Calculation in RoPE. Default: ``10000.0``
         max_seq_len (int): Maximum sequence length for RoPE.
     """
-    def __init__(self, d_model: int, n_heads: int, attn_bias: bool = False, qk_norm: bool = True, layer_idx: int = 0, rope_base: float = 10000.0, max_seq_len: int = 1024):
+    def __init__(self, d_model: int, n_heads: int, droput: float = 0.0, attn_bias: bool = False, qk_norm: bool = True, layer_idx: int = 0, rope_base: float = 10000.0, max_seq_len: int = 1024):
         super().__init__()
         assert d_model % n_heads == 0, "d_model must be divisible by n_heads"
         self.d_model, self.n_heads, self.d_head, self.layer_idx = d_model, n_heads, d_model//n_heads, layer_idx
@@ -32,19 +35,22 @@ class MHA(nn.Module):
             self.q_norm, self.k_norm = nn.RMSNorm(self.d_head), nn.RMSNorm(self.d_head)
 
     def forward(self, x: torch.Tensor, mask: torch.Tensor = None, pos: torch.Tensor = None, return_states: bool = False):
-        """
+        r"""
         Forward pass of MHA.
 
         Args:
-            x (torch.Tensor): Input tensor of shape (batch_size, seq_len, d_model)
-            mask (torch.Tensor, optional): Attention mask. shape (seq_len, seq_len) or broadcastable to (batch, heads, seq_len, seq_len).
-                                           Should be a boolean mask where True indicates masked positions.
-            pos (torch.Tensor, optional): Position indices for RoPE, shape (seq_len,) or (batch_size, seq_len).
-            return_states (bool, optional): If True, return a dictionary of intermediate tensors. Default: False
-
+            x (torch.Tensor): Input tensor of shape :math:`(B, N, D)` where :math:`N` is the Sequence Length,
+                :math:`B` is the batch size, and :math:`D` is the embedding dimension ``d_model``.
+            mask (torch.Tensor, optional): If specified, a 2D or 4D mask preventing attention to certain positions. Must be of shape
+                :math:`(N, N)` or :math:`(B, H, N, N)`, where :math:`B` is the batch size, :math:`H` is the number of heads and
+                :math:`N` is the Sequence Length. A 2D mask will be broadcasted across the batch while a 4D mask allows
+                for a different mask for each entry in the batch and/or heads dimensions.
+                    Should be a boolean mask where True indicates masked positions.
+            pos (torch.Tensor, optional): Position indices for RoPE, shape :math:`(N)` or :math:`(B, N)`
+            return_states (bool, optional): If ``True``, return a dictionary of intermediate tensors. Default: ``False``
         Returns:
-            Union[torch.Tensor, Dict]: Output tensor (batch_size, seq_len, d_model) if not return_states,
-                else a dict containing the keys: 'output', 'queries', 'keys', 'values', 'attn_weights', 'attn_scores', 'output_before_proj' and 'input'.
+            Union[torch.Tensor, Dict]: Output tensor :math:`(B, N, D)` if not return_states, else a dict containing
+                The keys: {`output`, `queries`, `keys`, `values`, `attn_weights`, `attn_scores`, `output_before_proj` and `input`}
         """
         B, N, D, H, d = *x.shape, self.n_heads, self.d_head
 
@@ -61,16 +67,20 @@ class MHA(nn.Module):
 
 class GQA(nn.Module):
     """
-    Grouped-Query Attention (GQA) module.
+    **Grouped Query Attention** ``GQA`` module using the optimized implementation of
+    ``torch.nn.functional.scaled_dot_product_attention()`` when possible.
 
     Args:
         d_model (int): Model dimension.
-        n_heads (int): Number of query heads.
+        n_heads (int): Number of attention heads. Note that ``d_model`` will be split
+            across ``n_heads`` (i.e. each head will have dimension ``d_head//n_heads``).
         n_kv_heads (int): Number of key/value heads (must divide n_heads).
-        attn_bias (bool, optional): Whether to use bias in linear projections. Default: False
-        qk_norm (bool, optional): Whether to apply RMSNorm to queries and keys. Default: True
-        rope_base (int, optional): Base for the Exponential Frequency Calculation in RoPE. Default: 10000.0
-        layer_idx (int, optional): Index of the layer (for debugging/logging).
+        dropout: Dropout probability on ``attn_output_weights``. Default: ``0.0`` (no dropout).
+            **Note: Latest SOTA Architectures do not use Dropout at all and for Research Purposes it is recommended to never use it.**
+        attn_bias (bool, optional): Whether to use bias in linear projections. Default: ``False``
+        qk_norm (bool, optional): Whether to apply RMSNorm to queries and keys. Default: ``True``
+        layer_idx (int, optional): Index of the layer (used for debugging/logging).
+        rope_base (int, optional): Base for the Exponential Frequency Calculation in RoPE. Default: ``10000.0``
         max_seq_len (int): Maximum sequence length for RoPE.
     """
     def __init__(self, d_model: int, n_heads: int, n_kv_heads: int, attn_bias: bool = False, qk_norm: bool = True, layer_idx: int = 0, rope_base: float = 10000.0, max_seq_len: int = 1024):
@@ -95,14 +105,19 @@ class GQA(nn.Module):
         Forward pass of GQA.
 
         Args:
-            x (torch.Tensor): Input tensor of shape (batch, seq_len, d_model)
-            mask (torch.Tensor, optional): Attention mask. Shape broadcastable to (batch_size, heads, seq_len, seq_len) or simply (seq_len, seq_len)
-            pos (torch.Tensor, optional): Position indices for RoPE, shape (seq_len,) or (batch_size, seq_len).
-            return_states (bool, optional): If True, return a dictionary of intermediate tensors. Default: False
+            x (torch.Tensor): Input tensor of shape :math:`(B, N, D)` where :math:`N` is the Sequence Length,
+                :math:`B` is the batch size, and :math:`D` is the embedding dimension ``d_model``.
+            mask (torch.Tensor, optional): If specified, a 2D or 4D mask preventing attention to certain positions. Must be of shape
+                :math:`(N, N)` or :math:`(B, H, N, N)`, where :math:`B` is the batch size, :math:`H` is the number of heads and
+                :math:`N` is the Sequence Length. A 2D mask will be broadcasted across the batch while a 4D mask allows
+                for a different mask for each entry in the batch and/or heads dimensions.
+                    Should be a boolean mask where True indicates masked positions.
+            pos (torch.Tensor, optional): Position indices for RoPE, shape :math:`(N)` or :math:`(B, N)`
+            return_states (bool, optional): If ``True``, return a dictionary of intermediate tensors. Default: ``False``
 
         Returns:
-            Union[torch.Tensor, Dict]: Output tensor (batch_size, seq_len, d_model) or dict with intermediates states
-                containing the keys: 'output', 'queries', 'keys', 'values', 'attn_weights', 'attn_scores', 'output_before_proj' and 'input'.
+            Union[torch.Tensor, Dict]: Output tensor of shape :math:`(B, N, D)` if not return_states, else a dict containing
+                The keys: {`output`, `queries`, `keys`, `values`, `attn_weights`, `attn_scores`, `output_before_proj` and `input`}
         """
         B, N, D, H_q, H_kv, G, d = *x.shape, self.n_heads, self.n_kv_heads, self.groups, self.d_head
 
@@ -120,15 +135,20 @@ class GQA(nn.Module):
 
 class CrossAttention(nn.Module):
     """
-    Cross-Attention module (queries from one sequence, keys/values from another).
+    **CrossAttention** module using the optimized implementation of
+    ``torch.nn.functional.scaled_dot_product_attention()`` when possible.
 
     Args:
         d_model (int): Model dimension.
-        n_heads (int): Number of attention heads.
-        attn_bias (bool, optional): Whether to use bias in linear projections. Default: False
-        qk_norm (bool, optional): Whether to apply RMSNorm to queries and keys. Default: True
-        layer_idx (int, optional): Index of the layer (for debugging/logging).
-        rope_base (int, optional): Base for the Exponential Frequency Calculation in RoPE. Default: 10000.0
+        n_heads (int): Number of attention heads. Note that ``d_model`` will be split
+            across ``n_heads`` (i.e. each head will have dimension ``d_head//n_heads``).
+        n_kv_heads (int): Number of key/value heads (must divide n_heads).
+        dropout: Dropout probability on ``attn_output_weights``. Default: ``0.0`` (no dropout).
+            **Note: Latest SOTA Architectures do not use Dropout at all and for Research Purposes it is recommended to never use it.**
+        attn_bias (bool, optional): Whether to use bias in linear projections. Default: ``False``
+        qk_norm (bool, optional): Whether to apply RMSNorm to queries and keys. Default: ``True``
+        layer_idx (int, optional): Index of the layer (used for debugging/logging).
+        rope_base (int, optional): Base for the Exponential Frequency Calculation in RoPE. Default: ``10000.0``
         max_seq_len (int): Maximum sequence length for RoPE.
     """
     def __init__(self, d_model: int, n_heads: int, attn_bias: bool = False, qk_norm: bool = True, layer_idx: int = 0, rope_base: float = 10000.0, max_seq_len: int = 1024):
@@ -154,16 +174,23 @@ class CrossAttention(nn.Module):
         Forward pass of CrossAttention.
 
         Args:
-            queries (torch.Tensor): Query input, shape (batch_size, seq_len_q, d_model)
-            kv (torch.Tensor): Key/Value input, shape (batch_size, seq_len_kv, d_model)
-            mask (torch.Tensor, optional): Attention mask, shape (seq_len_q, seq_len_kv) or broadcastable to (batch_size, n_heads, seq_len_q, seq_len_kv).
-            pos_q (torch.Tensor, optional): Positions for queries, shape (seq_len_q,) or (batch_size, seq_len_q)
-            pos_k (torch.Tensor, optional): Positions for keys/values, shape (seq_len_kv,) or (batch_size, seq_len_kv)
-            return_states (bool, optional): If True, return dictionary of intermediates. Default: False
+            queries (torch.Tensor): Input tensor of shape :math:`(B, Lq, D)` where :math:`Lq` is the Sequence Length for the query sequence,
+                :math:`B` is the batch size, and :math:`D` is the embedding dimension ``d_model``.
+            kv (torch.Tensor): Input tensor of shape :math:`(B, Lq, D)` where :math:`Lk` is the Sequence Length for the key/value sequence,
+                :math:`B` is the batch size, and :math:`D` is the embedding dimension ``d_model``.
+            mask (torch.Tensor, optional): If specified, a 2D or 4D mask preventing attention to certain positions. Must be of shape
+                :math:`(Lq, Lk)` or :math:`(B, H, Lq, Lk)`, where :math:`B` is the batch size, :math:`H` is the number of heads,
+                :math:`Lq` is the Sequence Length of the query sequence and :math:`Lk` is the Sequence Length of the key/value sequence.
+                A 2D mask will be broadcasted across the batch while a 4D mask allows for a different mask for each entry
+                in the batch and/or heads dimensions.
+                    Should be a boolean mask where True indicates masked positions.
+            pos_q (torch.Tensor, optional): Position indices for Queries, shape :math:`(Lq)` or :math:`(B, Lq)`
+            pos_k (torch.Tensor, optional): Position indices for Keys, shape :math:`(Lk)` or :math:`(B, Lk)`
+            return_states (bool, optional): If True, return dictionary of intermediates tensors. Default: False
 
         Returns:
-            Union[torch.Tensor, Dict]: Output tensor (batch_size, seq_len_q, d_model) or a dict
-                containing the keys: 'output', 'queries', 'keys', 'values', 'attn_weights', 'attn_scores', 'output_before_proj' and 'input' which is a tuple of (queries, kv).
+            Union[torch.Tensor, Dict]: Output tensor of shape :math:`(B, N, D)` if not return_states, else a dict containing
+                The keys: {`output`, `queries`, `keys`, `values`, `attn_weights`, `attn_scores`, `output_before_proj` and `input`} where `input` is a tuple (queries, kv)
         """
         B, Lq, D, Lk, H, d = *q.shape, kv.shape[1], self.n_heads, self.d_head
 
