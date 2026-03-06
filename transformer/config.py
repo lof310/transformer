@@ -1,5 +1,6 @@
 from transformers import PretrainedConfig
 
+
 class TransformerConfig(PretrainedConfig):
     """
     Configuration class for Transformer models.

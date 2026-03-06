@@ -1,7 +1,7 @@
+from .attns import GQA, MHA, CrossAttention
 from .config import TransformerConfig
-from .attns import MHA, GQA, CrossAttention
+from .ffn import MLP, SwiGLU
 from .pos import RoPE
-from .ffn import SwiGLU, MLP
 from .transformer import Transformer, TransformerBlock
 
 __all__ = [

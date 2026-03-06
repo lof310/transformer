@@ -1,14 +1,16 @@
+import math
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from transformers import PreTrainedModel, PretrainedConfig, GenerationMixin
+from transformers import GenerationMixin, PretrainedConfig, PreTrainedModel
 from transformers.modeling_outputs import CausalLMOutput
-import math
 
-from .config import TransformerConfig
 from .attns import MHA
-from .pos import RoPE
+from .config import TransformerConfig
 from .ffn import SwiGLU
+from .pos import RoPE
+
 
 class TransformerBlock(nn.Module):
     """

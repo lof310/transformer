@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class SwiGLU(nn.Module):
     """
     SwiGLU feed-forward module (used in LLaMA, etc.).
