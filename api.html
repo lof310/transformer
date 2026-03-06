@@ -1,0 +1,1123 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Usage Examples" href="examples.html"><link rel="prev" title="Quick Start" href="quickstart.html">
+
+    <!-- Generated with Sphinx 8.1.3 and Furo 2025.12.19 -->
+        <title>API Reference - transformer 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">transformer 0.1.0 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  <span class="sidebar-brand-text">transformer 0.1.0 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Usage Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Usage Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Project Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="_sources/api.md.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="api-reference">
+<h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">¶</a></h1>
+<p>This section provides detailed documentation of all public modules and classes.</p>
+<section id="module-transformer.config">
+<span id="configuration"></span><h2>Configuration<a class="headerlink" href="#module-transformer.config" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="transformer.config.TransformerConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">transformer.config.</span></span><span class="sig-name descname"><span class="pre">TransformerConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_layers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_heads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_kv_heads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vocab_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1536</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_ff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attn_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'MHA'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attn_bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ffn_bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attn_qk_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lm_head_bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tied_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1024</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_seq_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4096</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transformer/config.html#TransformerConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transformer.config.TransformerConfig" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PreTrainedConfig</span></code></p>
+<p>Configuration class for Transformer models.
+Inherits from <cite>PretrainedConfig</cite> for HuggingFace compatibility.</p>
+<p>Args:</p>
+<blockquote>
+<div><p>n_layers (int): Number of Transformer Blocks (layers).</p>
+<p>n_heads (int): Number of Attention Heads.</p>
+<p>vocab_size (int): Vocabulary size of the model. Defines the number of different tokens.</p>
+<p>d_model (int): Model Dimension.</p>
+<p>d_ff (int, optional): Dimension of the Feed-Forward Hidden Layer.</p>
+<p>seq_len (int): Sequence Length.</p>
+<p>max_seq_len (int): Maximum sequence length for positional embeddings.</p>
+<p>attn_bias (bool, optional): Whether to use bias in attention Linear Projections. Default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+<p>attn_qk_norm (bool, optional): Whether to apply Normalization to Queries and Keys before the Attention Computation. Default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p>
+<p>ffn_bias (bool, optional): Whether to use bias in Feed-Forward Linear layers. Default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p>
+<p>lm_head_bias (bool, optional): Whether to use bias in the Language Modeling Head. Default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+<p>tied_weights (bool, optional): If True, tie the input embedding and output projection weights. Default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+<p>rope_base (float, optional): Base for the RoPE frequency computation. Default: <code class="docutils literal notranslate"><span class="pre">10000.0</span></code></p>
+<p>attn_type (str, optional): Attention type, one of <code class="docutils literal notranslate"><span class="pre">MHA</span></code>, <code class="docutils literal notranslate"><span class="pre">GQA</span></code>, <code class="docutils literal notranslate"><span class="pre">CrossAttention</span></code>. For <code class="docutils literal notranslate"><span class="pre">GQA</span></code>, also specify <cite>n_kv_heads</cite>. Default: <code class="docutils literal notranslate"><span class="pre">MHA</span></code></p>
+<p>n_kv_heads (int, optional): Number of key/value heads for Grouped-Query Attention(GQA). Default: <code class="docutils literal notranslate"><span class="pre">n_heads</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">**kwargs</span></code> (dict, optional): Additional keyword arguments passed to <cite>PretrainedConfig</cite></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_layers</strong> (<em>int</em>)</p></li>
+<li><p><strong>n_heads</strong> (<em>int</em>)</p></li>
+<li><p><strong>n_kv_heads</strong> (<em>int</em>)</p></li>
+<li><p><strong>vocab_size</strong> (<em>int</em>)</p></li>
+<li><p><strong>d_model</strong> (<em>int</em>)</p></li>
+<li><p><strong>d_ff</strong> (<em>int</em>)</p></li>
+<li><p><strong>attn_type</strong> (<em>str</em>)</p></li>
+<li><p><strong>attn_bias</strong> (<em>bool</em>)</p></li>
+<li><p><strong>ffn_bias</strong> (<em>bool</em>)</p></li>
+<li><p><strong>attn_qk_norm</strong> (<em>bool</em>)</p></li>
+<li><p><strong>lm_head_bias</strong> (<em>bool</em>)</p></li>
+<li><p><strong>tied_weights</strong> (<em>bool</em>)</p></li>
+<li><p><strong>seq_len</strong> (<em>int</em>)</p></li>
+<li><p><strong>max_seq_len</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transformer.config.TransformerConfig.model_type">
+<span class="sig-name descname"><span class="pre">model_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'transformer'</span></em><a class="headerlink" href="#transformer.config.TransformerConfig.model_type" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="transformer.config.TransformerConfig.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_layers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_heads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_kv_heads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vocab_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1536</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_ff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attn_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'MHA'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attn_bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ffn_bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attn_qk_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lm_head_bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tied_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1024</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_seq_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4096</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transformer/config.html#TransformerConfig.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transformer.config.TransformerConfig.__init__" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_layers</strong> (<em>int</em>)</p></li>
+<li><p><strong>n_heads</strong> (<em>int</em>)</p></li>
+<li><p><strong>n_kv_heads</strong> (<em>int</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>vocab_size</strong> (<em>int</em>)</p></li>
+<li><p><strong>d_model</strong> (<em>int</em>)</p></li>
+<li><p><strong>d_ff</strong> (<em>int</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>attn_type</strong> (<em>str</em>)</p></li>
+<li><p><strong>attn_bias</strong> (<em>bool</em>)</p></li>
+<li><p><strong>ffn_bias</strong> (<em>bool</em>)</p></li>
+<li><p><strong>attn_qk_norm</strong> (<em>bool</em>)</p></li>
+<li><p><strong>lm_head_bias</strong> (<em>bool</em>)</p></li>
+<li><p><strong>tied_weights</strong> (<em>bool</em>)</p></li>
+<li><p><strong>seq_len</strong> (<em>int</em>)</p></li>
+<li><p><strong>max_seq_len</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="attention-modules">
+<h2>Attention Modules<a class="headerlink" href="#attention-modules" title="Link to this heading">¶</a></h2>
+<section id="multi-head-attention-mha">
+<h3>Multi-Head Attention (MHA)<a class="headerlink" href="#multi-head-attention-mha" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="transformer.attns.MHA">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">transformer.attns.</span></span><span class="sig-name descname"><span class="pre">MHA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_heads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">droput</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attn_bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qk_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rope_base</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_seq_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1024</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transformer/attns.html#MHA"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transformer.attns.MHA" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p><strong>Multi-Head Attention</strong> <code class="docutils literal notranslate"><span class="pre">MHA</span></code> module using the optimized implementation of
+<code class="docutils literal notranslate"><span class="pre">torch.nn.functional.scaled_dot_product_attention()</span></code> when possible.</p>
+<dl>
+<dt>Args:</dt><dd><p>d_model (int): Model dimension.
+n_heads (int): Number of attention heads. Note that <code class="docutils literal notranslate"><span class="pre">d_model</span></code> will be split
+across <code class="docutils literal notranslate"><span class="pre">n_heads</span></code> (i.e. each head will have dimension <code class="docutils literal notranslate"><span class="pre">d_head//n_heads</span></code>).</p>
+<dl class="simple">
+<dt>dropout (float): Dropout probability on <code class="docutils literal notranslate"><span class="pre">attn_output_weights</span></code>. Default: <code class="docutils literal notranslate"><span class="pre">0.0</span></code> (no dropout).</dt><dd><p><strong>Note: Latest SOTA Architectures do not use Dropout at all and for Research Purposes
+it is recommended to never use it.</strong></p>
+</dd>
+</dl>
+<p>attn_bias (bool, optional): Whether to use bias in linear projections. Default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+<p>qk_norm (bool, optional): Whether to apply RMSNorm to queries and keys. Default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p>
+<p>layer_idx (int, optional): Index of the layer (used for debugging/logging).</p>
+<p>rope_base (int, optional): Base for the Exponential Frequency Calculation in RoPE.
+Default: <code class="docutils literal notranslate"><span class="pre">10000.0</span></code></p>
+<p>max_seq_len (int): Maximum sequence length for RoPE.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>d_model</strong> (<em>int</em>)</p></li>
+<li><p><strong>n_heads</strong> (<em>int</em>)</p></li>
+<li><p><strong>droput</strong> (<em>float</em>)</p></li>
+<li><p><strong>attn_bias</strong> (<em>bool</em>)</p></li>
+<li><p><strong>qk_norm</strong> (<em>bool</em>)</p></li>
+<li><p><strong>layer_idx</strong> (<em>int</em>)</p></li>
+<li><p><strong>rope_base</strong> (<em>float</em>)</p></li>
+<li><p><strong>max_seq_len</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="transformer.attns.MHA.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_heads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">droput</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attn_bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qk_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rope_base</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_seq_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1024</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transformer/attns.html#MHA.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transformer.attns.MHA.__init__" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>d_model</strong> (<em>int</em>)</p></li>
+<li><p><strong>n_heads</strong> (<em>int</em>)</p></li>
+<li><p><strong>droput</strong> (<em>float</em>)</p></li>
+<li><p><strong>attn_bias</strong> (<em>bool</em>)</p></li>
+<li><p><strong>qk_norm</strong> (<em>bool</em>)</p></li>
+<li><p><strong>layer_idx</strong> (<em>int</em>)</p></li>
+<li><p><strong>rope_base</strong> (<em>float</em>)</p></li>
+<li><p><strong>max_seq_len</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="transformer.attns.MHA.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_states</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transformer/attns.html#MHA.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transformer.attns.MHA.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Forward pass of MHA.</p>
+<dl>
+<dt>Args:</dt><dd><dl class="simple">
+<dt>x (torch.Tensor): Input tensor of shape <img class="math" src="_images/math/5e9497fe6ab2dba65e61ea95f91b3c06a453136c.png" alt="(B, N, D)"/> where <img class="math" src="_images/math/3bfb3a64189a14b2704f4610827762d5e3145114.png" alt="N"/> is the Sequence Length,</dt><dd><p><img class="math" src="_images/math/4bc3e94a67870b41b7c20179693e889251e2c136.png" alt="B"/> is the batch size, and <img class="math" src="_images/math/0fcab9067b50b87e868c4fd70f213a086addb964.png" alt="D"/> is the embedding dimension <code class="docutils literal notranslate"><span class="pre">d_model</span></code>.</p>
+</dd>
+<dt>mask (torch.Tensor, optional): If specified, a 2D or 4D mask preventing attention to certain positions. Must be of shape</dt><dd><p><img class="math" src="_images/math/7a046172b1a23c599258cc4d02bf7916c45c9151.png" alt="(N, N)"/> or <img class="math" src="_images/math/2265e69985f15f505f5a3475ada6c228b681e2a3.png" alt="(B, H, N, N)"/>, where <img class="math" src="_images/math/4bc3e94a67870b41b7c20179693e889251e2c136.png" alt="B"/> is the batch size, <img class="math" src="_images/math/cb5de54f699cf4b3c7c1a3e87313d11d536c0d88.png" alt="H"/> is the number of heads and
+<img class="math" src="_images/math/3bfb3a64189a14b2704f4610827762d5e3145114.png" alt="N"/> is the Sequence Length. A 2D mask will be broadcasted across the batch while a 4D mask allows
+for a different mask for each entry in the batch and/or heads dimensions.
+<strong>Note: Should be a boolean mask where True indicates masked positions.</strong></p>
+</dd>
+</dl>
+<p>pos (torch.Tensor, optional): Position indices for RoPE, shape <img class="math" src="_images/math/53c49d40851a9450d6838659cff1081c4065b1ce.png" alt="(N)"/> or <img class="math" src="_images/math/110692db5509f72ec3d13d4fdd5dc22556737f99.png" alt="(B, N)"/></p>
+<p>return_states (bool, optional): If <code class="docutils literal notranslate"><span class="pre">True</span></code>, return a dictionary of intermediate tensors. Default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>Union[torch.Tensor, Dict]: Output tensor <img class="math" src="_images/math/5e9497fe6ab2dba65e61ea95f91b3c06a453136c.png" alt="(B, N, D)"/> if not return_states, else a dict containing</dt><dd><p>The keys: {<cite>output</cite>, <cite>queries</cite>, <cite>keys</cite>, <cite>values</cite>, <cite>attn_weights</cite>, <cite>attn_scores</cite>, <cite>output_before_proj</cite> and <cite>input</cite>}</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>Tensor</em>)</p></li>
+<li><p><strong>mask</strong> (<em>Tensor</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>pos</strong> (<em>Tensor</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>return_states</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="grouped-query-attention-gqa">
+<h3>Grouped-Query Attention (GQA)<a class="headerlink" href="#grouped-query-attention-gqa" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="transformer.attns.GQA">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">transformer.attns.</span></span><span class="sig-name descname"><span class="pre">GQA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_heads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_kv_heads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attn_bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qk_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rope_base</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_seq_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1024</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transformer/attns.html#GQA"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transformer.attns.GQA" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p><strong>Grouped Query Attention</strong> <code class="docutils literal notranslate"><span class="pre">GQA</span></code> module using the optimized implementation of
+<code class="docutils literal notranslate"><span class="pre">torch.nn.functional.scaled_dot_product_attention()</span></code> when possible.</p>
+<dl>
+<dt>Args:</dt><dd><p>d_model (int): Model dimension.
+n_heads (int): Number of attention heads. Note that <code class="docutils literal notranslate"><span class="pre">d_model</span></code> will be split
+across <code class="docutils literal notranslate"><span class="pre">n_heads</span></code> (i.e. each head will have dimension <code class="docutils literal notranslate"><span class="pre">d_head//n_heads</span></code>).</p>
+<p>n_kv_heads (int): Number of key/value heads (must divide n_heads).</p>
+<dl class="simple">
+<dt>dropout (float, optional): Dropout probability on <code class="docutils literal notranslate"><span class="pre">attn_output_weights</span></code>. Default: <code class="docutils literal notranslate"><span class="pre">0.0</span></code> (no dropout).</dt><dd><p><strong>Note: Latest SOTA Architectures do not use Dropout at all and for Research Purposes
+it is recommended to never use it.</strong></p>
+</dd>
+</dl>
+<p>attn_bias (bool, optional): Whether to use bias in linear projections. Default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+<p>qk_norm (bool, optional): Whether to apply RMSNorm to queries and keys. Default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p>
+<p>layer_idx (int, optional): Index of the layer (used for debugging/logging).</p>
+<p>rope_base (int, optional): Base for the Exponential Frequency Calculation in RoPE. Default: <code class="docutils literal notranslate"><span class="pre">10000.0</span></code></p>
+<p>max_seq_len (int): Maximum sequence length for RoPE.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>d_model</strong> (<em>int</em>)</p></li>
+<li><p><strong>n_heads</strong> (<em>int</em>)</p></li>
+<li><p><strong>n_kv_heads</strong> (<em>int</em>)</p></li>
+<li><p><strong>attn_bias</strong> (<em>bool</em>)</p></li>
+<li><p><strong>qk_norm</strong> (<em>bool</em>)</p></li>
+<li><p><strong>layer_idx</strong> (<em>int</em>)</p></li>
+<li><p><strong>rope_base</strong> (<em>float</em>)</p></li>
+<li><p><strong>max_seq_len</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="transformer.attns.GQA.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_heads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_kv_heads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attn_bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qk_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rope_base</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_seq_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1024</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transformer/attns.html#GQA.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transformer.attns.GQA.__init__" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>d_model</strong> (<em>int</em>)</p></li>
+<li><p><strong>n_heads</strong> (<em>int</em>)</p></li>
+<li><p><strong>n_kv_heads</strong> (<em>int</em>)</p></li>
+<li><p><strong>attn_bias</strong> (<em>bool</em>)</p></li>
+<li><p><strong>qk_norm</strong> (<em>bool</em>)</p></li>
+<li><p><strong>layer_idx</strong> (<em>int</em>)</p></li>
+<li><p><strong>rope_base</strong> (<em>float</em>)</p></li>
+<li><p><strong>max_seq_len</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="transformer.attns.GQA.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_states</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transformer/attns.html#GQA.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transformer.attns.GQA.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Forward pass of GQA.</p>
+<dl>
+<dt>Args:</dt><dd><dl class="simple">
+<dt>x (torch.Tensor): Input tensor of shape <img class="math" src="_images/math/5e9497fe6ab2dba65e61ea95f91b3c06a453136c.png" alt="(B, N, D)"/> where <img class="math" src="_images/math/3bfb3a64189a14b2704f4610827762d5e3145114.png" alt="N"/> is the Sequence Length,</dt><dd><p><img class="math" src="_images/math/4bc3e94a67870b41b7c20179693e889251e2c136.png" alt="B"/> is the batch size, and <img class="math" src="_images/math/0fcab9067b50b87e868c4fd70f213a086addb964.png" alt="D"/> is the embedding dimension <code class="docutils literal notranslate"><span class="pre">d_model</span></code>.</p>
+</dd>
+<dt>mask (torch.Tensor, optional): If specified, a 2D or 4D mask preventing attention to certain positions. Must be of shape</dt><dd><p><img class="math" src="_images/math/7a046172b1a23c599258cc4d02bf7916c45c9151.png" alt="(N, N)"/> or <img class="math" src="_images/math/2265e69985f15f505f5a3475ada6c228b681e2a3.png" alt="(B, H, N, N)"/>, where <img class="math" src="_images/math/4bc3e94a67870b41b7c20179693e889251e2c136.png" alt="B"/> is the batch size, <img class="math" src="_images/math/cb5de54f699cf4b3c7c1a3e87313d11d536c0d88.png" alt="H"/> is the number of heads and
+<img class="math" src="_images/math/3bfb3a64189a14b2704f4610827762d5e3145114.png" alt="N"/> is the Sequence Length. A 2D mask will be broadcasted across the batch while a 4D mask allows
+for a different mask for each entry in the batch and/or heads dimensions.
+<strong>Note: Should be a boolean mask where True indicates masked positions.</strong></p>
+</dd>
+</dl>
+<p>pos (torch.Tensor, optional): Position indices for RoPE, shape <img class="math" src="_images/math/53c49d40851a9450d6838659cff1081c4065b1ce.png" alt="(N)"/> or <img class="math" src="_images/math/110692db5509f72ec3d13d4fdd5dc22556737f99.png" alt="(B, N)"/></p>
+<p>return_states (bool, optional): If <code class="docutils literal notranslate"><span class="pre">True</span></code>, return a dictionary of intermediate tensors. Default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>Union[torch.Tensor, Dict]: Output tensor of shape <img class="math" src="_images/math/5e9497fe6ab2dba65e61ea95f91b3c06a453136c.png" alt="(B, N, D)"/> if not return_states, else a dict containing</dt><dd><p>The keys: {<cite>output</cite>, <cite>queries</cite>, <cite>keys</cite>, <cite>values</cite>, <cite>attn_weights</cite>, <cite>attn_scores</cite>, <cite>output_before_proj</cite> and <cite>input</cite>}</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>Tensor</em>)</p></li>
+<li><p><strong>mask</strong> (<em>Tensor</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>pos</strong> (<em>Tensor</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>return_states</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="cross-attention">
+<h3>Cross-Attention<a class="headerlink" href="#cross-attention" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="transformer.attns.CrossAttention">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">transformer.attns.</span></span><span class="sig-name descname"><span class="pre">CrossAttention</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_heads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attn_bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qk_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rope_base</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_seq_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1024</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transformer/attns.html#CrossAttention"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transformer.attns.CrossAttention" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p><strong>CrossAttention</strong> module using the optimized implementation of
+<code class="docutils literal notranslate"><span class="pre">torch.nn.functional.scaled_dot_product_attention()</span></code> when possible.</p>
+<dl>
+<dt>Args:</dt><dd><p>d_model (int): Model dimension.
+n_heads (int): Number of attention heads. Note that <code class="docutils literal notranslate"><span class="pre">d_model</span></code> will be split
+across <code class="docutils literal notranslate"><span class="pre">n_heads</span></code> (i.e. each head will have dimension <code class="docutils literal notranslate"><span class="pre">d_head//n_heads</span></code>).</p>
+<p>n_kv_heads (int): Number of key/value heads (must divide n_heads). Default: <code class="docutils literal notranslate"><span class="pre">n_heads</span></code></p>
+<dl class="simple">
+<dt>dropout (float, optional): Dropout probability on <code class="docutils literal notranslate"><span class="pre">attn_output_weights</span></code>. Default: <code class="docutils literal notranslate"><span class="pre">0.0</span></code> (no dropout).</dt><dd><p><strong>Note: Latest SOTA Architectures do not use Dropout at all and for Research Purposes
+it is recommended to never use it.</strong></p>
+</dd>
+</dl>
+<p>attn_bias (bool, optional): Whether to use bias in linear projections. Default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+<p>qk_norm (bool, optional): Whether to apply RMSNorm to queries and keys. Default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p>
+<p>layer_idx (int, optional): Index of the layer (used for debugging/logging).</p>
+<p>rope_base (int, optional): Base for the Exponential Frequency Calculation in RoPE. Default: <code class="docutils literal notranslate"><span class="pre">10000.0</span></code></p>
+<p>max_seq_len (int): Maximum sequence length for RoPE.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>d_model</strong> (<em>int</em>)</p></li>
+<li><p><strong>n_heads</strong> (<em>int</em>)</p></li>
+<li><p><strong>attn_bias</strong> (<em>bool</em>)</p></li>
+<li><p><strong>qk_norm</strong> (<em>bool</em>)</p></li>
+<li><p><strong>layer_idx</strong> (<em>int</em>)</p></li>
+<li><p><strong>rope_base</strong> (<em>float</em>)</p></li>
+<li><p><strong>max_seq_len</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="transformer.attns.CrossAttention.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_heads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attn_bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qk_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rope_base</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_seq_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1024</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transformer/attns.html#CrossAttention.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transformer.attns.CrossAttention.__init__" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>d_model</strong> (<em>int</em>)</p></li>
+<li><p><strong>n_heads</strong> (<em>int</em>)</p></li>
+<li><p><strong>attn_bias</strong> (<em>bool</em>)</p></li>
+<li><p><strong>qk_norm</strong> (<em>bool</em>)</p></li>
+<li><p><strong>layer_idx</strong> (<em>int</em>)</p></li>
+<li><p><strong>rope_base</strong> (<em>float</em>)</p></li>
+<li><p><strong>max_seq_len</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="transformer.attns.CrossAttention.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">queries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos_q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos_k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_states</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transformer/attns.html#CrossAttention.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transformer.attns.CrossAttention.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Forward pass of CrossAttention.</p>
+<dl>
+<dt>Args:</dt><dd><dl class="simple">
+<dt>queries (torch.Tensor): Input tensor of shape <img class="math" src="_images/math/961c1f542d83d264390c06562a5183d2f996a7c3.png" alt="(B, Lq, D)"/> where <img class="math" src="_images/math/a35e78dfb308c283de6fbc2526c0c84144786c66.png" alt="Lq"/> is the Sequence Length for the query sequence,</dt><dd><p><img class="math" src="_images/math/4bc3e94a67870b41b7c20179693e889251e2c136.png" alt="B"/> is the batch size, and <img class="math" src="_images/math/0fcab9067b50b87e868c4fd70f213a086addb964.png" alt="D"/> is the embedding dimension <code class="docutils literal notranslate"><span class="pre">d_model</span></code>.</p>
+</dd>
+<dt>kv (torch.Tensor): Input tensor of shape <img class="math" src="_images/math/961c1f542d83d264390c06562a5183d2f996a7c3.png" alt="(B, Lq, D)"/> where <img class="math" src="_images/math/46b2a12d126a79ec77a968c50989dc6f5b97d8c1.png" alt="Lk"/> is the Sequence Length for the key/value sequence,</dt><dd><p><img class="math" src="_images/math/4bc3e94a67870b41b7c20179693e889251e2c136.png" alt="B"/> is the batch size, and <img class="math" src="_images/math/0fcab9067b50b87e868c4fd70f213a086addb964.png" alt="D"/> is the embedding dimension <code class="docutils literal notranslate"><span class="pre">d_model</span></code>.</p>
+</dd>
+<dt>mask (torch.Tensor, optional): If specified, a 2D or 4D mask preventing attention to certain positions. Must be of shape</dt><dd><p><img class="math" src="_images/math/6002471d6d17f8485fb5b1274f70320b2627d50c.png" alt="(Lq, Lk)"/> or <img class="math" src="_images/math/b46ea0adb2a37b75716509704cf5d874e743f176.png" alt="(B, H, Lq, Lk)"/>, where <img class="math" src="_images/math/4bc3e94a67870b41b7c20179693e889251e2c136.png" alt="B"/> is the batch size, <img class="math" src="_images/math/cb5de54f699cf4b3c7c1a3e87313d11d536c0d88.png" alt="H"/> is the number of heads,
+<img class="math" src="_images/math/a35e78dfb308c283de6fbc2526c0c84144786c66.png" alt="Lq"/> is the Sequence Length of the query sequence and <img class="math" src="_images/math/46b2a12d126a79ec77a968c50989dc6f5b97d8c1.png" alt="Lk"/> is the Sequence Length of the key/value sequence.
+A 2D mask will be broadcasted across the batch while a 4D mask allows for a different mask for each entry
+in the batch and/or heads dimensions.
+<strong>Note: Should be a boolean mask where True indicates masked positions.</strong></p>
+</dd>
+</dl>
+<p>pos_q (torch.Tensor, optional): Position indices for Queries, shape <img class="math" src="_images/math/e26445c3127f0459187bc7e9901503d8e4c56135.png" alt="(Lq)"/> or <img class="math" src="_images/math/40189a0b33f86671401e1f50850267c8f9050ba4.png" alt="(B, Lq)"/></p>
+<p>pos_k (torch.Tensor, optional): Position indices for Keys, shape <img class="math" src="_images/math/17f593759064e6f1e261e2266dfe17791ca7a5a0.png" alt="(Lk)"/> or <img class="math" src="_images/math/624899c75bce9dd41bc7d925c353cba365dbccfa.png" alt="(B, Lk)"/></p>
+<p>return_states (bool, optional): If True, return dictionary of intermediates tensors. Default: False</p>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>Union[torch.Tensor, Dict]: Output tensor of shape <img class="math" src="_images/math/5e9497fe6ab2dba65e61ea95f91b3c06a453136c.png" alt="(B, N, D)"/> if not return_states, else a dict containing</dt><dd><p>The keys: {<cite>output</cite>, <cite>queries</cite>, <cite>keys</cite>, <cite>values</cite>, <cite>attn_weights</cite>, <cite>attn_scores</cite>, <cite>output_before_proj</cite> and <cite>input</cite>} where <cite>input</cite> is a tuple (queries, kv)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>queries</strong> (<em>Tensor</em>)</p></li>
+<li><p><strong>kv</strong> (<em>Tensor</em>)</p></li>
+<li><p><strong>mask</strong> (<em>Tensor</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>pos_q</strong> (<em>Tensor</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>pos_k</strong> (<em>Tensor</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>return_states</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+<section id="positional-embeddings">
+<h2>Positional Embeddings<a class="headerlink" href="#positional-embeddings" title="Link to this heading">¶</a></h2>
+<section id="rope-rotary-position-embedding">
+<h3>RoPE (Rotary Position Embedding)<a class="headerlink" href="#rope-rotary-position-embedding" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="transformer.pos.RoPE">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">transformer.pos.</span></span><span class="sig-name descname"><span class="pre">RoPE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_seq_len</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_head</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rope_base</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">persistent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transformer/pos.html#RoPE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transformer.pos.RoPE" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Rotary Position Embedding (RoPE) module.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>max_seq_len (int): Maximum sequence length for which to precompute frequencies.
+d_head (int): Dimension per head (must be even).
+rope_base (float): Base for the exponential frequency calculation. Default: 10000.0
+persistent (bool): Whether to register the precomputed cos/sin as persistent buffers. Default: True</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>max_seq_len</strong> (<em>int</em>)</p></li>
+<li><p><strong>d_head</strong> (<em>int</em>)</p></li>
+<li><p><strong>rope_base</strong> (<em>float</em>)</p></li>
+<li><p><strong>persistent</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="transformer.pos.RoPE.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_seq_len</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_head</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rope_base</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">persistent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transformer/pos.html#RoPE.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transformer.pos.RoPE.__init__" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>max_seq_len</strong> (<em>int</em>)</p></li>
+<li><p><strong>d_head</strong> (<em>int</em>)</p></li>
+<li><p><strong>rope_base</strong> (<em>float</em>)</p></li>
+<li><p><strong>persistent</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="transformer.pos.RoPE.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos_q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos_k</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transformer/pos.html#RoPE.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transformer.pos.RoPE.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Apply rotary position embeddings to queries and keys.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>q (torch.Tensor): Query tensor of shape (batch_size, n_heads, seq_len, d_head)
+k (torch.Tensor): Key tensor of shape (batch_size, n_heads, seq_len, d_head)
+pos_q (torch.Tensor): Positions for queries, shape (seq_len,) or (batch_size, seq_len)
+pos_k (torch.Tensor): Positions for keys, shape (seq_len,) or (batch_size, seq_len)</p>
+</dd>
+<dt>Returns:</dt><dd><p>Tuple[torch.Tensor, torch.Tensor]: Rotated queries and keys.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>Tensor</em>)</p></li>
+<li><p><strong>k</strong> (<em>Tensor</em>)</p></li>
+<li><p><strong>pos_q</strong> (<em>Tensor</em>)</p></li>
+<li><p><strong>pos_k</strong> (<em>Tensor</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+<section id="feed-forward-modules">
+<h2>Feed-Forward Modules<a class="headerlink" href="#feed-forward-modules" title="Link to this heading">¶</a></h2>
+<section id="swiglu">
+<h3>SwiGLU<a class="headerlink" href="#swiglu" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="transformer.ffn.SwiGLU">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">transformer.ffn.</span></span><span class="sig-name descname"><span class="pre">SwiGLU</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_ff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transformer/ffn.html#SwiGLU"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transformer.ffn.SwiGLU" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>SwiGLU feed-forward module</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>d_model (int): Input/output dimension.
+d_ff (int): Intermediate dimension (should be even, as it’s split into two halves).
+bias (bool, optional): Whether to use bias in linear layers. Default: True</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>d_model</strong> (<em>int</em>)</p></li>
+<li><p><strong>d_ff</strong> (<em>int</em>)</p></li>
+<li><p><strong>bias</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="transformer.ffn.SwiGLU.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_ff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transformer/ffn.html#SwiGLU.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transformer.ffn.SwiGLU.__init__" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>d_model</strong> (<em>int</em>)</p></li>
+<li><p><strong>d_ff</strong> (<em>int</em>)</p></li>
+<li><p><strong>bias</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="transformer.ffn.SwiGLU.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_states</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transformer/ffn.html#SwiGLU.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transformer.ffn.SwiGLU.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Forward pass of SwiGLU.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>x (torch.Tensor): Input tensor of shape (…, d_model)
+return_states (bool, optional): If True, return intermediate activations and input. Default: False</p>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>Union[torch.Tensor, Dict]: Output tensor (…, d_model) or dict with intermediates states</dt><dd><p>containing the keys: ‘output’, ‘y1’, ‘y2’ and ‘input’.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>Tensor</em>)</p></li>
+<li><p><strong>return_states</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="mlp">
+<h3>MLP<a class="headerlink" href="#mlp" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="transformer.ffn.MLP">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">transformer.ffn.</span></span><span class="sig-name descname"><span class="pre">MLP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_ff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transformer/ffn.html#MLP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transformer.ffn.MLP" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Classic MLP with GELU activation (as used in original Transformer).</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>d_model (int): Input/output dimension.
+d_ff (int): Intermediate dimension.
+bias (bool, optional): Whether to use bias in linear layers. Default: True</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>d_model</strong> (<em>int</em>)</p></li>
+<li><p><strong>d_ff</strong> (<em>int</em>)</p></li>
+<li><p><strong>bias</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="transformer.ffn.MLP.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_ff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transformer/ffn.html#MLP.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transformer.ffn.MLP.__init__" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>d_model</strong> (<em>int</em>)</p></li>
+<li><p><strong>d_ff</strong> (<em>int</em>)</p></li>
+<li><p><strong>bias</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="transformer.ffn.MLP.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_states</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transformer/ffn.html#MLP.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transformer.ffn.MLP.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Forward pass of MLP.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>x (torch.Tensor): Input tensor of shape (…, d_model)
+return_states (bool, optional): If True, return intermediate activations. Default: False</p>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>Union[torch.Tensor, Dict]: Output tensor (…, d_model) or dict with intermediates states</dt><dd><p>containing the keys: ‘output’, ‘h1’, ‘h2’ and ‘input’.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>Tensor</em>)</p></li>
+<li><p><strong>return_states</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+<section id="transformer-model">
+<h2>Transformer Model<a class="headerlink" href="#transformer-model" title="Link to this heading">¶</a></h2>
+<section id="transformerblock">
+<h3>TransformerBlock<a class="headerlink" href="#transformerblock" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="transformer.transformer.TransformerBlock">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">transformer.transformer.</span></span><span class="sig-name descname"><span class="pre">TransformerBlock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transformer/transformer.html#TransformerBlock"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transformer.transformer.TransformerBlock" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>A Single Decoder Transformer Block consisting of Multi-Head Attention and Feed-Forward layers,
+each with Pre-Normalization (RMSNorm) and Standard Residual Connections.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>config (TransformerConfig): Configuration object.
+layer_idx (int, optional): Index of this block (used for debugging/logging).</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>layer_idx</strong> (<em>int</em>)</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="transformer.transformer.TransformerBlock.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transformer/transformer.html#TransformerBlock.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transformer.transformer.TransformerBlock.__init__" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>layer_idx</strong> (<em>int</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="transformer.transformer.TransformerBlock.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attn_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_states</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transformer/transformer.html#TransformerBlock.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transformer.transformer.TransformerBlock.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Forward pass of the transformer block.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>x (torch.Tensor): Input tensor of shape (batch_size, seq_len, d_model)
+attn_mask (torch.Tensor, optional): Attention mask for the Attention block.
+pos (torch.Tensor, optional): Position indices for Positional Encoding.
+return_states (bool, optional): If True, return a dictionary of intermediate outputs. Default: False</p>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>Union[torch.Tensor, Dict]: Output tensor (batch_size, seq_len, d_model) if not return_states,</dt><dd><p>else a dict containing the keys: “output”, “attn_output” and “ffn_output”.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>Tensor</em>)</p></li>
+<li><p><strong>attn_mask</strong> (<em>Tensor</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>pos</strong> (<em>Tensor</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>return_states</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="transformer-class-main-model">
+<h3>Transformer Class (Main Model)<a class="headerlink" href="#transformer-class-main-model" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="transformer.transformer.Transformer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">transformer.transformer.</span></span><span class="sig-name descname"><span class="pre">Transformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transformer/transformer.html#Transformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transformer.transformer.Transformer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PreTrainedModel</span></code></p>
+<p>Transformer language model, compatible with the HuggingFace interface.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>config (TransformerConfig): Model configuration.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transformer.transformer.Transformer.config_class">
+<span class="sig-name descname"><span class="pre">config_class</span></span><a class="headerlink" href="#transformer.transformer.Transformer.config_class" title="Link to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#transformer.config.TransformerConfig" title="transformer.config.TransformerConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerConfig</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transformer.transformer.Transformer.base_model_prefix">
+<span class="sig-name descname"><span class="pre">base_model_prefix</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'transformer'</span></em><a class="headerlink" href="#transformer.transformer.Transformer.base_model_prefix" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="transformer.transformer.Transformer.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transformer/transformer.html#Transformer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transformer.transformer.Transformer.__init__" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="transformer.transformer.Transformer.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_causal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attn_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_states</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transformer/transformer.html#Transformer.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transformer.transformer.Transformer.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Forward pass of the Transformer model.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>input_ids (torch.Tensor): Token indices of shape (batch, seq_len)
+labels (torch.Tensor, optional): Target token indices for loss computation, same shape as input_ids.
+is_causal (bool, optional): If True, create a causal attention mask. Default: True
+attn_mask (torch.Tensor, optional): Custom attention mask. If None and is_causal, a upper triangular causal mask is generated.
+pos (torch.Tensor, optional): Position indices. If None, uses torch.arange(seq_len).
+return_states (bool, optional): If True, return hidden states of all layers. Default: False</p>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>CausalLMOutput: Contains loss (if labels given), logits, and optionally hidden states being a tuple of (input_embd, hidden_states)</dt><dd><p>where <cite>hidden_states</cite> is a list of dictionaries for the output of each layer.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_ids</strong> (<em>Tensor</em>)</p></li>
+<li><p><strong>labels</strong> (<em>Tensor</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>is_causal</strong> (<em>bool</em>)</p></li>
+<li><p><strong>attn_mask</strong> (<em>Tensor</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>pos</strong> (<em>Tensor</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>return_states</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="transformer.transformer.Transformer.get_num_params">
+<span class="sig-name descname"><span class="pre">get_num_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/transformer/transformer.html#Transformer.get_num_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transformer.transformer.Transformer.get_num_params" title="Link to this definition">¶</a></dt>
+<dd><p>Return the number of trainable parameters.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="examples.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Usage Examples</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="quickstart.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Quick Start</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, Leinier Orama Fernández
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">API Reference</a><ul>
+<li><a class="reference internal" href="#module-transformer.config">Configuration</a><ul>
+<li><a class="reference internal" href="#transformer.config.TransformerConfig"><code class="docutils literal notranslate"><span class="pre">TransformerConfig</span></code></a><ul>
+<li><a class="reference internal" href="#transformer.config.TransformerConfig.model_type"><code class="docutils literal notranslate"><span class="pre">TransformerConfig.model_type</span></code></a></li>
+<li><a class="reference internal" href="#transformer.config.TransformerConfig.__init__"><code class="docutils literal notranslate"><span class="pre">TransformerConfig.__init__()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#attention-modules">Attention Modules</a><ul>
+<li><a class="reference internal" href="#multi-head-attention-mha">Multi-Head Attention (MHA)</a><ul>
+<li><a class="reference internal" href="#transformer.attns.MHA"><code class="docutils literal notranslate"><span class="pre">MHA</span></code></a><ul>
+<li><a class="reference internal" href="#transformer.attns.MHA.__init__"><code class="docutils literal notranslate"><span class="pre">MHA.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#transformer.attns.MHA.forward"><code class="docutils literal notranslate"><span class="pre">MHA.forward()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#grouped-query-attention-gqa">Grouped-Query Attention (GQA)</a><ul>
+<li><a class="reference internal" href="#transformer.attns.GQA"><code class="docutils literal notranslate"><span class="pre">GQA</span></code></a><ul>
+<li><a class="reference internal" href="#transformer.attns.GQA.__init__"><code class="docutils literal notranslate"><span class="pre">GQA.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#transformer.attns.GQA.forward"><code class="docutils literal notranslate"><span class="pre">GQA.forward()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#cross-attention">Cross-Attention</a><ul>
+<li><a class="reference internal" href="#transformer.attns.CrossAttention"><code class="docutils literal notranslate"><span class="pre">CrossAttention</span></code></a><ul>
+<li><a class="reference internal" href="#transformer.attns.CrossAttention.__init__"><code class="docutils literal notranslate"><span class="pre">CrossAttention.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#transformer.attns.CrossAttention.forward"><code class="docutils literal notranslate"><span class="pre">CrossAttention.forward()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#positional-embeddings">Positional Embeddings</a><ul>
+<li><a class="reference internal" href="#rope-rotary-position-embedding">RoPE (Rotary Position Embedding)</a><ul>
+<li><a class="reference internal" href="#transformer.pos.RoPE"><code class="docutils literal notranslate"><span class="pre">RoPE</span></code></a><ul>
+<li><a class="reference internal" href="#transformer.pos.RoPE.__init__"><code class="docutils literal notranslate"><span class="pre">RoPE.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#transformer.pos.RoPE.forward"><code class="docutils literal notranslate"><span class="pre">RoPE.forward()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#feed-forward-modules">Feed-Forward Modules</a><ul>
+<li><a class="reference internal" href="#swiglu">SwiGLU</a><ul>
+<li><a class="reference internal" href="#transformer.ffn.SwiGLU"><code class="docutils literal notranslate"><span class="pre">SwiGLU</span></code></a><ul>
+<li><a class="reference internal" href="#transformer.ffn.SwiGLU.__init__"><code class="docutils literal notranslate"><span class="pre">SwiGLU.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#transformer.ffn.SwiGLU.forward"><code class="docutils literal notranslate"><span class="pre">SwiGLU.forward()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#mlp">MLP</a><ul>
+<li><a class="reference internal" href="#transformer.ffn.MLP"><code class="docutils literal notranslate"><span class="pre">MLP</span></code></a><ul>
+<li><a class="reference internal" href="#transformer.ffn.MLP.__init__"><code class="docutils literal notranslate"><span class="pre">MLP.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#transformer.ffn.MLP.forward"><code class="docutils literal notranslate"><span class="pre">MLP.forward()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#transformer-model">Transformer Model</a><ul>
+<li><a class="reference internal" href="#transformerblock">TransformerBlock</a><ul>
+<li><a class="reference internal" href="#transformer.transformer.TransformerBlock"><code class="docutils literal notranslate"><span class="pre">TransformerBlock</span></code></a><ul>
+<li><a class="reference internal" href="#transformer.transformer.TransformerBlock.__init__"><code class="docutils literal notranslate"><span class="pre">TransformerBlock.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#transformer.transformer.TransformerBlock.forward"><code class="docutils literal notranslate"><span class="pre">TransformerBlock.forward()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#transformer-class-main-model">Transformer Class (Main Model)</a><ul>
+<li><a class="reference internal" href="#transformer.transformer.Transformer"><code class="docutils literal notranslate"><span class="pre">Transformer</span></code></a><ul>
+<li><a class="reference internal" href="#transformer.transformer.Transformer.config_class"><code class="docutils literal notranslate"><span class="pre">Transformer.config_class</span></code></a></li>
+<li><a class="reference internal" href="#transformer.transformer.Transformer.base_model_prefix"><code class="docutils literal notranslate"><span class="pre">Transformer.base_model_prefix</span></code></a></li>
+<li><a class="reference internal" href="#transformer.transformer.Transformer.__init__"><code class="docutils literal notranslate"><span class="pre">Transformer.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#transformer.transformer.Transformer.forward"><code class="docutils literal notranslate"><span class="pre">Transformer.forward()</span></code></a></li>
+<li><a class="reference internal" href="#transformer.transformer.Transformer.get_num_params"><code class="docutils literal notranslate"><span class="pre">Transformer.get_num_params()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=01f34227"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>
