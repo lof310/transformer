@@ -6,7 +6,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 project = 'transformer'
 copyright = '2026, Leinier Orama Fernández'
 author = 'Leinier Orama Fernández'
-release = '0.1.0'
+release = '0.2.0'
 
 extensions = [
     'myst_parser',
@@ -48,7 +48,7 @@ templates_path = ['_templates']
 exclude_patterns = []
 
 html_theme = 'furo'
-#html_logo = '_static/logo.png'
+#html_logo = '_static/logo.jpg'
 html_static_path = ['_static']
 
 todo_include_todos = True

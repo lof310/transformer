@@ -13,12 +13,11 @@ Clone the repository and install in editable mode (recommended for development):
 ```bash
 git clone --depth=1 https://github.com/lof310/transformer
 cd transformer
+
+# Install in Development Mode
 pip install -e .
-```
 
-## Install normally
-
-```bash
+# Install Normally
 pip install .
 ```
 
@@ -29,6 +28,6 @@ The required dependencies are listed in `requirements.txt` and include:
 - `transformers`
 - `Nothing Else`
 
-Optional development dependencies:
+Optional development dependencies listed in `requirements-dev.txt`:
 - `pytest` (testing)
 - `sphinx`, `myst-parser`, `furo` (documentation)

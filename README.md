@@ -61,6 +61,30 @@ input_ids = torch.randint(low=0, high=config.vocab_size, size(B, N))
 output = model(input_ids, return_states=False)
 ```
 
+## Default Configuration
+The default configuration implements the latest SOTA Transformer design.
+
+```python
+from transformer import TransformerConfig
+
+TransformerConfig(
+    n_layers = 12,
+    d_model int = 1536,
+    n_heads = 32,
+    n_kv_heads = None, # GQA Disabled
+    vocab_size int = 50000,
+    d_ff = None, # Choosen Automatically: math.ceil(d_model * 2.666)
+    attn_type = "MHA",
+    attn_bias = False,
+    ffn_bias = True,
+    attn_qk_norm = True,
+    lm_head_bias = False,
+    tied_weights = False,
+    seq_len = 1024,
+    max_seq_len = 4096
+)
+```
+
 ## Documentation
 
 Full Documentation available at [This Page](https://lof310.github.io/transformer)

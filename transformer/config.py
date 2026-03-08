@@ -1,6 +1,8 @@
+import math
+from typing import Dict, Optional
+
 from transformers import PretrainedConfig
 
-import math
 
 class TransformerConfig(PretrainedConfig):
     r"""
@@ -27,6 +29,8 @@ class TransformerConfig(PretrainedConfig):
 
         attn_qk_norm (bool, optional): Whether to apply Normalization to Queries and Keys before the Attention Computation. Default: ``True``
 
+        attn_dropout (float, optional): Dropout probability for the Attention Layer. Default: ``0.0``
+
         ffn_bias (bool, optional): Whether to use bias in Feed-Forward Linear layers. Default: ``True``
 
         lm_head_bias (bool, optional): Whether to use bias in the Language Modeling Head. Default: ``False``
@@ -39,28 +43,33 @@ class TransformerConfig(PretrainedConfig):
 
         n_kv_heads (int, optional): Number of key/value heads for Grouped-Query Attention(GQA). Default: ``n_heads``
 
+        rope_base (float, optinal): Base for the Exponential Frequency Calculation in RoPE. Default: ``10000.0``
+
         ``**kwargs`` (dict, optional): Additional keyword arguments passed to `PretrainedConfig`
 
     """
+
     model_type = "transformer"
 
     def __init__(
         self,
         n_layers: int = 12,
         n_heads: int = 32,
-        n_kv_heads: int = None,
+        n_kv_heads: Optional[int] = None,
         vocab_size: int = 50000,
         d_model: int = 1536,
-        d_ff: int = None,
+        d_ff: Optional[int] = None,
         attn_type: str = "MHA",
-        attn_bias: bool = False,
+        attn_bias: Optional[bool] = False,
+        attn_dropout: Optional[float] = 0.0,
         ffn_bias: bool = True,
-        attn_qk_norm: bool = False,
+        attn_qk_norm: bool = True,
         lm_head_bias: bool = False,
         tied_weights: bool = False,
         seq_len: int = 1024,
+        rope_base: float = 10000.0,
         max_seq_len: int = 4096,
-        **kwargs
+        **kwargs: Dict,
     ):
         super().__init__(**kwargs)
         self.n_layer = n_layers
@@ -69,12 +78,14 @@ class TransformerConfig(PretrainedConfig):
         self.n_kv_heads = n_kv_heads if attn_type == "GQA" else n_heads
         self.vocab_size = vocab_size
         self.attn_bias = attn_bias
+        self.attn_dropout = attn_dropout
         self.ffn_bias = ffn_bias
         self.attn_qk_norm = attn_qk_norm
         self.lm_head_bias = lm_head_bias
         self.tied_weights = tied_weights
 
         self.seq_len = seq_len
+        self.rope_base = rope_base
         self.max_seq_len = max_seq_len
 
         self.d_model = d_model

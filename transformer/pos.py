@@ -1,35 +1,44 @@
+from typing import Optional, Tuple
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class RoPE(nn.Module):
-    """
+    r"""
     Rotary Position Embedding (RoPE) module.
 
     Args:
         max_seq_len (int): Maximum sequence length for which to precompute frequencies.
         d_head (int): Dimension per head (must be even).
-        rope_base (float): Base for the exponential frequency calculation. Default: 10000.0
-        persistent (bool): Whether to register the precomputed cos/sin as persistent buffers. Default: True
+        rope_base (float): Base for the exponential frequency calculation. Default: ``10000.0``
+        persistent (bool): Whether to register the precomputed cos/sin as persistent buffers. Default: ``True``
     """
+
     def __init__(self, max_seq_len: int, d_head: int, rope_base: float = 10000.0, persistent: bool = True):
         super().__init__()
         assert d_head % 2 == 0
         self.half = d_head // 2
-        inv_freq, pos = (1.0 / (rope_base ** (torch.arange(0, d_head, 2, dtype=torch.float32) / d_head)), torch.arange(max_seq_len, dtype=torch.float32).unsqueeze(1))
+        inv_freq, pos = (
+            1.0 / (rope_base ** (torch.arange(0, d_head, 2, dtype=torch.float32) / d_head)),
+            torch.arange(max_seq_len, dtype=torch.float32).unsqueeze(1),
+        )
         freqs = pos * inv_freq.unsqueeze(0)
         self.register_buffer("cos", torch.cos(freqs), persistent=persistent)
         self.register_buffer("sin", torch.sin(freqs), persistent=persistent)
 
-    def forward(self, q: torch.Tensor, k: torch.Tensor, pos_q: torch.Tensor, pos_k: torch.Tensor):
-        """
+    def forward(
+        self, q: torch.Tensor, k: torch.Tensor, pos_q: torch.LongTensor, pos_k: torch.LongTensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        r"""
         Apply rotary position embeddings to queries and keys.
 
         Args:
-            q (torch.Tensor): Query tensor of shape (batch_size, n_heads, seq_len, d_head)
-            k (torch.Tensor): Key tensor of shape (batch_size, n_heads, seq_len, d_head)
-            pos_q (torch.Tensor): Positions for queries, shape (seq_len,) or (batch_size, seq_len)
-            pos_k (torch.Tensor): Positions for keys, shape (seq_len,) or (batch_size, seq_len)
+            q (torch.Tensor): Query tensor of shape :math:`(B, H, N, d)`
+            k (torch.Tensor): Key tensor of shape :math:`(B, H, N, d)`
+            pos_q (torch.Tensor): Positions for queries, shape :math:`(N,)` or :math:`(B, N)`
+            pos_k (torch.Tensor): Positions for keys, shape :math:`(N,)` or :math:`(B, N)`
 
         Returns:
             Tuple[torch.Tensor, torch.Tensor]: Rotated queries and keys.

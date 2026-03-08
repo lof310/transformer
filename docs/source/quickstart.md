@@ -48,7 +48,7 @@ for epoch in range(3):
 
 ## Using HuggingFace Generation
 
-Since the model inherits from `PreTrainedModel`, you can use the built-in generation methods:
+Since the model inherits from `GenerationMixin`, you can use the built-in generation methods:
 
 ```python
 from transformers import GenerationConfig

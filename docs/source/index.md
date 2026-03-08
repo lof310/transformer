@@ -10,6 +10,13 @@ quickstart
 
 ```{toctree}
 :maxdepth: 2
+:caption: Guide
+
+guide
+```
+
+```{toctree}
+:maxdepth: 2
 :caption: API Reference
 
 api
@@ -41,7 +48,7 @@ A Polished PyTorch implementation of the current State-Of-The-Art(SOTA) Transfor
 - Rotary Position Embeddings (RoPE) and SwiGLU feed-forward
 - Optional weight tying, QK normalization, and bias control
 
-## Quick Example
+### Quick Example
 
 ```python
 import torch
@@ -55,7 +62,7 @@ outputs = model(input_ids)
 logits = outputs.logits  # shape: (2, 512, 32000) [batch_size, seq_len, vocab_size]
 ```
 
-## Indices and tables
+### Indices and tables
 
 - {ref}`genindex`
 - {ref}`modindex`

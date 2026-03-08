@@ -6,10 +6,12 @@ We welcome contributions! Please follow these guidelines to ensure a smooth coll
 
 1. Fork the repository.
 2. Clone your fork: `git clone https://github.com/your-username/transformer.git`
-3. Install in editable mode with development dependencies:
-   ```bash
-   pip install -e .
-   ```
+3. Install in development mode with development dependencies:
+```bash
+pip install -r requirements.txt
+pip install -r docs/requirements-docs.txt # Optional
+pip install -e .
+```
 4. Create a branch for your feature: `git checkout -b feature/amazing-feature`
 
 ## Code Style
@@ -36,8 +38,14 @@ If you change any public API, please update the docstrings accordingly. To build
 ```bash
 cd docs
 pip install -r requirements-docs.txt
+make clean
 make html
-# then open build/html/index.html
+```
+
+Then check in your browser with:
+```bash
+cd build/html
+python -m http.server
 ```
 
 ## Pull Request Process
@@ -48,4 +56,4 @@ make html
 
 ## Code of Conduct
 
-Please note that this project adheres to a [Contributor Covenant Code of Conduct]. By participating, you are expected to uphold this code.
+Please note that this project adheres to a **Contributor Covenant Code of Conduct**. By participating, you are expected to uphold this code.
