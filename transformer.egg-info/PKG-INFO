@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: transformer
-Version: 0.1.0
+Version: 0.2.0
 Summary: A polished PyTorch implementation of the current State-Of-The-Art(SOTA) Transformer
 Author-email: Leinier Orama <lof310w@gmail.com>
 Maintainer-email: Leinier Orama <lof310w@gmail.com>
@@ -23,8 +23,10 @@ Classifier: Topic :: Software Development :: Libraries :: Python Modules
 Classifier: Operating System :: OS Independent
 Requires-Python: >=3.9
 Description-Content-Type: text/markdown
+License-File: LICENSE
 Requires-Dist: torch>=1.12.0
 Requires-Dist: transformers>=4.30.0
+Dynamic: license-file
 
 # Transformer
 
@@ -87,6 +89,30 @@ model = Transformer(config)
 B, N = 16, 1024
 input_ids = torch.randint(low=0, high=config.vocab_size, size(B, N))
 output = model(input_ids, return_states=False)
+```
+
+## Default Configuration
+The default configuration implements the latest SOTA Transformer design.
+
+```python
+from transformer import TransformerConfig
+
+TransformerConfig(
+    n_layers = 12,
+    d_model int = 1536,
+    n_heads = 32,
+    n_kv_heads = None, # GQA Disabled
+    vocab_size int = 50000,
+    d_ff = None, # Choosen Automatically: math.ceil(d_model * 2.666)
+    attn_type = "MHA",
+    attn_bias = False,
+    ffn_bias = True,
+    attn_qk_norm = True,
+    lm_head_bias = False,
+    tied_weights = False,
+    seq_len = 1024,
+    max_seq_len = 4096
+)
 ```
 
 ## Documentation

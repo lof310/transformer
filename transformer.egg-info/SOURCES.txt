@@ -1,3 +1,4 @@
+LICENSE
 README.md
 pyproject.toml
 transformer/__init__.py
