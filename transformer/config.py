@@ -84,6 +84,7 @@ class TransformerConfig(PretrainedConfig):
         attn_dropout: Optional[float] = 0.0,
         tied_weights: bool = False,
         seq_len: int = 1024,
+        pos_encoding: str = "RoPE",
         rope_base: float = 10000.0,
         max_seq_len: int = 4096,
         **kwargs: Dict,
