@@ -1,5 +1,5 @@
 import math
-from typing import Dict, Optional
+from typing import Dict, Optional, Union, Type
 
 from transformers import PretrainedConfig
 
