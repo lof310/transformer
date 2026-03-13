@@ -6,7 +6,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 project = 'transformer'
 copyright = '2026, Leinier Orama Fernández'
 author = 'Leinier Orama Fernández'
-release = '0.2.0'
+release = '0.3.0'
 
 extensions = [
     'myst_parser',

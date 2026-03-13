@@ -1,10 +1,9 @@
 import math
 from typing import Dict, Optional, Type, Union
 
-from transformers import PretrainedConfig
-
 import torch
 import torch.nn as nn
+from transformers import PretrainedConfig
 
 
 class TransformerConfig(PretrainedConfig):
@@ -53,8 +52,6 @@ class TransformerConfig(PretrainedConfig):
         lm_head_bias (bool, optional): Whether to use bias in the Language Modeling Head. Default: ``False``
 
         tied_weights (bool, optional): If True, tie the input embedding and output projection weights. Default: ``False``
-
-        rope_base (float, optional): Base for the RoPE frequency computation. Default: ``10000.0``
 
         attn_class (Union[Type[nn.Module], str], optional): Attention class or type.
             - If ``str``, one of ``MHA``, ``GQA``, ``CrossAttention``. For ``GQA``, also specify `n_kv_heads`.
@@ -113,7 +110,7 @@ class TransformerConfig(PretrainedConfig):
 
         self.norm_design = norm_design
 
-        self.d_ff = d_ff if d_ff is not None else math.ceil(d_model * 2.666)
+        self.d_ff = d_ff if d_ff is not None else ((math.ceil(d_model * 8 / 3) + 1) // 2) * 2
 
         self.attn_dropout = attn_dropout
         self.attn_qk_norm = attn_qk_norm
@@ -125,6 +122,6 @@ class TransformerConfig(PretrainedConfig):
         self.tied_weights = tied_weights
 
         self.seq_len = seq_len
-        self.rope_base = rope_base
         self.pos_encoding = pos_encoding
+        self.rope_base = rope_base
         self.max_seq_len = max_seq_len

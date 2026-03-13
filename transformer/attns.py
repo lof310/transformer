@@ -27,8 +27,10 @@ class MHA(nn.Module):
 
         layer_idx (int, optional): Index of the layer (used for debugging/logging).
 
-        rope_base (float, optional): Base for the Exponential Frequency Calculation in RoPE.
-        Default: ``10000.0``
+        pos_encoding (str, optional): Positional Encoding to use. Default: ``RoPE``
+
+        pos_encoding_kwargs (Dict, optional): Dictionary of Additional Arguments for Positional Encoding.
+            Example: {"rope_base": 10000.0, "rot_frac": 0.5}.
 
         max_seq_len (int): Maximum sequence length for RoPE.
 
@@ -42,8 +44,8 @@ class MHA(nn.Module):
         attn_bias: Optional[bool] = False,
         qk_norm: Optional[bool] = True,
         layer_idx: int = 0,
-        rope_base: float = 10000.0,
         pos_encoding: str = "RoPE",
+        pos_encoding_kwargs: Dict = {},
         max_seq_len: int = 1024,
     ):
         super().__init__()
@@ -55,14 +57,17 @@ class MHA(nn.Module):
         self.out_proj = nn.Linear(self.d_model, self.d_model, bias=attn_bias)
 
         if pos_encoding == "RoPE":
-            self.rope = RoPE(max_seq_len, self.d_head, rope_base=rope_base)
+            self.rope = RoPE(max_seq_len, self.d_head, **pos_encoding_kwargs)
+        elif pos_encoding == "PartialRoPE":
+            self.rope = PartialRoPE(max_seq_len, self.d_head, **pos_encoding_kwargs)
         elif pos_encoding == "AliBI":
             raise ValueError("Under Development")
         else:
             raise ValueError("Not implemented")
+
         self.scale = self.d_head**-0.5
 
-        self.dropout = dropout if dropout is not None or dropout != 0.0 else None
+        self.dropout = dropout
 
         if qk_norm:
             self.q_norm, self.k_norm = nn.RMSNorm(self.d_head), nn.RMSNorm(self.d_head)
@@ -91,6 +96,7 @@ class MHA(nn.Module):
                 :math:`N` is the Sequence Length. A 2D mask will be broadcasted across the batch while a 4D mask allows
                 for a different mask for each entry in the batch and/or heads dimensions.
                 **Note: Should be a boolean mask where True indicates masked positions.**
+                When Flash Attention is enabled it is inverted because PyTorch expects True for allowed positions.
 
             pos (torch.LongTensor, optional): Position indices for RoPE, shape :math:`(N)` or :math:`(B, N)`
 
@@ -120,26 +126,36 @@ class MHA(nn.Module):
                         q,
                         k,
                         v,
-                        attn_mask=mask,
+                        attn_mask=~mask if mask is not None else None,
                         dropout_p=self.dropout if self.dropout is not None else 0.0,
                         is_causal=False,
                         scale=self.scale,
                         enable_gqa=False,
                     )
                     .transpose(1, 2)
-                    .contriguous()
+                    .contiguous()
                     .view(B, N, D)
                 )
         else:
             A_weights = torch.matmul(q, k.transpose(-1, -2)) * self.scale
             A_scores = (
-                F.softmax(A_weights.masked_fill_(mask, float("-inf")), dim=-1)
+                F.softmax(A_weights.masked_fill(mask, float("-inf")), dim=-1)
                 if mask is not None
                 else F.softmax(A_weights, dim=-1)
             )
-            if self.dropout is not None:
-                A_scores = F.dropout(A_scores, p=self.dropout, training=self.training, inplace=False)
-            y = torch.matmul(A_scores, v).transpose(1, 2).contiguous().view(B, N, D)
+            y = (
+                torch.matmul(
+                    (
+                        F.dropout(A_scores, p=self.dropout, training=self.training, inplace=False)
+                        if self.dropout is not None and self.dropout != 0.0
+                        else A_scores
+                    ),
+                    v,
+                )
+                .transpose(1, 2)
+                .contiguous()
+                .view(B, N, D)
+            )
 
         if return_states:
             if flash_attn[0]:
@@ -188,7 +204,10 @@ class GQA(nn.Module):
 
         layer_idx (int, optional): Index of the layer (used for debugging/logging).
 
-        rope_base (float, optional): Base for the Exponential Frequency Calculation in RoPE. Default: ``10000.0``
+        pos_encoding (str, optional): Positional Encoding to use. Default: ``RoPE``
+
+        pos_encoding_kwargs (Dict, optional): Dictionary of Additional Arguments for Positional Encoding.
+            Example: {"rope_base": 10000.0, "rot_frac": 0.5}.
 
         max_seq_len (int): Maximum sequence length for RoPE.
 
@@ -203,8 +222,8 @@ class GQA(nn.Module):
         attn_bias: Optional[bool] = False,
         qk_norm: Optional[bool] = True,
         layer_idx: int = 0,
-        rope_base: float = 10000.0,
         pos_encoding: str = "RoPE",
+        pos_encoding_kwargs: Dict = {},
         max_seq_len: int = 1024,
     ):
         super().__init__()
@@ -226,10 +245,18 @@ class GQA(nn.Module):
         )
         self.out_proj = nn.Linear(self.d_model, self.d_model, bias=attn_bias)
 
-        self.rope = RoPE(max_block_size, self.d_head, rope_base=rope_base)
+        if pos_encoding == "RoPE":
+            self.rope = RoPE(max_seq_len, self.d_head, **pos_encoding_kwargs)
+        elif pos_encoding == "PartialRoPE":
+            self.rope = PartialRoPE(max_seq_len, self.d_head, **pos_encoding_kwargs)
+        elif pos_encoding == "AliBI":
+            raise ValueError("Under Development")
+        else:
+            raise ValueError("Not implemented")
+
         self.scale = self.d_head**-0.5
 
-        self.dropout = dropout if dropout is not None or dropout != 0.0 else None
+        self.dropout = dropout
 
         if qk_norm:
             self.q_norm, self.k_norm = nn.RMSNorm(self.d_head), nn.RMSNorm(self.d_head)
@@ -258,6 +285,7 @@ class GQA(nn.Module):
                 :math:`N` is the Sequence Length. A 2D mask will be broadcasted across the batch while a 4D mask allows
                 for a different mask for each entry in the batch and/or heads dimensions.
                 **Note: Should be a boolean mask where True indicates masked positions.**
+                When Flash Attention is enabled it is inverted because PyTorch expects True for allowed positions.
 
             pos (torch.LongTensor, optional): Position indices for RoPE, shape :math:`(N)` or :math:`(B, N)`
 
@@ -276,7 +304,7 @@ class GQA(nn.Module):
         B, N, D, H_q, H_kv, G, d = *x.shape, self.n_heads, self.n_kv_heads, self.groups, self.d_head
 
         q, k, v = self.qkv_proj(x).view(B, N, H_q + (H_kv * 2), d).transpose(1, 2).split([H_q, H_kv, H_kv], dim=1)
-        q, k = (self.q_norm(q), self.k_norm(k)) if qk_norm else (q, k)
+        q, k = (self.q_norm(q), self.k_norm(k)) if self.qk_norm else (q, k)
         q, k = self.rope(q, k, pos, pos) if pos is not None else (q, k)
 
         y, A_weights, A_scores = None, None, None
@@ -287,7 +315,7 @@ class GQA(nn.Module):
                         q,
                         k,
                         v,
-                        attn_mask=mask,
+                        attn_mask=~mask if mask is not None else None,
                         dropout_p=self.dropout if self.dropout is not None else 0.0,
                         is_causal=False,
                         scale=self.scale,
@@ -298,15 +326,28 @@ class GQA(nn.Module):
                     .view(B, N, D)
                 )
         else:
+            k = k.repeat_interleave(self.groups, dim=1)
+            v = v.repeat_interleave(self.groups, dim=1)
+
             A_weights = torch.matmul(q, k.transpose(-1, -2)) * self.scale
             A_scores = (
-                F.softmax(A_weights.masked_fill_(mask, float("-inf")), dim=-1)
+                F.softmax(A_weights.masked_fill(mask, float("-inf")), dim=-1)
                 if mask is not None
                 else F.softmax(A_weights, dim=-1)
             )
-            if self.dropout is not None:
-                A_scores = F.dropout(A_scores, p=self.dropout, training=self.training, inplace=False)
-            y = torch.matmul(A_scores, v).transpose(1, 2).contiguous().view(B, N, D)
+            y = (
+                torch.matmul(
+                    (
+                        F.dropout(A_scores, p=self.dropout, training=self.training, inplace=False)
+                        if self.dropout is not None and self.dropout != 0.0
+                        else A_scores
+                    ),
+                    v,
+                )
+                .transpose(1, 2)
+                .contiguous()
+                .view(B, N, D)
+            )
 
         if return_states:
             if flash_attn[0]:
@@ -376,16 +417,16 @@ class CrossAttention(nn.Module):
         self.d_model, self.n_heads, self.d_head, self.layer_idx = d_model, n_heads, d_model // n_heads, layer_idx
         self.qk_norm = qk_norm
 
-        self.q, self.kv_proj, self.out_proj = (
+        self.q_proj, self.kv_proj, self.out_proj = (
             nn.Linear(self.d_model, self.d_model, bias=attn_bias),
             nn.Linear(self.d_model, self.d_model * 2, bias=attn_bias),
             nn.Linear(self.d_model, self.d_model, bias=attn_bias),
         )
 
-        self.rope = RoPE(max_block_size, self.d_head, rope_base=rope_base)
+        self.rope = RoPE(max_seq_len, self.d_head, rope_base=rope_base)
         self.scale = self.d_head**-0.5
 
-        self.dropout = nn.Dropout(dropout) if dropout is not None or dropout != 0.0 else None
+        self.dropout = dropout
 
         if qk_norm:
             self.q_norm, self.k_norm = nn.RMSNorm(self.d_head), nn.RMSNorm(self.d_head)
@@ -420,6 +461,7 @@ class CrossAttention(nn.Module):
                 A 2D mask will be broadcasted across the batch while a 4D mask allows for a different mask for each entry
                 in the batch and/or heads dimensions.
                 **Note: Should be a boolean mask where True indicates masked positions.**
+                When Flash Attention is enabled it is inverted because PyTorch expects True for allowed positions.
 
             pos_q (torch.LongTensor, optional): Position indices for Queries, shape :math:`(Lq)` or :math:`(B, Lq)`
 
@@ -437,7 +479,7 @@ class CrossAttention(nn.Module):
                 The keys: {`output`, `queries`, `keys`, `values`, `attn_weights`, `attn_scores`, `output_before_proj` and `input`} where `input` is a tuple (queries, kv)
 
         """
-        B, Lq, D, Lk, H, d = *q.shape, kv.shape[1], self.n_heads, self.d_head
+        B, Lq, D, Lk, H, d = *queries.shape, kv.shape[1], self.n_heads, self.d_head
 
         q, k, v = self.q_proj(queries).view(B, Lq, H, d).transpose(1, 2), *self.kv_proj(kv).view(
             B, Lk, H, d * 2
@@ -453,7 +495,7 @@ class CrossAttention(nn.Module):
                         q,
                         k,
                         v,
-                        attn_mask=mask,
+                        attn_mask=~mask if mask is not None else None,
                         dropout_p=self.dropout if self.dropout is not None else 0.0,
                         is_causal=False,
                         scale=self.scale,
@@ -466,13 +508,23 @@ class CrossAttention(nn.Module):
         else:
             A_weights = torch.matmul(q, k.transpose(-1, -2)) * self.scale
             A_scores = (
-                F.softmax(A_weights.masked_fill_(mask, float("-inf")), dim=-1)
+                F.softmax(A_weights.masked_fill(mask, float("-inf")), dim=-1)
                 if mask is not None
                 else F.softmax(A_weights, dim=-1)
             )
-            if self.dropout is not None:
-                A_scores = F.dropout(A_scores, p=self.dropout, training=self.training, inplace=False)
-            y = torch.matmul(A_scores, v).transpose(1, 2).contiguous().view(B, Lq, D)
+            y = (
+                torch.matmul(
+                    (
+                        F.dropout(A_scores, p=self.dropout, training=self.training, inplace=False)
+                        if self.dropout is not None and self.dropout != 0.0
+                        else A_scores
+                    ),
+                    v,
+                )
+                .transpose(1, 2)
+                .contiguous()
+                .view(B, Lq, D)
+            )
 
         if return_states:
             if flash_attn[0]:
@@ -482,7 +534,7 @@ class CrossAttention(nn.Module):
                     "keys": k,
                     "values": v,
                     "output_before_proj": y,
-                    "input": x,
+                    "input": (queries, kv),
                 }
             else:
                 return {
@@ -493,7 +545,7 @@ class CrossAttention(nn.Module):
                     "attn_weights": A_weights,
                     "attn_scores": A_scores,
                     "output_before_proj": y,
-                    "input": x,
+                    "input": (queries, kv),
                 }
         else:
             return self.out_proj(y)

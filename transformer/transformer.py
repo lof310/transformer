@@ -5,8 +5,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from transformers import GenerationMixin, PretrainedConfig, PreTrainedModel
-from transformers.modeling_outputs import CausalLMOutput
 from transformers.modeling_layers import GradientCheckpointingLayer
+from transformers.modeling_outputs import CausalLMOutput
+
 from .attns import MHA
 from .config import TransformerConfig
 from .ffn import SwiGLU
@@ -27,6 +28,7 @@ class TransformerBlock(GradientCheckpointingLayer):
             It is only used if ``TransformerConfig.ffn_class`` is ``Type[nn.Module]``
         norm_kwargs: (Dict, optional): Additional Arguments for the normalization class passed from ``TransformerConfig.norm_class``. It is always passed.
         layer_idx (int, optional): Index of this block (used for debugging/logging).
+
     """
 
     def __init__(
@@ -39,6 +41,7 @@ class TransformerBlock(GradientCheckpointingLayer):
     ):
         super().__init__()
         self.d_model, self.d_ff, self.n_heads, self.layer_idx = config.d_model, config.d_ff, config.n_heads, layer_idx
+        self.norm_design = config.norm_design
 
         if config.attn_class == "MHA":
             self.attn = MHA(
@@ -48,9 +51,9 @@ class TransformerBlock(GradientCheckpointingLayer):
                 attn_bias=config.attn_bias,
                 qk_norm=config.attn_qk_norm,
                 layer_idx=layer_idx,
-                rope_base=config.rope_base,
                 pos_encoding=config.pos_encoding,
                 max_seq_len=config.max_seq_len,
+                **attn_kwargs,
             )
         elif config.attn_class == "GQA":
             self.attn = GQA(
@@ -61,9 +64,9 @@ class TransformerBlock(GradientCheckpointingLayer):
                 attn_bias=config.attn_bias,
                 qk_norm=config.attn_qk_norm,
                 layer_idx=layer_idx,
-                rope_base=config.rope_base,
                 pos_encoding=config.pos_encoding,
                 max_seq_len=config.max_seq_len,
+                **attn_kwargs,
             )
         elif config.attn_class == "CrossAttention":
             raise ValueError(f"Under Development: {config.attn_class}")
@@ -74,14 +77,6 @@ class TransformerBlock(GradientCheckpointingLayer):
                 self.d_model,
                 self.n_heads,
                 config.attn_bias,
-                {
-                    "dropout": config.attn_dropout,
-                    "qk_norm": config.attn_qk_norm,
-                    "layer_idx": layer_idx,
-                    "rope_base": config.rope_base,
-                    "pos_encoding": config.pos_encoding,
-                    "max_seq_len": config.max_seq_len,
-                },
                 **attn_kwargs,
             )
         else:
@@ -90,9 +85,9 @@ class TransformerBlock(GradientCheckpointingLayer):
             )
 
         if config.ffn_class == "SwiGLU":
-            self.ffn = SwiGLU(self.d_model, self.d_ff, bias=config.ffn_bias)
+            self.ffn = SwiGLU(self.d_model, self.d_ff, bias=config.ffn_bias, **ffn_kwargs)
         elif config.ffn_class == "MLP":
-            self.ffn = MLP(self.d_model, self.d_ff, bias=config.ffn_bias)
+            self.ffn = MLP(self.d_model, self.d_ff, bias=config.ffn_bias, **ffn_kwargs)
         elif config.ffn_class == "MoE":
             raise ValueError(f"Under Development: {config.ffn_class}")
         elif check_type(config.ffn_class) == 0:
@@ -104,7 +99,6 @@ class TransformerBlock(GradientCheckpointingLayer):
                 "TransformerConfig.ffn_class Should be str or Type[nn.Module] but found: {config.ffn_class}"
             )
 
-        # FIXME
         if config.norm_class == "rms_norm":
             if config.norm_design == "pre_norm" or config.norm_design == "post_norm":
                 self.norm_attn, self.norm_ffn = (
@@ -118,6 +112,8 @@ class TransformerBlock(GradientCheckpointingLayer):
                     nn.RMSNorm(self.d_model, **norm_kwargs),
                     nn.RMSNorm(self.d_model, **norm_kwargs),
                 )
+            else:
+                raise ValueError(f"Invalid norm_design: {config.norm_design}")
         elif config.norm_class == "layer_norm":
             if config.norm_design == "pre_norm" or config.norm_design == "post_norm":
                 self.norm_attn, self.norm_ffn = (
@@ -131,6 +127,8 @@ class TransformerBlock(GradientCheckpointingLayer):
                     nn.LayerNorm(self.d_model, **norm_kwargs),
                     nn.LayerNorm(self.d_model, **norm_kwargs),
                 )
+            else:
+                raise ValueError(f"Invalid norm_design: {config.norm_design}")
         elif check_type(config.norm_class) == 0:
             raise ValueError(f"Unknown normalization class: {config.norm_class}")
         elif check_type(config.norm_class) == 1:
@@ -146,6 +144,8 @@ class TransformerBlock(GradientCheckpointingLayer):
                     config.norm_class(self.d_model, **norm_kwargs),
                     config.norm_class(self.d_model, **norm_kwargs),
                 )
+            else:
+                raise ValueError(f"Invalid norm_design: {config.norm_design}")
         else:
             raise RuntimeError(
                 "TransformerConfig.norm_class Should be str or Type[nn.Module] but found: {config.norm_class}"
@@ -176,11 +176,45 @@ class TransformerBlock(GradientCheckpointingLayer):
         Returns:
             Union[torch.Tensor, Dict]: Output tensor (batch_size, seq_len, d_model) if not return_states,
                 else a dict containing the keys: "output", "attn_output" and "ffn_output".
+
         """
-        attn = self.attn(self.norm_attn(x), attn_mask, pos, flash_attn=flash_attn, return_states=return_states)
-        x = x + attn["output"] if return_states else x + attn
-        ffn = self.ffn(self.norm_ffn(x), return_states=return_states)
-        x = x + ffn["output"] if return_states else x + ffn
+
+        def extract(out):
+            """Helper to extract output tensor from module return (handles dict vs tensor)"""
+            return out["output"] if return_states else out
+
+        attn, ffn = None, None
+        if self.norm_design == "pre_norm":
+            attn = self.attn(
+                self.norm_attn(x),
+                return_states=return_states,
+                **{"mask": attn_mask, "pos": pos, "flash_attn": flash_attn},
+            )
+            x = x + extract(attn)
+
+            ffn = self.ffn(self.norm_ffn(x), return_states=return_states)
+            x = x + extract(ffn)
+        elif self.norm_design == "post_norm":
+            attn = self.attn(
+                x, return_states=return_states, **{"mask": attn_mask, "pos": pos, "flash_attn": flash_attn}
+            )
+            x = self.norm_attn(x + extract(attn))
+
+            ffn = self.ffn(x, return_states=return_states)
+            x = self.norm_ffn(x + extract(ffn))
+        elif self.norm_design == "both":
+            attn = self.attn(
+                self.pre_norm_attn(x),
+                return_states=return_states,
+                **{"mask": attn_mask, "pos": pos, "flash_attn": flash_attn},
+            )
+            x = self.post_norm_attn(x + extract(attn))
+
+            ffn = self.ffn(self.pre_norm_ffn(x), return_states=return_states)
+            x = self.post_norm_ffn(x + extract(ffn))
+        else:
+            raise ValueError(f"Invalid norm_design: {self.norm_design}")
+
         if return_states:
             return {"output": x, "attn_output": attn, "ffn_output": ffn}
         else:
@@ -188,11 +222,21 @@ class TransformerBlock(GradientCheckpointingLayer):
 
 
 class Transformer(PreTrainedModel, GenerationMixin):
-    """
+    r"""
     Transformer language model, compatible with the HuggingFace interface.
 
     Args:
         config (TransformerConfig): Model configuration.
+
+        attn_kwargs (Dict, optional): Additional Keyword Arguments passed to the Attention Module. Default: ``{"pos_encoding_kwargs": **pos_encoding_kwargs}``
+
+        pos_encoding_kwargs (Dict, optional): Additional Arguments for Positional Encoding. Default: ``{}``
+            Example: ``{"rope_base": 12000, "persistent": False}``
+
+        ffn_kwargs (Dict, optional): Additional Keyword Arguments passed to the Feed-Forward Module. Default: ``{}``
+
+        norm_kwargs (Dict, optional): Additional Keyword Arguments passed to the Normalization Layer. Default: ``{}``
+
     """
 
     config_class = TransformerConfig
@@ -208,6 +252,7 @@ class Transformer(PreTrainedModel, GenerationMixin):
         self,
         config,
         attn_kwargs: Dict = {},
+        pos_encoding_kwargs: Dict = {},
         ffn_kwargs: Dict = {},
         norm_kwargs: Dict = {},
     ):
@@ -217,7 +262,24 @@ class Transformer(PreTrainedModel, GenerationMixin):
 
         self.emb = nn.Embedding(config.vocab_size, config.d_model)
         self.blocks = nn.ModuleList(
-            [TransformerBlock(config, attn_kwargs, ffn_kwargs, norm_kwargs, i) for i in range(config.n_layer)]
+            [
+                TransformerBlock(
+                    config,
+                    (
+                        attn_kwargs
+                        if attn_kwargs != {}
+                        else {
+                            "pos_encoding_kwargs": (
+                                pos_encoding_kwargs if pos_encoding_kwargs != {} else {"rope_base": config.rope_base}
+                            )
+                        }
+                    ),
+                    ffn_kwargs,
+                    norm_kwargs,
+                    i,
+                )
+                for i in range(config.n_layer)
+            ]
         )
         self.norm_out = nn.RMSNorm(config.d_model)
         self.lm_head = nn.Linear(config.d_model, config.vocab_size, bias=config.lm_head_bias)
@@ -307,8 +369,7 @@ class Transformer(PreTrainedModel, GenerationMixin):
         return self.emb
 
     def set_input_embeddings(self, embeddings: nn.Embedding):
-        self.shared = new_embed
-        self.encoder.set_input_embeddings(new_embeddings)
+        self.emb = embeddings
 
     def get_num_params(self) -> int:
         """Return the number of trainable parameters."""
