@@ -1,33 +1,46 @@
 import math
-from typing import Any, Dict, Optional, Union, Tuple
+from typing import Any, Dict, Optional, Tuple, Union
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from transformers import GenerationMixin, PretrainedConfig, PreTrainedModel
 from transformers.modeling_outputs import CausalLMOutput
-
+from transformers.modeling_layers import GradientCheckpointingLayer
 from .attns import MHA
 from .config import TransformerConfig
 from .ffn import SwiGLU
 from .pos import RoPE
+from .utils import check_type
 
 
-class TransformerBlock(nn.Module):
+class TransformerBlock(GradientCheckpointingLayer):
     """
-    A Single Decoder Transformer Block consisting of Multi-Head Attention and Feed-Forward layers,
+    A Single Transformer Decoder Block consisting of Multi-Head Attention and Feed-Forward layers,
     each with Pre-Normalization (RMSNorm) and Standard Residual Connections.
 
     Args:
         config (TransformerConfig): Configuration object.
+        attn_kwargs: (Dict, optional): Additional Arguments for the attention class passed from ``TransformerConfig.attn_class``.
+            It is only used if ``TransformerConfig.attn_class`` is ``Type[nn.Module]``
+        ffn_kwargs: (Dict, optional): Additional Arguments for the ffn class passed from ``TransformerConfig.ffn_class``.
+            It is only used if ``TransformerConfig.ffn_class`` is ``Type[nn.Module]``
+        norm_kwargs: (Dict, optional): Additional Arguments for the normalization class passed from ``TransformerConfig.norm_class``. It is always passed.
         layer_idx (int, optional): Index of this block (used for debugging/logging).
     """
 
-    def __init__(self, config, layer_idx: Optional[int] = 0):
+    def __init__(
+        self,
+        config,
+        attn_kwargs: Optional[Dict] = {},
+        ffn_kwargs: Optional[Dict] = {},
+        norm_kwargs: Optional[Dict] = {},
+        layer_idx: int = 0,
+    ):
         super().__init__()
         self.d_model, self.d_ff, self.n_heads, self.layer_idx = config.d_model, config.d_ff, config.n_heads, layer_idx
 
-        if config.attn_type == "MHA":
+        if config.attn_class == "MHA":
             self.attn = MHA(
                 self.d_model,
                 self.n_heads,
@@ -36,27 +49,107 @@ class TransformerBlock(nn.Module):
                 qk_norm=config.attn_qk_norm,
                 layer_idx=layer_idx,
                 rope_base=config.rope_base,
+                pos_encoding=config.pos_encoding,
                 max_seq_len=config.max_seq_len,
             )
-        elif config.attn_type == "GQA":
+        elif config.attn_class == "GQA":
             self.attn = GQA(
                 self.d_model,
                 self.n_heads,
-                config.n_kv_heads,
+                n_kv_heads=config.n_kv_heads,
                 dropout=config.attn_dropout,
                 attn_bias=config.attn_bias,
                 qk_norm=config.attn_qk_norm,
                 layer_idx=layer_idx,
                 rope_base=config.rope_base,
+                pos_encoding=config.pos_encoding,
                 max_seq_len=config.max_seq_len,
             )
-        elif config.attn_type == "CrossAttention":
-            raise ValueError(f"Under Development: {config.attn_type}")
+        elif config.attn_class == "CrossAttention":
+            raise ValueError(f"Under Development: {config.attn_class}")
+        elif check_type(config.attn_class) == 0:
+            raise ValueError(f"Unknown attention type: {config.attn_class}")
+        elif check_type(config.attn_class) == 1:
+            self.attn = config.attn_class(
+                self.d_model,
+                self.n_heads,
+                config.attn_bias,
+                {
+                    "dropout": config.attn_dropout,
+                    "qk_norm": config.attn_qk_norm,
+                    "layer_idx": layer_idx,
+                    "rope_base": config.rope_base,
+                    "pos_encoding": config.pos_encoding,
+                    "max_seq_len": config.max_seq_len,
+                },
+                **attn_kwargs,
+            )
         else:
-            raise ValueError(f"Unknown attention type: {config.attn_type}")
+            raise RuntimeError(
+                "TransformerConfig.attn_class Should be str or Type[nn.Module] but found: {config.attn_class}"
+            )
 
-        self.ffn = SwiGLU(self.d_model, self.d_ff, bias=config.ffn_bias)
-        self.norm_attn, self.norm_ffn = nn.RMSNorm(self.d_model), nn.RMSNorm(self.d_model)
+        if config.ffn_class == "SwiGLU":
+            self.ffn = SwiGLU(self.d_model, self.d_ff, bias=config.ffn_bias)
+        elif config.ffn_class == "MLP":
+            self.ffn = MLP(self.d_model, self.d_ff, bias=config.ffn_bias)
+        elif config.ffn_class == "MoE":
+            raise ValueError(f"Under Development: {config.ffn_class}")
+        elif check_type(config.ffn_class) == 0:
+            raise ValueError(f"Unknown ffn class: {config.ffn_class}")
+        elif check_type(config.ffn_class) == 1:
+            self.ffn = config.ffn_class(self.d_model, self.d_ff, bias=config.ffn_bias, **ffn_kwargs)
+        else:
+            raise RuntimeError(
+                "TransformerConfig.ffn_class Should be str or Type[nn.Module] but found: {config.ffn_class}"
+            )
+
+        # FIXME
+        if config.norm_class == "rms_norm":
+            if config.norm_design == "pre_norm" or config.norm_design == "post_norm":
+                self.norm_attn, self.norm_ffn = (
+                    nn.RMSNorm(self.d_model, **norm_kwargs),
+                    nn.RMSNorm(self.d_model, **norm_kwargs),
+                )
+            elif config.norm_design == "both":
+                self.pre_norm_attn, self.pre_norm_ffn, self.post_norm_attn, self.post_norm_ffn = (
+                    nn.RMSNorm(self.d_model, **norm_kwargs),
+                    nn.RMSNorm(self.d_model, **norm_kwargs),
+                    nn.RMSNorm(self.d_model, **norm_kwargs),
+                    nn.RMSNorm(self.d_model, **norm_kwargs),
+                )
+        elif config.norm_class == "layer_norm":
+            if config.norm_design == "pre_norm" or config.norm_design == "post_norm":
+                self.norm_attn, self.norm_ffn = (
+                    nn.LayerNorm(self.d_model, **norm_kwargs),
+                    nn.LayerNorm(self.d_model, **norm_kwargs),
+                )
+            elif config.norm_design == "both":
+                self.pre_norm_attn, self.pre_norm_ffn, self.post_norm_attn, self.post_norm_ffn = (
+                    nn.LayerNorm(self.d_model, **norm_kwargs),
+                    nn.LayerNorm(self.d_model, **norm_kwargs),
+                    nn.LayerNorm(self.d_model, **norm_kwargs),
+                    nn.LayerNorm(self.d_model, **norm_kwargs),
+                )
+        elif check_type(config.norm_class) == 0:
+            raise ValueError(f"Unknown normalization class: {config.norm_class}")
+        elif check_type(config.norm_class) == 1:
+            if config.norm_design == "pre_norm" or config.norm_design == "post_norm":
+                self.norm_attn, self.norm_ffn = (
+                    config.norm_class(self.d_model, **norm_kwargs),
+                    config.norm_class(self.d_model, **norm_kwargs),
+                )
+            elif config.norm_design == "both":
+                self.pre_norm_attn, self.pre_norm_ffn, self.post_norm_attn, self.post_norm_ffn = (
+                    config.norm_class(self.d_model, **norm_kwargs),
+                    config.norm_class(self.d_model, **norm_kwargs),
+                    config.norm_class(self.d_model, **norm_kwargs),
+                    config.norm_class(self.d_model, **norm_kwargs),
+                )
+        else:
+            raise RuntimeError(
+                "TransformerConfig.norm_class Should be str or Type[nn.Module] but found: {config.norm_class}"
+            )
 
     def forward(
         self,
@@ -105,13 +198,27 @@ class Transformer(PreTrainedModel, GenerationMixin):
     config_class = TransformerConfig
     base_model_prefix = "transformer"
 
-    def __init__(self, config):
+    supports_gradient_checkpointing = True
+    _supports_flash_attn = True
+    _supports_sdpa = True
+
+    input_modalities = "text"  # Will add "image" for v0.4.0
+
+    def __init__(
+        self,
+        config,
+        attn_kwargs: Dict = {},
+        ffn_kwargs: Dict = {},
+        norm_kwargs: Dict = {},
+    ):
         super().__init__(config)
         self.config = config
         self.d_model = config.d_model
 
         self.emb = nn.Embedding(config.vocab_size, config.d_model)
-        self.blocks = nn.ModuleList([TransformerBlock(config, i) for i in range(config.n_layer)])
+        self.blocks = nn.ModuleList(
+            [TransformerBlock(config, attn_kwargs, ffn_kwargs, norm_kwargs, i) for i in range(config.n_layer)]
+        )
         self.norm_out = nn.RMSNorm(config.d_model)
         self.lm_head = nn.Linear(config.d_model, config.vocab_size, bias=config.lm_head_bias)
 
@@ -145,7 +252,7 @@ class Transformer(PreTrainedModel, GenerationMixin):
             False,
         ),
         return_states: Optional[bool] = False,
-        loss_kwargs: Dict = None,
+        loss_kwargs: Dict = {},
         **kwargs: Dict,
     ) -> CausalLMOutput:
         """
@@ -195,6 +302,13 @@ class Transformer(PreTrainedModel, GenerationMixin):
         return CausalLMOutput(
             loss=loss, logits=logits, hidden_states=(input_embs, hidden_states) if return_states else None
         )
+
+    def get_input_embeddings(self) -> nn.Embedding:
+        return self.emb
+
+    def set_input_embeddings(self, embeddings: nn.Embedding):
+        self.shared = new_embed
+        self.encoder.set_input_embeddings(new_embeddings)
 
     def get_num_params(self) -> int:
         """Return the number of trainable parameters."""

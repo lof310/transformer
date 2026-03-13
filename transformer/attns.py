@@ -43,6 +43,7 @@ class MHA(nn.Module):
         qk_norm: Optional[bool] = True,
         layer_idx: int = 0,
         rope_base: float = 10000.0,
+        pos_encoding: str = "RoPE",
         max_seq_len: int = 1024,
     ):
         super().__init__()
@@ -53,7 +54,12 @@ class MHA(nn.Module):
         self.qkv_proj = nn.Linear(self.d_model, self.d_model * 3, bias=attn_bias)
         self.out_proj = nn.Linear(self.d_model, self.d_model, bias=attn_bias)
 
-        self.rope = RoPE(max_seq_len, self.d_head, rope_base=rope_base)
+        if pos_encoding == "RoPE":
+            self.rope = RoPE(max_seq_len, self.d_head, rope_base=rope_base)
+        elif pos_encoding == "AliBI":
+            raise ValueError("Under Development")
+        else:
+            raise ValueError("Not implemented")
         self.scale = self.d_head**-0.5
 
         self.dropout = dropout if dropout is not None or dropout != 0.0 else None
@@ -198,6 +204,7 @@ class GQA(nn.Module):
         qk_norm: Optional[bool] = True,
         layer_idx: int = 0,
         rope_base: float = 10000.0,
+        pos_encoding: str = "RoPE",
         max_seq_len: int = 1024,
     ):
         super().__init__()

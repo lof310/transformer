@@ -1,7 +1,10 @@
 import math
-from typing import Dict, Optional, Union, Type
+from typing import Dict, Optional, Type, Union
 
 from transformers import PretrainedConfig
+
+import torch
+import torch.nn as nn
 
 
 class TransformerConfig(PretrainedConfig):
@@ -25,11 +28,17 @@ class TransformerConfig(PretrainedConfig):
 
         max_seq_len (int): Maximum sequence length for positional embeddings.
 
+        ffn_class (Union[Type[nn.Module], str], optional): Feed-Forward Network class or type.
+            - If ``str``, one of ``SwiGLU``, ``MLP``.
+            - If ``Type[nn.Module]`` then will beinstantiated inside the model.
+              Should have the same API as ``SwiGLU`` and ``MLP``.
+              Default ``SwiGLU``
+
         attn_bias (bool, optional): Whether to use bias in attention Linear Projections. Default: ``False``
 
         attn_qk_norm (bool, optional): Whether to apply Normalization to Queries and Keys before the Attention Computation. Default: ``True``
 
-        norm_type (Union[Type[nn.Module], str], optional): Normalization class or type.
+        norm_class (Union[Type[nn.Module], str], optional): Normalization class or type.
             - If ``str``, one of ``rms_norm`` or ``layer_norm``.
             - If ``Type[nn.Module]`` then will be instantiated inside the model.
               Should have the same API as a torch Normalization Layer.
@@ -47,9 +56,9 @@ class TransformerConfig(PretrainedConfig):
 
         rope_base (float, optional): Base for the RoPE frequency computation. Default: ``10000.0``
 
-        attn_type (Union[Type[nn.Module], str], optional): Attention class or type.
+        attn_class (Union[Type[nn.Module], str], optional): Attention class or type.
             - If ``str``, one of ``MHA``, ``GQA``, ``CrossAttention``. For ``GQA``, also specify `n_kv_heads`.
-            - If ``Type`` then will beinstantiated inside the model.
+            - If ``Type[nn.Module]`` then will beinstantiated inside the model.
               Should have the same API as ``transformer.attn.MHA``.
               Default ``MHA``
 
@@ -75,8 +84,9 @@ class TransformerConfig(PretrainedConfig):
         vocab_size: int = 50000,
         d_ff: Optional[int] = None,
         norm_design: str = "pre_norm",
-        norm_type: Union[Type[nn.Module], str] = "rms_norm",
-        attn_type: Union[Type[nn.Module], str] = "MHA",
+        norm_class: Union[Type[nn.Module], str] = "rms_norm",
+        ffn_class: Union[Type[nn.Module], str] = "SwiGLU",
+        attn_class: Union[Type[nn.Module], str] = "MHA",
         attn_bias: Optional[bool] = False,
         ffn_bias: bool = True,
         lm_head_bias: bool = False,
@@ -94,11 +104,14 @@ class TransformerConfig(PretrainedConfig):
         self.n_layer = n_layers
         self.d_model = d_model
         self.n_heads = n_heads
-        self.n_kv_heads = n_kv_heads if attn_type == "GQA" else n_heads
+        self.n_kv_heads = n_kv_heads if attn_class == "GQA" else n_heads
         self.vocab_size = vocab_size
 
-        self.attn_type = attn_type
-        self.norm_type = norm_type
+        self.attn_class = attn_class
+        self.ffn_class = ffn_class
+        self.norm_class = norm_class
+
+        self.norm_design = norm_design
 
         self.d_ff = d_ff if d_ff is not None else math.ceil(d_model * 2.666)
 
