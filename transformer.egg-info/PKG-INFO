@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: transformer
-Version: 0.2.0
+Version: 0.3.0
 Summary: A polished PyTorch implementation of the current State-Of-The-Art(SOTA) Transformer
 Author-email: Leinier Orama <lof310w@gmail.com>
 Maintainer-email: Leinier Orama <lof310w@gmail.com>

@@ -1,10 +1,9 @@
 import math
-from typing import Dict, Optional, Type, Union
+from typing import Dict, List, Optional, Type, Union
 
 import torch
 import torch.nn as nn
 from transformers import PretrainedConfig
-
 
 class TransformerConfig(PretrainedConfig):
     r"""
@@ -27,21 +26,25 @@ class TransformerConfig(PretrainedConfig):
 
         max_seq_len (int): Maximum sequence length for positional embeddings.
 
-        ffn_class (Union[Type[nn.Module], str], optional): Feed-Forward Network class or type.
+        ffn_class (Union[List[Union[Type[nn.Module], str]], Type[nn.Module], str], optional): Feed-Forward Network class or type.
             - If ``str``, one of ``SwiGLU``, ``MLP``.
-            - If ``Type[nn.Module]`` then will beinstantiated inside the model.
+            - If ``Type[nn.Module]`` then will be instantiated inside the model.
               Should have the same API as ``SwiGLU`` and ``MLP``.
               Default ``SwiGLU``
+            - If ``List[Union[Type[nn.Module], str]]`` and len(ffn_class) == n_layers
+              then will be instantiated inside the model for the corresponding layers.
+              Default ``SwiGLU`` for every layer.
 
         attn_bias (bool, optional): Whether to use bias in attention Linear Projections. Default: ``False``
 
         attn_qk_norm (bool, optional): Whether to apply Normalization to Queries and Keys before the Attention Computation. Default: ``True``
 
-        norm_class (Union[Type[nn.Module], str], optional): Normalization class or type.
+        norm_class (Union[List[Union[Type[nn.Module], str]], Type[nn.Module], str], optional): Normalization class or type. Default: ``SwiGLU``
             - If ``str``, one of ``rms_norm`` or ``layer_norm``.
             - If ``Type[nn.Module]`` then will be instantiated inside the model.
               Should have the same API as a torch Normalization Layer.
-              Default: ``rms_norm``
+            - If ``List[Union[Type[nn.Module], str]]`` and len(ffn_class) == n_layers
+              then will be instantiated inside the model for the corresponding layers.
 
         norm_design (str, optional): Normalization Design, one of ``pre-norm``, ``post-norm`` or ``both``. Default: ``pre-norm``
 
@@ -53,15 +56,26 @@ class TransformerConfig(PretrainedConfig):
 
         tied_weights (bool, optional): If True, tie the input embedding and output projection weights. Default: ``False``
 
-        attn_class (Union[Type[nn.Module], str], optional): Attention class or type.
+        attn_class (Union[List[Union[Type[nn.Module], str]], Type[nn.Module], str], optional): Attention class or type.
             - If ``str``, one of ``MHA``, ``GQA``, ``CrossAttention``. For ``GQA``, also specify `n_kv_heads`.
-            - If ``Type[nn.Module]`` then will beinstantiated inside the model.
+            - If ``Type[nn.Module]`` then will be instantiated inside the model.
               Should have the same API as ``transformer.attn.MHA``.
               Default ``MHA``
+            - If ``List[Union[Type[nn.Module], str]]`` and len(ffn_class) == n_layers
+              then will be instantiated inside the model for the corresponding layers.
+              Default ``SwiGLU`` for every layer.
+
+        block_class (Optional[Type[nn.Module]], optional) Transformer Block class for every layer. Default: ``None``
+           - If ``Type[nn.Module]`` then will be instantiated for every layer inside the model.
+           - If ``None`` then the default ``transformer.TransformerBlock`` will be used
 
         n_kv_heads (int, optional): Number of key/value heads for Grouped-Query Attention(GQA). Default: ``n_heads``
 
-        pos_encoding (str, optional): Positional Encoding for attention, one of ``RoPE``, ``AliBI``, ``PartialRoPE``. Default: ``RoPE``
+        pos_encoding (Union[List[str], str], optional): Positional Encoding for attention.
+            - If ``List[Union[Type[nn.Module], str]]`` and len(ffn_class) == n_layers
+              then will be instantiated inside the model for the corresponding layers.
+              Default ``SwiGLU`` for every layer.
+            - If ``str`` one of ``RoPE``, ``AliBI``, ``PartialRoPE``. Default: ``RoPE``
             Note: Is recommended to change the default to ``PartialRoPE`` which is used in SOTA models like Qwen3-Next-80B-A3B
 
         rope_base (float, optinal): Base for the Exponential Frequency Calculation in RoPE. Default: ``10000.0``
@@ -81,10 +95,11 @@ class TransformerConfig(PretrainedConfig):
         vocab_size: int = 50000,
         d_ff: Optional[int] = None,
         norm_design: str = "pre_norm",
-        norm_class: Union[Type[nn.Module], str] = "rms_norm",
-        ffn_class: Union[Type[nn.Module], str] = "SwiGLU",
-        attn_class: Union[Type[nn.Module], str] = "MHA",
-        attn_bias: Optional[bool] = False,
+        norm_class: Union[List[Union[Type[nn.Module], str]], Type[nn.Module], str] = "rms_norm",
+        ffn_class: Union[List[Union[Type[nn.Module], str]], Type[nn.Module], str] = "SwiGLU",
+        attn_class: Union[List[Union[Type[nn.Module], str]], Type[nn.Module], str] = "MHA",
+        block_class: Optional[Type[nn.Module]] = None,
+        attn_bias: bool = False,
         ffn_bias: bool = True,
         lm_head_bias: bool = False,
         attn_qk_norm: bool = True,
@@ -107,6 +122,7 @@ class TransformerConfig(PretrainedConfig):
         self.attn_class = attn_class
         self.ffn_class = ffn_class
         self.norm_class = norm_class
+        self.block_class = block_class
 
         self.norm_design = norm_design
 

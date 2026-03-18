@@ -77,7 +77,14 @@ class TransformerBlock(GradientCheckpointingLayer):
                 self.d_model,
                 self.n_heads,
                 config.attn_bias,
-                **attn_kwargs,
+                **{
+                    "layer_idx": layer_idx,
+                    "max_seq_len": config.max_seq_len,
+                    "dropout": config.attn_dropout,
+                    "qk_norm": config.attn_qk_norm,
+                    "pos_encoding": config.pos_encoding,
+                    **attn_kwargs,
+                },
             )
         else:
             raise RuntimeError(
@@ -261,9 +268,11 @@ class Transformer(PreTrainedModel, GenerationMixin):
         self.d_model = config.d_model
 
         self.emb = nn.Embedding(config.vocab_size, config.d_model)
+        block_class = config.block_class if config.block_class is not None else TransformerBlock
+
         self.blocks = nn.ModuleList(
             [
-                TransformerBlock(
+                block_class(
                     config,
                     (
                         attn_kwargs

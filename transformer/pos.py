@@ -28,6 +28,16 @@ class RoPE(nn.Module):
         self.register_buffer("cos", torch.cos(freqs), persistent=persistent)
         self.register_buffer("sin", torch.sin(freqs), persistent=persistent)
 
+    def _rot(self, x, cos, sin):
+        x1, x2 = x[..., ::2], x[..., 1::2]
+        if cos.dim() == 2:
+            cos = cos.unsqueeze(0).unsqueeze(0)
+            sin = sin.unsqueeze(0).unsqueeze(0)
+        else:
+            cos = cos.unsqueeze(1)
+            sin = sin.unsqueeze(1)
+        return torch.cat([x1 * cos - x2 * sin, x1 * sin + x2 * cos], dim=-1)
+
     def forward(
         self, q: torch.Tensor, k: torch.Tensor, pos_q: torch.LongTensor, pos_k: torch.LongTensor
     ) -> Tuple[torch.Tensor, torch.Tensor]:
@@ -47,17 +57,7 @@ class RoPE(nn.Module):
         cos_q, sin_q = self.cos[pos_q].to(q.device, dtype=q.dtype), self.sin[pos_q].to(q.device, dtype=q.dtype)
         cos_k, sin_k = self.cos[pos_k].to(k.device, dtype=k.dtype), self.sin[pos_k].to(k.device, dtype=k.dtype)
 
-        def _rot(x, cos, sin):
-            x1, x2 = x[..., ::2], x[..., 1::2]
-            if cos.dim() == 2:
-                cos = cos.unsqueeze(0).unsqueeze(0)
-                sin = sin.unsqueeze(0).unsqueeze(0)
-            else:
-                cos = cos.unsqueeze(1)
-                sin = sin.unsqueeze(1)
-            return torch.cat([x1 * cos - x2 * sin, x1 * sin + x2 * cos], dim=-1)
-
-        return _rot(q, cos_q, sin_q), _rot(k, cos_k, sin_k)
+        return self._rot(q, cos_q, sin_q), self._rot(k, cos_k, sin_k)
 
 
 class PartialRoPE(nn.Module):

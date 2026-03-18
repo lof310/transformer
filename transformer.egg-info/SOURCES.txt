@@ -7,6 +7,7 @@ transformer/config.py
 transformer/ffn.py
 transformer/pos.py
 transformer/transformer.py
+transformer/utils.py
 transformer.egg-info/PKG-INFO
 transformer.egg-info/SOURCES.txt
 transformer.egg-info/dependency_links.txt
