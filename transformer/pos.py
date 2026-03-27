@@ -9,11 +9,17 @@ class RoPE(nn.Module):
     r"""
     Rotary Position Embedding (RoPE) module.
 
-    Args:
-        max_seq_len (int): Maximum sequence length for which to precompute frequencies.
-        d_head (int): Dimension per head (must be even).
-        rope_base (float): Base for the exponential frequency calculation. Default: ``10000.0``
-        persistent (bool): Whether to register the precomputed cos/sin as persistent buffers. Default: ``True``
+    :param max_seq_len: Maximum sequence length for which to precompute frequencies.
+    :type max_seq_len: int
+
+    :param d_head: Dimension per head (must be even).
+    :type d_head: int
+
+    :param rope_base: Base for the exponential frequency calculation. Default: ``10000.0``
+    :type rope_base: float, optional
+
+    :param persistent: Whether to register the precomputed cos/sin as persistent buffers. Default: ``True``
+    :type persistent: bool, optional
     """
 
     def __init__(self, max_seq_len: int, d_head: int, rope_base: float = 10000.0, persistent: bool = True):
@@ -44,14 +50,20 @@ class RoPE(nn.Module):
         r"""
         Apply rotary position embeddings to queries and keys.
 
-        Args:
-            q (torch.Tensor): Query tensor of shape :math:`(B, H, N, d)`
-            k (torch.Tensor): Key tensor of shape :math:`(B, H, N, d)`
-            pos_q (torch.Tensor): Positions for queries, shape :math:`(N,)` or :math:`(B, N)`
-            pos_k (torch.Tensor): Positions for keys, shape :math:`(N,)` or :math:`(B, N)`
+        :param q: Query tensor of shape :math:`(B, H, N, d)`
+        :type q: torch.Tensor
 
-        Returns:
-            Tuple[torch.Tensor, torch.Tensor]: Rotated queries and keys.
+        :param k: Key tensor of shape :math:`(B, H, N, d)`
+        :type k: torch.Tensor
+
+        :param pos_q: Positions for queries, shape :math:`(N,)` or :math:`(B, N)`
+        :type pos_q: torch.LongTensor
+
+        :param pos_k: Positions for keys, shape :math:`(N,)` or :math:`(B, N)`
+        :type pos_k: torch.LongTensor
+
+        :return: Rotated queries and keys.
+        :rtype: Tuple[torch.Tensor, torch.Tensor]
         """
         pos_q, pos_k = pos_q.long(), pos_k.long()
         cos_q, sin_q = self.cos[pos_q].to(q.device, dtype=q.dtype), self.sin[pos_q].to(q.device, dtype=q.dtype)
@@ -70,14 +82,22 @@ class PartialRoPE(nn.Module):
     standard RoPE) and supports position indices provided either per-sequence
     (shape :math:`(N,)`) or per-batch (shape :math:`(B, N)`).
 
-    Args:
-        max_seq_len (int): Maximum sequence length for which to precompute cos/sin.
-        d_head (int): Dimension per head (must be even).
-        rot_frac (float, optional): Fraction of head dimensions to rotate in (0, 1].
-            The number of rotated dimensions is `int(d_head * rot_frac)` rounded
-            down to the nearest even integer.
-        rope_base (float, optional): Base for the exponential frequency calculation. Default: 10000.0
-        persistent (bool, optional): Whether to register cos/sin as persistent buffers. Default: True
+    :param max_seq_len: Maximum sequence length for which to precompute cos/sin.
+    :type max_seq_len: int
+
+    :param d_head: Dimension per head (must be even).
+    :type d_head: int
+
+    :param rot_frac: Fraction of head dimensions to rotate in (0, 1].
+        The number of rotated dimensions is `int(d_head * rot_frac)` rounded
+        down to the nearest even integer. Default: 0.5
+    :type rot_frac: float, optional
+
+    :param rope_base: Base for the exponential frequency calculation. Default: 10000.0
+    :type rope_base: float, optional
+
+    :param persistent: Whether to register cos/sin as persistent buffers. Default: True
+    :type persistent: bool, optional
     """
 
     def __init__(
@@ -119,14 +139,20 @@ class PartialRoPE(nn.Module):
         r"""
         Apply partial RoPE to queries and keys.
 
-        Args:
-            q (torch.Tensor): Query tensor of shape :math:`(B, H, N, d)`
-            k (torch.Tensor): Key tensor of shape :math:`(B, H, N, d)`
-            pos_q (torch.Tensor): Positions for queries, shape :math:`(N,)` or :math:`(B, N)`
-            pos_k (torch.Tensor): Positions for keys, shape :math:`(N,)` or :math:`(B, N)`
+        :param q: Query tensor of shape :math:`(B, H, N, d)`
+        :type q: torch.Tensor
 
-        Returns:
-            Tuple[torch.Tensor, torch.Tensor]: Rotated queries and keys.
+        :param k: Key tensor of shape :math:`(B, H, N, d)`
+        :type k: torch.Tensor
+        :param pos_q: Positions for queries, shape :math:`(N,)` or :math:`(B, N)`
+
+        :type pos_q: torch.LongTensor
+        :param pos_k: Positions for keys, shape :math:`(N,)` or :math:`(B, N)`
+
+        :type pos_k: torch.LongTensor
+        :return: Rotated queries and keys.
+
+        :rtype: Tuple[torch.Tensor, torch.Tensor]
         """
         pos_q, pos_k = pos_q.long(), pos_k.long()
 
@@ -216,13 +242,19 @@ class ALiBi(nn.Module):
     positions). The module returns a tensor of shape (1, n_heads, L, L)
     so it can be added to logits of shape (B, n_heads, L, L) with broadcasting.
 
-    Args:
-        max_seq_len (int): nominal maximum sequence length (used for internal
-            checks; biases can be computed for longer sequences on the fly).
-        n_heads (int): number of attention heads.
-        base (float): base used in slope schedule. Default follows the paper:
-            slopes = 2^{-8 * h / n_heads}.
-        persistent (bool): whether to register slopes as persistent buffers.
+    :param max_seq_len: nominal maximum sequence length (used for internal
+        checks; biases can be computed for longer sequences on the fly).
+    :type max_seq_len: int
+
+    :param n_heads: number of attention heads.
+    :type n_heads: int
+
+    :param base: base used in slope schedule. Default follows the paper:
+        slopes = 2^{-8 * h / n_heads}.
+    :type base: float, optional
+
+    :param persistent: whether to register slopes as persistent buffers.
+    :type persistent: bool, optional
     """
 
     def __init__(self, max_seq_len: int, n_heads: int, base: float = 2.0, persistent: bool = True):
@@ -244,17 +276,21 @@ class ALiBi(nn.Module):
         r"""
         Return ALiBi bias tensor for a square attention of length `seq_len`.
 
-        Args:
-            seq_len (int): sequence length L for which to compute biases.
-            device (torch.device, optional): device for the returned tensor.
-                If None, uses the device of the stored slopes buffer.
-            dtype (torch.dtype, optional): dtype for the returned tensor.
-                If None, uses the dtype of the stored slopes buffer.
+        :param seq_len: sequence length L for which to compute biases.
+        :type seq_len: int
 
-        Returns:
-            torch.Tensor: bias tensor of shape (1, n_heads, L, L) with dtype/device
+        :param device: device for the returned tensor.
+            If None, uses the device of the stored slopes buffer.
+        :type device: torch.device, optional
+
+        :param dtype: dtype for the returned tensor.
+            If None, uses the dtype of the stored slopes buffer.
+        :type dtype: torch.dtype, optional
+
+        :return: bias tensor of shape (1, n_heads, L, L) with dtype/device
             as requested. This can be added to attention logits of shape
             (B, n_heads, L, L).
+        :rtype: torch.Tensor
         """
         L = int(seq_len)
         if L <= 0:

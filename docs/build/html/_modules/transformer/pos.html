@@ -189,25 +189,20 @@
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
-  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
-<ul>
+  <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quick Start</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../guide.html">Transformer: A PyTorch SOTA Transformer Implementation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../guide.html#configuration">Configuration</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Usage Examples</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../examples.html">Usage Examples</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Project Info</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
 </ul>
@@ -256,11 +251,17 @@
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Rotary Position Embedding (RoPE) module.</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        max_seq_len (int): Maximum sequence length for which to precompute frequencies.</span>
-<span class="sd">        d_head (int): Dimension per head (must be even).</span>
-<span class="sd">        rope_base (float): Base for the exponential frequency calculation. Default: ``10000.0``</span>
-<span class="sd">        persistent (bool): Whether to register the precomputed cos/sin as persistent buffers. Default: ``True``</span>
+<span class="sd">    :param max_seq_len: Maximum sequence length for which to precompute frequencies.</span>
+<span class="sd">    :type max_seq_len: int</span>
+
+<span class="sd">    :param d_head: Dimension per head (must be even).</span>
+<span class="sd">    :type d_head: int</span>
+
+<span class="sd">    :param rope_base: Base for the exponential frequency calculation. Default: ``10000.0``</span>
+<span class="sd">    :type rope_base: float, optional</span>
+
+<span class="sd">    :param persistent: Whether to register the precomputed cos/sin as persistent buffers. Default: ``True``</span>
+<span class="sd">    :type persistent: bool, optional</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="RoPE.__init__">
@@ -278,6 +279,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;sin&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">freqs</span><span class="p">),</span> <span class="n">persistent</span><span class="o">=</span><span class="n">persistent</span><span class="p">)</span></div>
 
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_rot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sin</span><span class="p">):</span>
+        <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">::</span><span class="mi">2</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">cos</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">cos</span> <span class="o">=</span> <span class="n">cos</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">sin</span> <span class="o">=</span> <span class="n">sin</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cos</span> <span class="o">=</span> <span class="n">cos</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">sin</span> <span class="o">=</span> <span class="n">sin</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">x1</span> <span class="o">*</span> <span class="n">cos</span> <span class="o">-</span> <span class="n">x2</span> <span class="o">*</span> <span class="n">sin</span><span class="p">,</span> <span class="n">x1</span> <span class="o">*</span> <span class="n">sin</span> <span class="o">+</span> <span class="n">x2</span> <span class="o">*</span> <span class="n">cos</span><span class="p">],</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
 <div class="viewcode-block" id="RoPE.forward">
 <a class="viewcode-back" href="../../api.html#transformer.pos.RoPE.forward">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span>
@@ -286,30 +297,26 @@
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply rotary position embeddings to queries and keys.</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            q (torch.Tensor): Query tensor of shape :math:`(B, H, N, d)`</span>
-<span class="sd">            k (torch.Tensor): Key tensor of shape :math:`(B, H, N, d)`</span>
-<span class="sd">            pos_q (torch.Tensor): Positions for queries, shape :math:`(N,)` or :math:`(B, N)`</span>
-<span class="sd">            pos_k (torch.Tensor): Positions for keys, shape :math:`(N,)` or :math:`(B, N)`</span>
+<span class="sd">        :param q: Query tensor of shape :math:`(B, H, N, d)`</span>
+<span class="sd">        :type q: torch.Tensor</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">            Tuple[torch.Tensor, torch.Tensor]: Rotated queries and keys.</span>
+<span class="sd">        :param k: Key tensor of shape :math:`(B, H, N, d)`</span>
+<span class="sd">        :type k: torch.Tensor</span>
+
+<span class="sd">        :param pos_q: Positions for queries, shape :math:`(N,)` or :math:`(B, N)`</span>
+<span class="sd">        :type pos_q: torch.LongTensor</span>
+
+<span class="sd">        :param pos_k: Positions for keys, shape :math:`(N,)` or :math:`(B, N)`</span>
+<span class="sd">        :type pos_k: torch.LongTensor</span>
+
+<span class="sd">        :return: Rotated queries and keys.</span>
+<span class="sd">        :rtype: Tuple[torch.Tensor, torch.Tensor]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">pos_q</span><span class="p">,</span> <span class="n">pos_k</span> <span class="o">=</span> <span class="n">pos_q</span><span class="o">.</span><span class="n">long</span><span class="p">(),</span> <span class="n">pos_k</span><span class="o">.</span><span class="n">long</span><span class="p">()</span>
         <span class="n">cos_q</span><span class="p">,</span> <span class="n">sin_q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cos</span><span class="p">[</span><span class="n">pos_q</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">q</span><span class="o">.</span><span class="n">dtype</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">sin</span><span class="p">[</span><span class="n">pos_q</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">q</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
         <span class="n">cos_k</span><span class="p">,</span> <span class="n">sin_k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cos</span><span class="p">[</span><span class="n">pos_k</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">k</span><span class="o">.</span><span class="n">dtype</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">sin</span><span class="p">[</span><span class="n">pos_k</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">k</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
 
-        <span class="k">def</span><span class="w"> </span><span class="nf">_rot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sin</span><span class="p">):</span>
-            <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">::</span><span class="mi">2</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">cos</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="n">cos</span> <span class="o">=</span> <span class="n">cos</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-                <span class="n">sin</span> <span class="o">=</span> <span class="n">sin</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">cos</span> <span class="o">=</span> <span class="n">cos</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-                <span class="n">sin</span> <span class="o">=</span> <span class="n">sin</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">x1</span> <span class="o">*</span> <span class="n">cos</span> <span class="o">-</span> <span class="n">x2</span> <span class="o">*</span> <span class="n">sin</span><span class="p">,</span> <span class="n">x1</span> <span class="o">*</span> <span class="n">sin</span> <span class="o">+</span> <span class="n">x2</span> <span class="o">*</span> <span class="n">cos</span><span class="p">],</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">_rot</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">cos_q</span><span class="p">,</span> <span class="n">sin_q</span><span class="p">),</span> <span class="n">_rot</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">cos_k</span><span class="p">,</span> <span class="n">sin_k</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rot</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">cos_q</span><span class="p">,</span> <span class="n">sin_q</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rot</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">cos_k</span><span class="p">,</span> <span class="n">sin_k</span><span class="p">)</span></div>
 </div>
 
 
@@ -324,14 +331,22 @@
 <span class="sd">    standard RoPE) and supports position indices provided either per-sequence</span>
 <span class="sd">    (shape :math:`(N,)`) or per-batch (shape :math:`(B, N)`).</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        max_seq_len (int): Maximum sequence length for which to precompute cos/sin.</span>
-<span class="sd">        d_head (int): Dimension per head (must be even).</span>
-<span class="sd">        rot_frac (float, optional): Fraction of head dimensions to rotate in (0, 1].</span>
-<span class="sd">            The number of rotated dimensions is `int(d_head * rot_frac)` rounded</span>
-<span class="sd">            down to the nearest even integer.</span>
-<span class="sd">        rope_base (float, optional): Base for the exponential frequency calculation. Default: 10000.0</span>
-<span class="sd">        persistent (bool, optional): Whether to register cos/sin as persistent buffers. Default: True</span>
+<span class="sd">    :param max_seq_len: Maximum sequence length for which to precompute cos/sin.</span>
+<span class="sd">    :type max_seq_len: int</span>
+
+<span class="sd">    :param d_head: Dimension per head (must be even).</span>
+<span class="sd">    :type d_head: int</span>
+
+<span class="sd">    :param rot_frac: Fraction of head dimensions to rotate in (0, 1].</span>
+<span class="sd">        The number of rotated dimensions is `int(d_head * rot_frac)` rounded</span>
+<span class="sd">        down to the nearest even integer. Default: 0.5</span>
+<span class="sd">    :type rot_frac: float, optional</span>
+
+<span class="sd">    :param rope_base: Base for the exponential frequency calculation. Default: 10000.0</span>
+<span class="sd">    :type rope_base: float, optional</span>
+
+<span class="sd">    :param persistent: Whether to register cos/sin as persistent buffers. Default: True</span>
+<span class="sd">    :type persistent: bool, optional</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -373,14 +388,20 @@
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply partial RoPE to queries and keys.</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            q (torch.Tensor): Query tensor of shape :math:`(B, H, N, d)`</span>
-<span class="sd">            k (torch.Tensor): Key tensor of shape :math:`(B, H, N, d)`</span>
-<span class="sd">            pos_q (torch.Tensor): Positions for queries, shape :math:`(N,)` or :math:`(B, N)`</span>
-<span class="sd">            pos_k (torch.Tensor): Positions for keys, shape :math:`(N,)` or :math:`(B, N)`</span>
+<span class="sd">        :param q: Query tensor of shape :math:`(B, H, N, d)`</span>
+<span class="sd">        :type q: torch.Tensor</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">            Tuple[torch.Tensor, torch.Tensor]: Rotated queries and keys.</span>
+<span class="sd">        :param k: Key tensor of shape :math:`(B, H, N, d)`</span>
+<span class="sd">        :type k: torch.Tensor</span>
+<span class="sd">        :param pos_q: Positions for queries, shape :math:`(N,)` or :math:`(B, N)`</span>
+
+<span class="sd">        :type pos_q: torch.LongTensor</span>
+<span class="sd">        :param pos_k: Positions for keys, shape :math:`(N,)` or :math:`(B, N)`</span>
+
+<span class="sd">        :type pos_k: torch.LongTensor</span>
+<span class="sd">        :return: Rotated queries and keys.</span>
+
+<span class="sd">        :rtype: Tuple[torch.Tensor, torch.Tensor]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">pos_q</span><span class="p">,</span> <span class="n">pos_k</span> <span class="o">=</span> <span class="n">pos_q</span><span class="o">.</span><span class="n">long</span><span class="p">(),</span> <span class="n">pos_k</span><span class="o">.</span><span class="n">long</span><span class="p">()</span>
 
@@ -470,13 +491,19 @@
 <span class="sd">    positions). The module returns a tensor of shape (1, n_heads, L, L)</span>
 <span class="sd">    so it can be added to logits of shape (B, n_heads, L, L) with broadcasting.</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        max_seq_len (int): nominal maximum sequence length (used for internal</span>
-<span class="sd">            checks; biases can be computed for longer sequences on the fly).</span>
-<span class="sd">        n_heads (int): number of attention heads.</span>
-<span class="sd">        base (float): base used in slope schedule. Default follows the paper:</span>
-<span class="sd">            slopes = 2^{-8 * h / n_heads}.</span>
-<span class="sd">        persistent (bool): whether to register slopes as persistent buffers.</span>
+<span class="sd">    :param max_seq_len: nominal maximum sequence length (used for internal</span>
+<span class="sd">        checks; biases can be computed for longer sequences on the fly).</span>
+<span class="sd">    :type max_seq_len: int</span>
+
+<span class="sd">    :param n_heads: number of attention heads.</span>
+<span class="sd">    :type n_heads: int</span>
+
+<span class="sd">    :param base: base used in slope schedule. Default follows the paper:</span>
+<span class="sd">        slopes = 2^{-8 * h / n_heads}.</span>
+<span class="sd">    :type base: float, optional</span>
+
+<span class="sd">    :param persistent: whether to register slopes as persistent buffers.</span>
+<span class="sd">    :type persistent: bool, optional</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_seq_len</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_heads</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">base</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">persistent</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
@@ -498,17 +525,21 @@
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return ALiBi bias tensor for a square attention of length `seq_len`.</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            seq_len (int): sequence length L for which to compute biases.</span>
-<span class="sd">            device (torch.device, optional): device for the returned tensor.</span>
-<span class="sd">                If None, uses the device of the stored slopes buffer.</span>
-<span class="sd">            dtype (torch.dtype, optional): dtype for the returned tensor.</span>
-<span class="sd">                If None, uses the dtype of the stored slopes buffer.</span>
+<span class="sd">        :param seq_len: sequence length L for which to compute biases.</span>
+<span class="sd">        :type seq_len: int</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">            torch.Tensor: bias tensor of shape (1, n_heads, L, L) with dtype/device</span>
+<span class="sd">        :param device: device for the returned tensor.</span>
+<span class="sd">            If None, uses the device of the stored slopes buffer.</span>
+<span class="sd">        :type device: torch.device, optional</span>
+
+<span class="sd">        :param dtype: dtype for the returned tensor.</span>
+<span class="sd">            If None, uses the dtype of the stored slopes buffer.</span>
+<span class="sd">        :type dtype: torch.dtype, optional</span>
+
+<span class="sd">        :return: bias tensor of shape (1, n_heads, L, L) with dtype/device</span>
 <span class="sd">            as requested. This can be added to attention logits of shape</span>
 <span class="sd">            (B, n_heads, L, L).</span>
+<span class="sd">        :rtype: torch.Tensor</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">L</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">seq_len</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">L</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>

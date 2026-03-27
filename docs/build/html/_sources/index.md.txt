@@ -9,7 +9,7 @@ quickstart
 ```
 
 ```{toctree}
-:maxdepth: 2
+:maxdepth: 3
 :caption: Guide
 
 guide
@@ -23,14 +23,14 @@ api
 ```
 
 ```{toctree}
-:maxdepth: 2
+:maxdepth: 3
 :caption: Usage Examples
 
 examples
 ```
 
 ```{toctree}
-:maxdepth: 1
+:maxdepth: 2
 :caption: Project Info
 
 contributing

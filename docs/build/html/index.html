@@ -280,15 +280,35 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="guide.html#configuration">Configuration</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="guide.html#default-configuration-sota-design">Default Configuration (SOTA Design)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="guide.html#module-overview">Module Overview</a></li>
-<li class="toctree-l2"><a class="reference internal" href="guide.html#detailed-module-usage">Detailed Module Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide.html#module-overview">Module Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="guide.html#attention-modules">1. Attention Modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="guide.html#feedforward-modules">2. Feed‑Forward Modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="guide.html#positional-embedding">3. Positional Embedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="guide.html#transformer-components">4. Transformer Components</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="guide.html#detailed-module-usage">Detailed Module Usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="guide.html#using-mha-or-gqa">Using <code class="docutils literal notranslate"><span class="pre">MHA</span></code> or <code class="docutils literal notranslate"><span class="pre">GQA</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="guide.html#using-swiglu">Using <code class="docutils literal notranslate"><span class="pre">SwiGLU</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="guide.html#using-rope-independently">Using <code class="docutils literal notranslate"><span class="pre">RoPE</span></code> independently</a></li>
+<li class="toctree-l3"><a class="reference internal" href="guide.html#using-transformerblock">Using <code class="docutils literal notranslate"><span class="pre">TransformerBlock</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="guide.html#training-a-model">Training a Model</a></li>
 <li class="toctree-l2"><a class="reference internal" href="guide.html#text-generation">Text Generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="guide.html#saving-and-loading">Saving and Loading</a></li>
 <li class="toctree-l2"><a class="reference internal" href="guide.html#using-flash-attention">Using Flash Attention</a></li>
-<li class="toctree-l2"><a class="reference internal" href="guide.html#accessing-intermediate-states">Accessing Intermediate States</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide.html#accessing-intermediate-states">Accessing Intermediate States</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="guide.html#the-hidden-states-1-is-a-list-of-dictionaries-for-each-layer-containing-the-following-dictionary-structure-for-each-layer">The <code class="docutils literal notranslate"><span class="pre">hidden_states[1]</span></code> is a list of Dictionaries for each layer containing the following dictionary structure for each layer:</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="guide.html#custom-attention-mask">Custom Attention Mask</a></li>
-<li class="toctree-l2"><a class="reference internal" href="guide.html#extending-the-library">Extending the Library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide.html#extending-the-library">Extending the Library</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="guide.html#adding-a-new-attention-mechanism">Adding a new attention mechanism</a></li>
+<li class="toctree-l3"><a class="reference internal" href="guide.html#adding-a-new-feedforward-variant">Adding a new feed‑forward variant</a></li>
+<li class="toctree-l3"><a class="reference internal" href="guide.html#adding-a-new-positional-encoding">Adding a new positional encoding</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="guide.html#faq-troubleshooting">FAQ / Troubleshooting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="guide.html#license">License</a></li>
 <li class="toctree-l2"><a class="reference internal" href="guide.html#citation">Citation</a></li>
@@ -326,7 +346,15 @@
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Project Info</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#development-setup">Development Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#code-style">Code Style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#testing">Testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#documentation">Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#pull-request-process">Pull Request Process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#code-of-conduct">Code of Conduct</a></li>
+</ul>
+</li>
 </ul>
 </div>
 <section id="overview">

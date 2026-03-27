@@ -253,7 +253,7 @@
 <h1>Transformer: A PyTorch SOTA Transformer Implementation<a class="headerlink" href="#transformer-a-pytorch-sota-transformer-implementation" title="Link to this heading">¶</a></h1>
 <section id="introduction">
 <h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">transformer</span></code> is a polished and fully configurable implementation of the latest SOTA Transformer architecture design in PyTorch. It is designed with the following goals:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">transformer</span></code> library is a polished and fully configurable implementation of the latest SOTA Transformer architecture design in PyTorch. It is designed with the following goals:</p>
 <ul class="simple">
 <li><p><strong>Clarity</strong>: Each component is self-contained, well-documented, and easy to understand.</p></li>
 <li><p><strong>Reproducibility</strong>: The default configuration matches current state-of-the-art practices (e.g., pre‑RMSNorm, SwiGLU, RoPE, no attention dropout).</p></li>
@@ -300,11 +300,11 @@ pip<span class="w"> </span>install<span class="w"> </span>.
 <span class="n">model</span> <span class="o">=</span> <span class="n">Transformer</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 
 <span class="c1"># 3. Prepare input</span>
-<span class="n">input_ids</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">vocab_size</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">128</span><span class="p">))</span>
+<span class="n">input_ids</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">vocab_size</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1024</span><span class="p">))</span>
 
 <span class="c1"># 4. Forward pass</span>
 <span class="n">outputs</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">input_ids</span><span class="p">)</span>
-<span class="n">logits</span> <span class="o">=</span> <span class="n">outputs</span><span class="o">.</span><span class="n">logits</span>  <span class="c1"># shape: [2, 128, 65]</span>
+<span class="n">logits</span> <span class="o">=</span> <span class="n">outputs</span><span class="o">.</span><span class="n">logits</span>  <span class="c1"># shape: [2, 1024, 65]</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">logits</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -332,7 +332,7 @@ pip<span class="w"> </span>install<span class="w"> </span>.
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">n_layers</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">12</span></code></p></td>
-<td><p>—</p></td>
+<td><p>–</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">n_heads</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">32</span></code></p></td>
@@ -344,47 +344,55 @@ pip<span class="w"> </span>install<span class="w"> </span>.
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">d_ff</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">None</span></code> (automatically set to <code class="docutils literal notranslate"><span class="pre">ceil(d_model</span> <span class="pre">*</span> <span class="pre">2.666)</span> <span class="pre">≈</span> <span class="pre">4096</span></code>)</p></td>
-<td><p>The feed‑forward hidden dimension is typically 2–4× the model dimension. 2.666× (8/3) is the exact ratio used in LLaMA and PaLM, yielding 4096 for <code class="docutils literal notranslate"><span class="pre">d_model=1536</span></code>. This value is chosen to keep the FFN parameters roughly 2× the attention parameters.</p></td>
+<td><p>The feed‑forward hidden dimension is typically 2-4x the model dimension. 2.666× (8/3) is the exact ratio used in LLaMA and PaLM, yielding 4096 for <code class="docutils literal notranslate"><span class="pre">d_model=1536</span></code>. This value is chosen to keep the FFN parameters roughly 2× the attention parameters.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">attn_type</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">attn_class</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">&quot;MHA&quot;</span></code></p></td>
 <td><p>Multi‑Head Attention is the standard and most flexible. GQA can be enabled for memory efficiency when scaling to very large models.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">n_kv_heads</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">norm_design</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;pre_norm&quot;</span></code></p></td>
+<td><p>Standard Pre-Norm Design used in almost all SOTA Transformers.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">n_kv_heads</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">n_heads</span></code></p></td>
 <td><p>For <code class="docutils literal notranslate"><span class="pre">attn_type=&quot;GQA&quot;</span></code>, defaults to the same as <code class="docutils literal notranslate"><span class="pre">n_heads</span></code> (equivalent to MHA). Must be explicitly set lower to activate grouped‑query attention.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">attn_bias</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">attn_bias</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
-<td><p>SOTA models (LLaMA, GPT‑3) omit biases in attention projections to reduce parameters and improve throughput; normalization layers provide sufficient learnable shifts.</p></td>
+<td><p>SOTA models (LLaMA, Qwen, etc) omit biases in attention projections to reduce parameters and improve throughput; normalization layers provide sufficient learnable shifts.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">attn_dropout</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">attn_dropout</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">0.0</span></code></p></td>
 <td><p>Modern large transformers typically use <strong>no dropout</strong> in attention, relying on other regularisation (weight decay, gradient clipping) and large‑scale training. Using dropout is not usually not recomended for Research Purposes</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ffn_bias</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ffn_bias</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
-<td><p>Biases in feed‑forward layers are retained because they add minimal overhead and can help with training stability; some models (e.g., LLaMA) also use biases in FFNs.</p></td>
+<td><p>Biases in feed‑forward layers are retained because they add minimal overhead and can help with training stability; some models (e.g., Qwen, LLaMA) also use biases in FFNs.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">attn_qk_norm</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">attn_qk_norm</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
 <td><p>Applying RMSNorm to queries and keys <strong>before</strong> the attention computation stabilises training, especially at deeper layers and with low‑precision (FP16/BF16). Adopted by LLaMA and others.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">lm_head_bias</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">lm_head_bias</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
 <td><p>The language modeling head typically does not include a bias term; the logits are directly projected from the final hidden states. This is consistent with GPT‑2/3, Llama,etc.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">tied_weights</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">tied_weights</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
 <td><p>Weight tying (sharing embeddings with the output layer) reduces parameters but may limit expressiveness. SOTA decoupled models (LLaMA, GPT‑3) do not tie weights by default.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seq_len</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seq_len</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">1024</span></code></p></td>
 <td><p>Default context length for training; many models are trained on 1024 tokens before extrapolation to longer sequences.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">max_seq_len</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">max_seq_len</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">4096</span></code></p></td>
 <td><p>Maximum sequence length for which RoPE frequencies are precomputed.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pos_encoding</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">RoPE</span></code></p></td>
+<td><p>Standard Positiona Encoding. There are SOTA models that implement <code class="docutils literal notranslate"><span class="pre">PartialRoPE</span></code> you can switch to it in any moment.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rope_base</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">10000.0</span></code></p></td>
@@ -423,6 +431,7 @@ pip<span class="w"> </span>install<span class="w"> </span>.
 <h3>3. Positional Embedding<a class="headerlink" href="#positional-embedding" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong><code class="docutils literal notranslate"><span class="pre">RoPE</span></code></strong> – Rotary Position Embedding (Su et al.). Applied directly to queries and keys.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">PartialRoPE</span></code></strong> - Rotary Position Embedding only applied to a subset of queries and keys.</p></li>
 </ul>
 </section>
 <section id="transformer-components">
@@ -564,7 +573,33 @@ pip<span class="w"> </span>install<span class="w"> </span>.
 <li><p>For <code class="docutils literal notranslate"><span class="pre">TransformerBlock</span></code>: returns dict with <code class="docutils literal notranslate"><span class="pre">output</span></code>, <code class="docutils literal notranslate"><span class="pre">attn_output</span></code> (dict), <code class="docutils literal notranslate"><span class="pre">ffn_output</span></code> (dict).</p></li>
 <li><p>For <code class="docutils literal notranslate"><span class="pre">Transformer</span></code>: returns a <code class="docutils literal notranslate"><span class="pre">CausalLMOutput</span></code> where <code class="docutils literal notranslate"><span class="pre">hidden_states</span></code> is a tuple <code class="docutils literal notranslate"><span class="pre">(input_embeddings,</span> <span class="pre">list_of_layer_dicts)</span></code>.</p></li>
 </ul>
+<section id="the-hidden-states-1-is-a-list-of-dictionaries-for-each-layer-containing-the-following-dictionary-structure-for-each-layer">
+<h3>The <code class="docutils literal notranslate"><span class="pre">hidden_states[1]</span></code> is a list of Dictionaries for each layer containing the following dictionary structure for each layer:<a class="headerlink" href="#the-hidden-states-1-is-a-list-of-dictionaries-for-each-layer-containing-the-following-dictionary-structure-for-each-layer" title="Link to this heading">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>  <span class="c1"># Shape: [B, N, D]</span>
+    <span class="s2">&quot;attn_output&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>       <span class="c1"># Shape: [B, N, D]</span>
+        <span class="s2">&quot;queries&quot;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>      <span class="c1"># Shape: [B, H, N, d]</span>
+        <span class="s2">&quot;keys&quot;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>         <span class="c1"># Shape: [B, H, N, d]</span>
+        <span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>       <span class="c1"># Shape: [B, H, N, d]</span>
+        <span class="s2">&quot;attn_weights&quot;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="c1"># Shape: [B, H, N, N] or [B, H, Lq, Lk] depending on if you use the Cross Attention module</span>
+        <span class="s2">&quot;attn_scores&quot;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>  <span class="c1"># Shape: [B, H, N, N] or [B, H, Lq, Lk] depending on if you use the Cross Attention module</span>
+        <span class="s2">&quot;output_before_proj&quot;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="c1"># Shape: [B, N, D]</span>
+        <span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">]</span> <span class="c1"># Can be Tensor of shape [B, N, D] or Tuple (query, kv) both of shape [B, N, D]</span>
+                                             <span class="c1"># depending on if you use the Cross Attention module</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;ffn_output&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="c1"># Shape: [B, N, D]</span>
+        <span class="s2">&quot;y1&quot;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="c1"># Shape: [B, N, D_ff//2]</span>
+        <span class="s2">&quot;y2&quot;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="c1"># Shape: [B, N, D_ff//2]</span>
+        <span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="c1"># Shape: [B, N, D]</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Note: The keys “attn_weights” and “attn_scores” will not be available when FlashAttention is used</strong></p>
 <p>This is useful for debugging, visualization, or extracting features for downstream tasks.</p>
+</section>
 </section>
 <hr class="docutils" />
 <section id="custom-attention-mask">
@@ -610,7 +645,7 @@ pip<span class="w"> </span>install<span class="w"> </span>.
 <ol class="arabic simple">
 <li><p>Create a class in <code class="docutils literal notranslate"><span class="pre">pos.py</span></code> with a <code class="docutils literal notranslate"><span class="pre">forward(q,</span> <span class="pre">k,</span> <span class="pre">pos_q,</span> <span class="pre">pos_k)</span></code> method.</p></li>
 <li><p>Export it.</p></li>
-<li><p>Modify attention modules to use the new positional encoding.</p></li>
+<li><p>Modify attention modules to use the new positional encoding if needed.</p></li>
 </ol>
 </section>
 </section>
@@ -725,7 +760,10 @@ Yes, the model is compatible with HuggingFace’s <code class="docutils literal 
 <li><a class="reference internal" href="#text-generation">Text Generation</a></li>
 <li><a class="reference internal" href="#saving-and-loading">Saving and Loading</a></li>
 <li><a class="reference internal" href="#using-flash-attention">Using Flash Attention</a></li>
-<li><a class="reference internal" href="#accessing-intermediate-states">Accessing Intermediate States</a></li>
+<li><a class="reference internal" href="#accessing-intermediate-states">Accessing Intermediate States</a><ul>
+<li><a class="reference internal" href="#the-hidden-states-1-is-a-list-of-dictionaries-for-each-layer-containing-the-following-dictionary-structure-for-each-layer">The <code class="docutils literal notranslate"><span class="pre">hidden_states[1]</span></code> is a list of Dictionaries for each layer containing the following dictionary structure for each layer:</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#custom-attention-mask">Custom Attention Mask</a></li>
 <li><a class="reference internal" href="#extending-the-library">Extending the Library</a><ul>
 <li><a class="reference internal" href="#adding-a-new-attention-mechanism">Adding a new attention mechanism</a></li>

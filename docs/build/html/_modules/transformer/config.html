@@ -189,25 +189,20 @@
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
-  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
-<ul>
+  <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quick Start</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../guide.html">Transformer: A PyTorch SOTA Transformer Implementation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../guide.html#configuration">Configuration</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Usage Examples</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../examples.html">Usage Examples</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Project Info</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
 </ul>
@@ -244,7 +239,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for transformer.config</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nn</span>
@@ -258,62 +253,97 @@
 <span class="sd">    Configuration class for Transformer models.</span>
 <span class="sd">    Inherits from `PretrainedConfig` for HuggingFace compatibility.</span>
 
-<span class="sd">    Args:</span>
+<span class="sd">    :param n_layers: Number of Transformer Blocks (layers).</span>
+<span class="sd">    :type n_layers: int</span>
 
-<span class="sd">        n_layers (int): Number of Transformer Blocks (layers).</span>
+<span class="sd">    :param d_model: Model Dimension.</span>
+<span class="sd">    :type d_model: int</span>
 
-<span class="sd">        n_heads (int): Number of Attention Heads.</span>
+<span class="sd">    :param n_heads: Number of Attention Heads.</span>
+<span class="sd">    :type n_heads: int</span>
 
-<span class="sd">        vocab_size (int): Vocabulary size of the model. Defines the number of different tokens.</span>
+<span class="sd">    :param n_kv_heads: Number of key/value heads for Grouped-Query Attention(GQA). Default: ``n_heads``</span>
+<span class="sd">    :type n_kv_heads: int, optional</span>
 
-<span class="sd">        d_model (int): Model Dimension.</span>
+<span class="sd">    :param vocab_size: Vocabulary size of the model. Defines the number of different tokens.</span>
+<span class="sd">    :type vocab_size: int</span>
 
-<span class="sd">        d_ff (int, optional): Dimension of the Feed-Forward Hidden Layer.</span>
+<span class="sd">    :param d_ff: Dimension of the Feed-Forward Hidden Layer.</span>
+<span class="sd">    :type d_ff: int, optional</span>
 
-<span class="sd">        seq_len (int): Sequence Length.</span>
+<span class="sd">    :param norm_design: Normalization Design, one of ``pre-norm``, ``post-norm`` or ``both``. Default: ``pre-norm``</span>
+<span class="sd">    :type norm_design: str</span>
 
-<span class="sd">        max_seq_len (int): Maximum sequence length for positional embeddings.</span>
+<span class="sd">    :param norm_class: Normalization class or type.</span>
+<span class="sd">        - If ``str``, one of ``rms_norm`` or ``layer_norm``.</span>
+<span class="sd">        - If ``Type[nn.Module]`` then will be instantiated inside the model.</span>
+<span class="sd">          Should have the same API as a torch Normalization Layer.</span>
+<span class="sd">        - If ``List[Union[Type[nn.Module], str]]`` and len(ffn_class) == n_layers</span>
+<span class="sd">          then will be instantiated inside the model for the corresponding layers.</span>
+<span class="sd">    :type norm_class: Union[List[Union[Type[nn.Module], str]], Type[nn.Module], str]</span>
 
-<span class="sd">        ffn_class (Union[Type[nn.Module], str], optional): Feed-Forward Network class or type.</span>
-<span class="sd">            - If ``str``, one of ``SwiGLU``, ``MLP``.</span>
-<span class="sd">            - If ``Type[nn.Module]`` then will beinstantiated inside the model.</span>
-<span class="sd">              Should have the same API as ``SwiGLU`` and ``MLP``.</span>
-<span class="sd">              Default ``SwiGLU``</span>
+<span class="sd">    :param ffn_class: Feed-Forward Network class or type.</span>
+<span class="sd">        - If ``str``, one of ``SwiGLU``, ``MLP``.</span>
+<span class="sd">        - If ``Type[nn.Module]`` then will be instantiated inside the model.</span>
+<span class="sd">          Should have the same API as ``SwiGLU`` and ``MLP``.</span>
+<span class="sd">          Default ``SwiGLU``</span>
+<span class="sd">        - If ``List[Union[Type[nn.Module], str]]`` and len(ffn_class) == n_layers</span>
+<span class="sd">          then will be instantiated inside the model for the corresponding layers.</span>
+<span class="sd">          Default ``SwiGLU`` for every layer.</span>
+<span class="sd">    :type ffn_class: Union[List[Union[Type[nn.Module], str]], Type[nn.Module], str]</span>
 
-<span class="sd">        attn_bias (bool, optional): Whether to use bias in attention Linear Projections. Default: ``False``</span>
+<span class="sd">    :param attn_class: Attention class or type.</span>
+<span class="sd">        - If ``str``, one of ``MHA``, ``GQA``, ``CrossAttention``. For ``GQA``, also specify `n_kv_heads`.</span>
+<span class="sd">        - If ``Type[nn.Module]`` then will be instantiated inside the model.</span>
+<span class="sd">          Should have the same API as ``transformer.attn.MHA``.</span>
+<span class="sd">          Default ``MHA``</span>
+<span class="sd">        - If ``List[Union[Type[nn.Module], str]]`` and len(ffn_class) == n_layers</span>
+<span class="sd">          then will be instantiated inside the model for the corresponding layers.</span>
+<span class="sd">          Default ``SwiGLU`` for every layer.</span>
+<span class="sd">    :type attn_class: Union[List[Union[Type[nn.Module], str]], Type[nn.Module], str]</span>
 
-<span class="sd">        attn_qk_norm (bool, optional): Whether to apply Normalization to Queries and Keys before the Attention Computation. Default: ``True``</span>
+<span class="sd">    :param block_class: Transformer Block class for every layer. Default: ``None``</span>
+<span class="sd">        - If ``Type[nn.Module]`` then will be instantiated for every layer inside the model.</span>
+<span class="sd">        - If ``None`` then the default ``transformer.TransformerBlock`` will be used</span>
+<span class="sd">    :type block_class: Optional[Type[nn.Module]]</span>
 
-<span class="sd">        norm_class (Union[Type[nn.Module], str], optional): Normalization class or type.</span>
-<span class="sd">            - If ``str``, one of ``rms_norm`` or ``layer_norm``.</span>
-<span class="sd">            - If ``Type[nn.Module]`` then will be instantiated inside the model.</span>
-<span class="sd">              Should have the same API as a torch Normalization Layer.</span>
-<span class="sd">              Default: ``rms_norm``</span>
+<span class="sd">    :param attn_bias: Whether to use bias in attention Linear Projections. Default: ``False``</span>
+<span class="sd">    :type attn_bias: bool, optional</span>
 
-<span class="sd">        norm_design (str, optional): Normalization Design, one of ``pre-norm``, ``post-norm`` or ``both``. Default: ``pre-norm``</span>
+<span class="sd">    :param ffn_bias: Whether to use bias in Feed-Forward Linear layers. Default: ``True``</span>
+<span class="sd">    :type ffn_bias: bool, optional</span>
 
-<span class="sd">        attn_dropout (float, optional): Dropout probability for the Attention Layer. Default: ``0.0``</span>
+<span class="sd">    :param lm_head_bias: Whether to use bias in the Language Modeling Head. Default: ``False``</span>
+<span class="sd">    :type lm_head_bias: bool, optional</span>
 
-<span class="sd">        ffn_bias (bool, optional): Whether to use bias in Feed-Forward Linear layers. Default: ``True``</span>
+<span class="sd">    :param attn_qk_norm: Whether to apply Normalization to Queries and Keys before the Attention Computation. Default: ``True``</span>
+<span class="sd">    :type attn_qk_norm: bool, optional</span>
 
-<span class="sd">        lm_head_bias (bool, optional): Whether to use bias in the Language Modeling Head. Default: ``False``</span>
+<span class="sd">    :param attn_dropout: Dropout probability for the Attention Layer. Default: ``0.0``</span>
+<span class="sd">    :type attn_dropout: float, optional</span>
 
-<span class="sd">        tied_weights (bool, optional): If True, tie the input embedding and output projection weights. Default: ``False``</span>
+<span class="sd">    :param tied_weights: If True, tie the input embedding and output projection weights. Default: ``False``</span>
+<span class="sd">    :type tied_weights: bool, optional</span>
 
-<span class="sd">        attn_class (Union[Type[nn.Module], str], optional): Attention class or type.</span>
-<span class="sd">            - If ``str``, one of ``MHA``, ``GQA``, ``CrossAttention``. For ``GQA``, also specify `n_kv_heads`.</span>
-<span class="sd">            - If ``Type[nn.Module]`` then will beinstantiated inside the model.</span>
-<span class="sd">              Should have the same API as ``transformer.attn.MHA``.</span>
-<span class="sd">              Default ``MHA``</span>
+<span class="sd">    :param seq_len: Sequence Length.</span>
+<span class="sd">    :type seq_len: int</span>
 
-<span class="sd">        n_kv_heads (int, optional): Number of key/value heads for Grouped-Query Attention(GQA). Default: ``n_heads``</span>
+<span class="sd">    :param pos_encoding: Positional Encoding for attention.</span>
+<span class="sd">        - If ``List[Union[Type[nn.Module], str]]`` and len(ffn_class) == n_layers</span>
+<span class="sd">          then will be instantiated inside the model for the corresponding layers.</span>
+<span class="sd">          Default ``SwiGLU`` for every layer.</span>
+<span class="sd">        - If ``str`` one of ``RoPE``, ``AliBI``, ``PartialRoPE``. Default: ``RoPE``</span>
+<span class="sd">        Note: Is recommended to change the default to ``PartialRoPE`` which is used in SOTA models like Qwen3-Next-80B-A3B</span>
+<span class="sd">    :type pos_encoding: Union[List[str], str]</span>
 
-<span class="sd">        pos_encoding (str, optional): Positional Encoding for attention, one of ``RoPE``, ``AliBI``, ``PartialRoPE``. Default: ``RoPE``</span>
-<span class="sd">            Note: Is recommended to change the default to ``PartialRoPE`` which is used in SOTA models like Qwen3-Next-80B-A3B</span>
+<span class="sd">    :param rope_base: Base for the Exponential Frequency Calculation in RoPE. Default: ``10000.0``</span>
+<span class="sd">    :type rope_base: float, optional</span>
 
-<span class="sd">        rope_base (float, optinal): Base for the Exponential Frequency Calculation in RoPE. Default: ``10000.0``</span>
+<span class="sd">    :param max_seq_len: Maximum sequence length for positional embeddings.</span>
+<span class="sd">    :type max_seq_len: int</span>
 
-<span class="sd">        ``**kwargs`` (dict, optional): Additional keyword arguments passed to `PretrainedConfig`</span>
+<span class="sd">    :param kwargs: Additional keyword arguments passed to `PretrainedConfig`</span>
+<span class="sd">    :type kwargs: dict, optional</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -330,10 +360,11 @@
         <span class="n">vocab_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50000</span><span class="p">,</span>
         <span class="n">d_ff</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">norm_design</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;pre_norm&quot;</span><span class="p">,</span>
-        <span class="n">norm_class</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">],</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;rms_norm&quot;</span><span class="p">,</span>
-        <span class="n">ffn_class</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">],</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;SwiGLU&quot;</span><span class="p">,</span>
-        <span class="n">attn_class</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">],</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;MHA&quot;</span><span class="p">,</span>
-        <span class="n">attn_bias</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">norm_class</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">],</span> <span class="nb">str</span><span class="p">]],</span> <span class="n">Type</span><span class="p">[</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">],</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;rms_norm&quot;</span><span class="p">,</span>
+        <span class="n">ffn_class</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">],</span> <span class="nb">str</span><span class="p">]],</span> <span class="n">Type</span><span class="p">[</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">],</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;SwiGLU&quot;</span><span class="p">,</span>
+        <span class="n">attn_class</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">],</span> <span class="nb">str</span><span class="p">]],</span> <span class="n">Type</span><span class="p">[</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">],</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;MHA&quot;</span><span class="p">,</span>
+        <span class="n">block_class</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">attn_bias</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">ffn_bias</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">lm_head_bias</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">attn_qk_norm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -356,6 +387,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">attn_class</span> <span class="o">=</span> <span class="n">attn_class</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ffn_class</span> <span class="o">=</span> <span class="n">ffn_class</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">norm_class</span> <span class="o">=</span> <span class="n">norm_class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">block_class</span> <span class="o">=</span> <span class="n">block_class</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">norm_design</span> <span class="o">=</span> <span class="n">norm_design</span>
 

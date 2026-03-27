@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .pos import RoPE
+from .pos import PartialRoPE, RoPE
 
 
 class MHA(nn.Module):
@@ -12,27 +12,36 @@ class MHA(nn.Module):
     **Multi-Head Attention** ``MHA`` module using the optimized implementation of
     ``torch.nn.functional.scaled_dot_product_attention()`` when possible.
 
-    Args:
-        d_model (int): Model dimension.
-        n_heads (int): Number of attention heads. Note that ``d_model`` will be split
+    :param d_model: Model dimension.
+    :type d_model: int
+
+    :param n_heads: Number of attention heads. Note that ``d_model`` will be split
         across ``n_heads`` (i.e. each head will have dimension ``d_head//n_heads``).
+    :type n_heads: int
 
-        dropout (float): Dropout probability on ``attn_output_weights``. Default: ``0.0`` (no dropout).
-            **Note: Latest SOTA Architectures do not use Dropout at all and for Research Purposes
-            it is recommended to never use it.**
+    :param dropout: Dropout probability on ``attn_output_weights``. Default: ``0.0`` (no dropout).
+        **Note: Latest SOTA Architectures do not use Dropout at all and for Research Purposes
+        it is recommended to never use it.**
+    :type dropout: float, optional
 
-        attn_bias (bool, optional): Whether to use bias in linear projections. Default: ``False``
+    :param attn_bias: Whether to use bias in linear projections. Default: ``False``
+    :type attn_bias: bool, optional
 
-        qk_norm (bool, optional): Whether to apply RMSNorm to queries and keys. Default: ``True``
+    :param qk_norm: Whether to apply RMSNorm to queries and keys. Default: ``True``
+    :type qk_norm: bool, optional
 
-        layer_idx (int, optional): Index of the layer (used for debugging/logging).
+    :param layer_idx: Index of the layer (used for debugging/logging).
+    :type layer_idx: int, optional
 
-        pos_encoding (str, optional): Positional Encoding to use. Default: ``RoPE``
+    :param pos_encoding: Positional Encoding to use. Default: ``RoPE``
+    :type pos_encoding: str, optional
 
-        pos_encoding_kwargs (Dict, optional): Dictionary of Additional Arguments for Positional Encoding.
-            Example: {"rope_base": 10000.0, "rot_frac": 0.5}.
+    :param pos_encoding_kwargs: Dictionary of Additional Arguments for Positional Encoding.
+        Example: {"rope_base": 10000.0, "rot_frac": 0.5}.
+    :type pos_encoding_kwargs: Dict, optional
 
-        max_seq_len (int): Maximum sequence length for RoPE.
+    :param max_seq_len: Maximum sequence length for RoPE.
+    :type max_seq_len: int
 
     """
 
@@ -87,31 +96,35 @@ class MHA(nn.Module):
         r"""
         Forward pass of MHA.
 
-        Args:
-            x (torch.Tensor): Input tensor of shape :math:`(B, N, D)` where :math:`N` is the Sequence Length,
-                :math:`B` is the batch size, and :math:`D` is the embedding dimension ``d_model``.
+        :param x: Input tensor of shape :math:`(B, N, D)` where :math:`N` is the Sequence Length,
+            :math:`B` is the batch size, and :math:`D` is the embedding dimension ``d_model``.
+        :type x: torch.Tensor
 
-            mask (torch.BoolTensor, optional): If specified, a 2D or 4D mask preventing attention to certain positions. Must be of shape
-                :math:`(N, N)` or :math:`(B, H, N, N)`, where :math:`B` is the batch size, :math:`H` is the number of heads and
-                :math:`N` is the Sequence Length. A 2D mask will be broadcasted across the batch while a 4D mask allows
-                for a different mask for each entry in the batch and/or heads dimensions.
-                **Note: Should be a boolean mask where True indicates masked positions.**
-                When Flash Attention is enabled it is inverted because PyTorch expects True for allowed positions.
+        :param mask: If specified, a 2D or 4D mask preventing attention to certain positions. Must be of shape
+            :math:`(N, N)` or :math:`(B, H, N, N)`, where :math:`B` is the batch size, :math:`H` is the number of heads and
+            :math:`N` is the Sequence Length. A 2D mask will be broadcasted across the batch while a 4D mask allows
+            for a different mask for each entry in the batch and/or heads dimensions.
+            **Note: Should be a boolean mask where True indicates masked positions.**
+            When Flash Attention is enabled it is inverted because PyTorch expects True for allowed positions.
+        :type mask: torch.BoolTensor, optional
 
-            pos (torch.LongTensor, optional): Position indices for RoPE, shape :math:`(N)` or :math:`(B, N)`
+        :param pos: Position indices for RoPE, shape :math:`(N)` or :math:`(B, N)`
+        :type pos: torch.LongTensor, optional
 
-            flash_attn (Tuple[bool, Union[list[torch.nn.attention.SDPBackend], torch.nn.attention.SDPBackend], bool], optional): Tuple of Arguments for Flash Attention and the Context manager to select which backend to use for scaled dot product attention.
-                bool: Whether to use or not Flash Attention. Default: ``False``
-                Union[List[SDPBackend], SDPBackend]: A backend or list of backends for scaled dot product attention. Default: ``torch.nn.attention.SPDBackend.FLASH_ATTENTION``
-                bool: Whether the ordering of the backends is interpreted as their priority order. Default: ``False``
+        :param flash_attn: Tuple of Arguments for Flash Attention and the Context manager to select which backend to use for scaled dot product attention.
+            - bool: Whether to use or not Flash Attention. Default: ``False``
+            - Union[List[SDPBackend], SDPBackend]: A backend or list of backends for scaled dot product attention. Default: ``torch.nn.attention.SPDBackend.FLASH_ATTENTION``
+            - bool: Whether the ordering of the backends is interpreted as their priority order. Default: ``False``
+        :type flash_attn: Tuple[bool, Union[list[torch.nn.attention.SDPBackend], torch.nn.attention.SDPBackend], bool], optional
 
-            return_states (bool, optional): If ``True``, return a dictionary of intermediate tensors. Default: ``False``
+        :param return_states: If ``True``, return a dictionary of intermediate tensors. Default: ``False``
+        :type return_states: bool, optional
 
-        Returns:
-            Union[torch.Tensor, Dict]: Output tensor :math:`(B, N, D)` if not return_states, else a dict containing
-                The keys: {`output`, `queries`, `keys`, `values`, `attn_weights`, `attn_scores`, `output_before_proj` and `input`}
-
+        :return: Output tensor :math:`(B, N, D)` if not return_states, else a dict containing
+            the keys: {`output`, `queries`, `keys`, `values`, `attn_weights`, `attn_scores`, `output_before_proj` and `input`}
+        :rtype: Union[torch.Tensor, Dict]
         """
+
         B, N, D, H, d = *x.shape, self.n_heads, self.d_head
 
         q, k, v = self.qkv_proj(x).view(B, N, H, d * 3).transpose(1, 2).chunk(3, dim=-1)
@@ -187,29 +200,39 @@ class GQA(nn.Module):
     **Grouped Query Attention** ``GQA`` module using the optimized implementation of
     ``torch.nn.functional.scaled_dot_product_attention()`` when possible.
 
-    Args:
-        d_model (int): Model dimension.
-        n_heads (int): Number of attention heads. Note that ``d_model`` will be split
+    :param d_model: Model dimension.
+    :type d_model: int
+
+    :param n_heads: Number of attention heads. Note that ``d_model`` will be split
         across ``n_heads`` (i.e. each head will have dimension ``d_head//n_heads``).
+    :type n_heads: int
 
-        n_kv_heads (int): Number of key/value heads (must divide n_heads).
+    :param n_kv_heads: Number of key/value heads (must divide n_heads).
+    :type n_kv_heads: int
 
-        dropout (float, optional): Dropout probability on ``attn_output_weights``. Default: ``0.0`` (no dropout).
-            **Note: Latest SOTA Architectures do not use Dropout at all and for Research Purposes
-            it is recommended to never use it.**
+    :param dropout: Dropout probability on ``attn_output_weights``. Default: ``0.0`` (no dropout).
+        **Note: Latest SOTA Architectures do not use Dropout at all and for Research Purposes
+        it is recommended to never use it.**
+    :type dropout: float, optional
 
-        attn_bias (bool, optional): Whether to use bias in linear projections. Default: ``False``
+    :param attn_bias: Whether to use bias in linear projections. Default: ``False``
+    :type attn_bias: bool, optional
 
-        qk_norm (bool, optional): Whether to apply RMSNorm to queries and keys. Default: ``True``
+    :param qk_norm: Whether to apply RMSNorm to queries and keys. Default: ``True``
+    :type qk_norm: bool, optional
 
-        layer_idx (int, optional): Index of the layer (used for debugging/logging).
+    :param layer_idx: Index of the layer (used for debugging/logging).
+    :type layer_idx: int, optional
 
-        pos_encoding (str, optional): Positional Encoding to use. Default: ``RoPE``
+    :param pos_encoding: Positional Encoding to use. Default: ``RoPE``
+    :type pos_encoding: str, optional
 
-        pos_encoding_kwargs (Dict, optional): Dictionary of Additional Arguments for Positional Encoding.
-            Example: {"rope_base": 10000.0, "rot_frac": 0.5}.
+    :param pos_encoding_kwargs: Dictionary of Additional Arguments for Positional Encoding.
+        Example: {"rope_base": 10000.0, "rot_frac": 0.5}.
+    :type pos_encoding_kwargs: Dict, optional
 
-        max_seq_len (int): Maximum sequence length for RoPE.
+    :param max_seq_len: Maximum sequence length for RoPE.
+    :type max_seq_len: int
 
     """
 
@@ -276,31 +299,36 @@ class GQA(nn.Module):
         """
         Forward pass of GQA.
 
-        Args:
-            x (torch.Tensor): Input tensor of shape :math:`(B, N, D)` where :math:`N` is the Sequence Length,
-                :math:`B` is the batch size, and :math:`D` is the embedding dimension ``d_model``.
+        :param x: Input tensor of shape :math:`(B, N, D)` where :math:`N` is the Sequence Length,
+            :math:`B` is the batch size, and :math:`D` is the embedding dimension ``d_model``.
+        :type x: torch.Tensor
 
-            mask (torch.BoolTensor, optional): If specified, a 2D or 4D mask preventing attention to certain positions. Must be of shape
-                :math:`(N, N)` or :math:`(B, H, N, N)`, where :math:`B` is the batch size, :math:`H` is the number of heads and
-                :math:`N` is the Sequence Length. A 2D mask will be broadcasted across the batch while a 4D mask allows
-                for a different mask for each entry in the batch and/or heads dimensions.
-                **Note: Should be a boolean mask where True indicates masked positions.**
-                When Flash Attention is enabled it is inverted because PyTorch expects True for allowed positions.
+        :param mask: If specified, a 2D or 4D mask preventing attention to certain positions. Must be of shape
+            :math:`(N, N)` or :math:`(B, H, N, N)`, where :math:`B` is the batch size, :math:`H` is the number of heads and
+            :math:`N` is the Sequence Length. A 2D mask will be broadcasted across the batch while a 4D mask allows
+            for a different mask for each entry in the batch and/or heads dimensions.
+            **Note: Should be a boolean mask where True indicates masked positions.**
+            When Flash Attention is enabled it is inverted because PyTorch expects True for allowed positions.
+        :type mask: torch.BoolTensor, optional
 
-            pos (torch.LongTensor, optional): Position indices for RoPE, shape :math:`(N)` or :math:`(B, N)`
+        :param pos: Position indices for RoPE, shape :math:`(N)` or :math:`(B, N)`
+        :type pos: torch.LongTensor, optional
 
-            flash_attn (Tuple[bool, Union[list[torch.nn.attention.SDPBackend], torch.nn.attention.SDPBackend], bool], optional): Tuple of Arguments for Flash Attention and the Context manager to select which backend to use for scaled dot product attention.
-                bool: Whether to use or not Flash Attention. Default: ``False``
-                Union[List[SDPBackend], SDPBackend]: A backend or list of backends for scaled dot product attention. Default: ``torch.nn.attention.SPDBackend.FLASH_ATTENTION``
-                bool: Whether the ordering of the backends is interpreted as their priority order. Default: ``False``
+        :param flash_attn: Tuple of Arguments for Flash Attention and the Context manager to select which backend to use for scaled dot product attention.
+            - bool: Whether to use or not Flash Attention. Default: ``False``
+            - Union[List[SDPBackend], SDPBackend]: A backend or list of backends for scaled dot product attention. Default: ``torch.nn.attention.SPDBackend.FLASH_ATTENTION``
+            - bool: Whether the ordering of the backends is interpreted as their priority order. Default: ``False``
+        :type flash_attn: Tuple[bool, Union[list[torch.nn.attention.SDPBackend], torch.nn.attention.SDPBackend], bool], optional
 
-            return_states (bool, optional): If ``True``, return a dictionary of intermediate tensors. Default: ``False``
+        :param return_states: If ``True``, return a dictionary of intermediate tensors. Default: ``False``
+        :type return_states: bool, optional
 
-        Returns:
-            Union[torch.Tensor, Dict]: Output tensor of shape :math:`(B, N, D)` if not return_states, else a dict containing
-                The keys: {`output`, `queries`, `keys`, `values`, `attn_weights`, `attn_scores`, `output_before_proj` and `input`}
+        :return: Output tensor of shape :math:`(B, N, D)` if not return_states, else a dict containing
+            the keys: {`output`, `queries`, `keys`, `values`, `attn_weights`, `attn_scores`, `output_before_proj` and `input`}
+        :rtype: Union[torch.Tensor, Dict]
 
         """
+
         B, N, D, H_q, H_kv, G, d = *x.shape, self.n_heads, self.n_kv_heads, self.groups, self.d_head
 
         q, k, v = self.qkv_proj(x).view(B, N, H_q + (H_kv * 2), d).transpose(1, 2).split([H_q, H_kv, H_kv], dim=1)
@@ -379,26 +407,33 @@ class CrossAttention(nn.Module):
     **CrossAttention** module using the optimized implementation of
     ``torch.nn.functional.scaled_dot_product_attention()`` when possible.
 
-    Args:
-        d_model (int): Model dimension.
-        n_heads (int): Number of attention heads. Note that ``d_model`` will be split
+    :param d_model: Model dimension.
+    :type d_model: int
+
+    :param n_heads: Number of attention heads. Note that ``d_model`` will be split
         across ``n_heads`` (i.e. each head will have dimension ``d_head//n_heads``).
+    :type n_heads: int
 
-        n_kv_heads (int): Number of key/value heads (must divide n_heads). Default: ``n_heads``
+    :param dropout: Dropout probability on ``attn_output_weights``. Default: ``0.0`` (no dropout).
+        **Note: Latest SOTA Architectures do not use Dropout at all and for Research Purposes
+        it is recommended to never use it.**
+    :type dropout: float, optional
 
-        dropout (float, optional): Dropout probability on ``attn_output_weights``. Default: ``0.0`` (no dropout).
-            **Note: Latest SOTA Architectures do not use Dropout at all and for Research Purposes
-            it is recommended to never use it.**
+    :param attn_bias: Whether to use bias in linear projections. Default: ``False``
+    :type attn_bias: bool, optional
 
-        attn_bias (bool, optional): Whether to use bias in linear projections. Default: ``False``
+    :param qk_norm: Whether to apply RMSNorm to queries and keys. Default: ``True``
+    :type qk_norm: bool, optional
 
-        qk_norm (bool, optional): Whether to apply RMSNorm to queries and keys. Default: ``True``
+    :param layer_idx: Index of the layer (used for debugging/logging).
+    :type layer_idx: int, optional
 
-        layer_idx (int, optional): Index of the layer (used for debugging/logging).
+    :param rope_base: Base for the Exponential Frequency Calculation in RoPE. Default: ``10000.0``
+    :type rope_base: float, optional
 
-        rope_base (float, optional): Base for the Exponential Frequency Calculation in RoPE. Default: ``10000.0``
+    :param max_seq_len: Maximum sequence length for RoPE.
+    :type max_seq_len: int
 
-        max_seq_len (int): Maximum sequence length for RoPE.
     """
 
     def __init__(
@@ -448,37 +483,44 @@ class CrossAttention(nn.Module):
         """
         Forward pass of CrossAttention.
 
-        Args:
-            queries (torch.Tensor): Input tensor of shape :math:`(B, Lq, D)` where :math:`Lq` is the Sequence Length for the query sequence,
-                :math:`B` is the batch size, and :math:`D` is the embedding dimension ``d_model``.
+        :param queries: Input tensor of shape :math:`(B, Lq, D)` where :math:`Lq` is the Sequence Length for the query sequence,
+            :math:`B` is the batch size, and :math:`D` is the embedding dimension ``d_model``.
+        :type queries: torch.Tensor
 
-            kv (torch.Tensor): Input tensor of shape :math:`(B, Lq, D)` where :math:`Lk` is the Sequence Length for the key/value sequence,
-                :math:`B` is the batch size, and :math:`D` is the embedding dimension ``d_model``.
+        :param kv: Input tensor of shape :math:`(B, Lq, D)` where :math:`Lk` is the Sequence Length for the key/value sequence,
+            :math:`B` is the batch size, and :math:`D` is the embedding dimension ``d_model``.
+        :type kv: torch.Tensor
 
-            mask (torch.BoolTensor, optional): If specified, a 2D or 4D mask preventing attention to certain positions. Must be of shape
-                :math:`(Lq, Lk)` or :math:`(B, H, Lq, Lk)`, where :math:`B` is the batch size, :math:`H` is the number of heads,
-                :math:`Lq` is the Sequence Length of the query sequence and :math:`Lk` is the Sequence Length of the key/value sequence.
-                A 2D mask will be broadcasted across the batch while a 4D mask allows for a different mask for each entry
-                in the batch and/or heads dimensions.
-                **Note: Should be a boolean mask where True indicates masked positions.**
-                When Flash Attention is enabled it is inverted because PyTorch expects True for allowed positions.
+        :param mask: If specified, a 2D or 4D mask preventing attention to certain positions. Must be of shape
+            :math:`(Lq, Lk)` or :math:`(B, H, Lq, Lk)`, where :math:`B` is the batch size, :math:`H` is the number of heads,
+            :math:`Lq` is the Sequence Length of the query sequence and :math:`Lk` is the Sequence Length of the key/value sequence.
+            A 2D mask will be broadcasted across the batch while a 4D mask allows for a different mask for each entry
+            in the batch and/or heads dimensions.
+            **Note: Should be a boolean mask where True indicates masked positions.**
+            When Flash Attention is enabled it is inverted because PyTorch expects True for allowed positions.
+        :type mask: torch.BoolTensor, optional
 
-            pos_q (torch.LongTensor, optional): Position indices for Queries, shape :math:`(Lq)` or :math:`(B, Lq)`
+        :param pos_q: Position indices for Queries, shape :math:`(Lq)` or :math:`(B, Lq)`
+        :type pos_q: torch.LongTensor, optional
 
-            pos_k (torch.LongTensor, optional): Position indices for Keys, shape :math:`(Lk)` or :math:`(B, Lk)`
+        :param pos_k: Position indices for Keys, shape :math:`(Lk)` or :math:`(B, Lk)`
+        :type pos_k: torch.LongTensor, optional
 
-            flash_attn (Tuple[bool, Union[list[torch.nn.attention.SDPBackend], torch.nn.attention.SDPBackend], bool], optional): Tuple of Arguments for Flash Attention and the Context manager to select which backend to use for scaled dot product attention.
-                bool: Whether to use or not Flash Attention. Default: ``False``
-                Union[List[SDPBackend], SDPBackend]: A backend or list of backends for scaled dot product attention. Default: ``torch.nn.attention.SPDBackend.FLASH_ATTENTION``
-                bool: Whether the ordering of the backends is interpreted as their priority order. Default: ``False``
+        :param flash_attn: Tuple of Arguments for Flash Attention and the Context manager to select which backend to use for scaled dot product attention.
+            - bool: Whether to use or not Flash Attention. Default: ``False``
+            - Union[List[SDPBackend], SDPBackend]: A backend or list of backends for scaled dot product attention. Default: ``torch.nn.attention.SPDBackend.FLASH_ATTENTION``
+            - bool: Whether the ordering of the backends is interpreted as their priority order. Default: ``False``
+        :type flash_attn: Tuple[bool, Union[list[torch.nn.attention.SDPBackend], torch.nn.attention.SDPBackend], bool], optional
 
-            return_states (bool, optional): If True, return dictionary of intermediates tensors. Default: False
+        :param return_states: If True, return dictionary of intermediates tensors. Default: False
+        :type return_states: bool, optional
 
-        Returns:
-            Union[torch.Tensor, Dict]: Output tensor of shape :math:`(B, N, D)` if not return_states, else a dict containing
-                The keys: {`output`, `queries`, `keys`, `values`, `attn_weights`, `attn_scores`, `output_before_proj` and `input`} where `input` is a tuple (queries, kv)
+        :return: Output tensor of shape :math:`(B, N, D)` if not return_states, else a dict containing
+            the keys: {`output`, `queries`, `keys`, `values`, `attn_weights`, `attn_scores`, `output_before_proj` and `input`} where `input` is a tuple (queries, kv)
+        :rtype: Union[torch.Tensor, Dict]
 
         """
+
         B, Lq, D, Lk, H, d = *queries.shape, kv.shape[1], self.n_heads, self.d_head
 
         q, k, v = self.q_proj(queries).view(B, Lq, H, d).transpose(1, 2), *self.kv_proj(kv).view(

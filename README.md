@@ -7,13 +7,13 @@
 [![Stars](https://img.shields.io/github/stars/lof310/transformer)](#)
 [![Downloads](https://img.shields.io/github/downloads/lof310/transformer/total)](https://github.com/lof310/transformer/releases)
 
-A polished PyTorch implementation of the current State-Of-The-Art(SOTA) Transformer. Designed for clarity, reproducibility, and interoperability with HuggingFace Transformers, this repository provides a robust baseline for research and engineering being fully configurable. The codebase emphasizes readable, well-documented components so you can iterate on attention mechanisms, Feed-Forward, Attention and Normalization blocks and other architectural variants with minimal friction.
+_A polished **PyTorch implementation** of the current **State-Of-The-Art(SOTA) Transformer**. Designed for clarity, reproducibility, and interoperability with **HuggingFace Transformers**, this repository provides a robust baseline for **Research** and **Engineering** being **Fully Configurable**. The codebase emphasizes **readable and well-documented components** so you can iterate on **Feed-Forward**, **Attention** and **Normalization** blocks and other **architectural variants** with minimal friction._
 
 ## Features
 - **Fully Configurable** architecture (layers, heads, model dimensions, dropout, etc.)
-- HuggingFace-compatible API alignment.
-- Compact and easily extensible design for rapid prototyping and research experiments.
-- Clear, well-documented modules to facilitate experimentation with attention, FFNs, etc.
+- **HuggingFace-compatible** API alignment.
+- **Compact and easily extensible** design for rapid prototyping and research experiments.
+- **Clear, well-documented modules** to facilitate experimentation with attention, FFNs, etc.
 
 ## Download the code
 ```bash
@@ -46,7 +46,7 @@ config = TransformerConfig(
     n_layers = 12,
     n_heads: int = 32,
     d_model: int = 1536,
-    qk_norm: bool = False,     
+    attn_qk_norm: bool = False,     
     tied_weights: bool = False,
     seq_len: int = 1024,
     max_seq_len: int = 4096,
@@ -69,18 +69,25 @@ from transformer import TransformerConfig
 
 TransformerConfig(
     n_layers = 12,
-    d_model int = 1536,
+    d_model = 1536,
     n_heads = 32,
-    n_kv_heads = None, # GQA Disabled
-    vocab_size int = 50000,
-    d_ff = None, # Choosen Automatically: math.ceil(d_model * 2.666)
-    attn_type = "MHA",
+    n_kv_heads = None, # QKA Disabled
+    vocab_size = 50000,
+    d_ff = None, # Choosen Automatically, ratio 8/3=2.666
+    norm_design = "pre_norm",
+    norm_class = "rms_norm",
+    ffn_class = "SwiGLU",
+    attn_class = "MHA",
+    block_class = None, # transformer.TransformerBlock
     attn_bias = False,
     ffn_bias = True,
-    attn_qk_norm = True,
     lm_head_bias = False,
+    attn_qk_norm = True,
+    attn_dropout = 0.0,
     tied_weights = False,
     seq_len = 1024,
+    pos_encoding = "RoPE",
+    rope_base = 10000.0,
     max_seq_len = 4096
 )
 ```

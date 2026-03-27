@@ -70,31 +70,6 @@ logits = output.logits # shape: [batch_size, seq_len, vocab_size]
 hidden_states = output.hidden_states # Tuple: (input_embs, hidden_states)
 hidden_states = hidden_states[1] # The hidden_states
 
-# The hidden_states is a list of Dictionaries for each layer containing the following dictionary structure for each layer:
-r"""
-{
-    "output": torch.Tensor,  # Shape: [B, N, D]
-    "attn_output": {
-        "output": torch.Tensor,       # Shape: [B, N, D]
-        "queries": torch.Tensor,      # Shape: [B, H, N, d]
-        "keys": torch.Tensor,         # Shape: [B, H, N, d]
-        "values": torch.Tensor,       # Shape: [B, H, N, d]
-        "attn_weights": torch.Tensor, # Shape: [B, H, N, N] or [B, H, Lq, Lk] depending on if you use the Cross Attention module
-        "attn_scores": torch.Tensor,  # Shape: [B, H, N, N] or [B, H, Lq, Lk] depending on if you use the Cross Attention module
-        "output_before_proj": torch.Tensor, # Shape: [B, N, D]
-        "input": Union[torch.Tensor, Tuple] # Can be Tensor of shape [B, N, D] or Tuple (query, kv) both of shape [B, N, D]
-                                             # depending on if you use the Cross Attention module
-    },
-    "ffn_output": {
-        "output": torch.Tensor, # Shape: [B, N, D]
-        "y1": torch.Tensor, # Shape: [B, N, D_ff//2]
-        "y2": torch.Tensor, # Shape: [B, N, D_ff//2]
-        "input": torch.Tensor # Shape: [B, N, D]
-    }
-}
-"""
-# Note: The keys "attn_weights" and "attn_scores" will not be available when FlashAttention is used
-
 layer, batch, head = (0, 0, 0)
 
 # Visualization of Attention Scores

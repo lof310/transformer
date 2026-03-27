@@ -189,25 +189,20 @@
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
-  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
-<ul>
+  <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quick Start</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../guide.html">Transformer: A PyTorch SOTA Transformer Implementation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../guide.html#configuration">Configuration</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Usage Examples</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../examples.html">Usage Examples</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Project Info</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
 </ul>
@@ -253,10 +248,10 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">transformers.modeling_layers</span><span class="w"> </span><span class="kn">import</span> <span class="n">GradientCheckpointingLayer</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">transformers.modeling_outputs</span><span class="w"> </span><span class="kn">import</span> <span class="n">CausalLMOutput</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.attns</span><span class="w"> </span><span class="kn">import</span> <span class="n">MHA</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.attns</span><span class="w"> </span><span class="kn">import</span> <span class="n">GQA</span><span class="p">,</span> <span class="n">MHA</span><span class="p">,</span> <span class="n">CrossAttention</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransformerConfig</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.ffn</span><span class="w"> </span><span class="kn">import</span> <span class="n">SwiGLU</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.pos</span><span class="w"> </span><span class="kn">import</span> <span class="n">RoPE</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.ffn</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLP</span><span class="p">,</span> <span class="n">SwiGLU</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.pos</span><span class="w"> </span><span class="kn">import</span> <span class="n">PartialRoPE</span><span class="p">,</span> <span class="n">RoPE</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_type</span>
 
 
@@ -264,18 +259,25 @@
 <a class="viewcode-back" href="../../api.html#transformer.transformer.TransformerBlock">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">TransformerBlock</span><span class="p">(</span><span class="n">GradientCheckpointingLayer</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A Single Transformer Decoder Block consisting of Multi-Head Attention and Feed-Forward layers,</span>
+<span class="sd">    A Single Transformer Decoder Block with support for Gradient Checkpointing consisting of Multi-Head Attention and Feed-Forward layers,</span>
 <span class="sd">    each with Pre-Normalization (RMSNorm) and Standard Residual Connections.</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        config (TransformerConfig): Configuration object.</span>
-<span class="sd">        attn_kwargs: (Dict, optional): Additional Arguments for the attention class passed from ``TransformerConfig.attn_class``.</span>
-<span class="sd">            It is only used if ``TransformerConfig.attn_class`` is ``Type[nn.Module]``</span>
-<span class="sd">        ffn_kwargs: (Dict, optional): Additional Arguments for the ffn class passed from ``TransformerConfig.ffn_class``.</span>
-<span class="sd">            It is only used if ``TransformerConfig.ffn_class`` is ``Type[nn.Module]``</span>
-<span class="sd">        norm_kwargs: (Dict, optional): Additional Arguments for the normalization class passed from ``TransformerConfig.norm_class``. It is always passed.</span>
-<span class="sd">        layer_idx (int, optional): Index of this block (used for debugging/logging).</span>
+<span class="sd">    :param config: Configuration object.</span>
+<span class="sd">    :type config: TransformerConfig</span>
 
+<span class="sd">    :param attn_kwargs: Additional Arguments for the attention class passed from ``TransformerConfig.attn_class``.</span>
+<span class="sd">        It is only used if ``TransformerConfig.attn_class`` is ``Type[nn.Module]``</span>
+<span class="sd">    :type attn_kwargs: Dict, optional</span>
+
+<span class="sd">    :param ffn_kwargs: Additional Arguments for the ffn class passed from ``TransformerConfig.ffn_class``.</span>
+<span class="sd">        It is only used if ``TransformerConfig.ffn_class`` is ``Type[nn.Module]``</span>
+<span class="sd">    :type ffn_kwargs: Dict, optional</span>
+
+<span class="sd">    :param norm_kwargs: Additional Arguments for the normalization class passed from ``TransformerConfig.norm_class``. It is always passed.</span>
+<span class="sd">    :type norm_kwargs: Dict, optional</span>
+
+<span class="sd">    :param layer_idx: Index of this block (used for debugging/logging).</span>
+<span class="sd">    :type layer_idx: int, optional</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="TransformerBlock.__init__">
@@ -326,7 +328,14 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">n_heads</span><span class="p">,</span>
                 <span class="n">config</span><span class="o">.</span><span class="n">attn_bias</span><span class="p">,</span>
-                <span class="o">**</span><span class="n">attn_kwargs</span><span class="p">,</span>
+                <span class="o">**</span><span class="p">{</span>
+                    <span class="s2">&quot;layer_idx&quot;</span><span class="p">:</span> <span class="n">layer_idx</span><span class="p">,</span>
+                    <span class="s2">&quot;max_seq_len&quot;</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">max_seq_len</span><span class="p">,</span>
+                    <span class="s2">&quot;dropout&quot;</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">attn_dropout</span><span class="p">,</span>
+                    <span class="s2">&quot;qk_norm&quot;</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">attn_qk_norm</span><span class="p">,</span>
+                    <span class="s2">&quot;pos_encoding&quot;</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">pos_encoding</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">attn_kwargs</span><span class="p">,</span>
+                <span class="p">},</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
@@ -418,17 +427,24 @@
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Forward pass of the transformer block.</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            x (torch.Tensor): Input tensor of shape :math:`(B, N, D)`.</span>
-<span class="sd">            attn_mask (torch.Tensor, optional): Attention mask for the Attention block.</span>
-<span class="sd">            pos (torch.Tensor, optional): Position indices for Positional Encoding.</span>
-<span class="sd">            flash_attn (Tuple[bool, Union[list[torch.nn.attention.SDPBackend], torch.nn.attention.SDPBackend], bool], optional): Tuple of Arguments for Flash Attention.</span>
-<span class="sd">            return_states (bool, optional): If True, return a dictionary of intermediate outputs. Default: False</span>
+<span class="sd">        :param x: Input tensor of shape :math:`(B, N, D)`.</span>
+<span class="sd">        :type x: torch.Tensor</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">            Union[torch.Tensor, Dict]: Output tensor (batch_size, seq_len, d_model) if not return_states,</span>
-<span class="sd">                else a dict containing the keys: &quot;output&quot;, &quot;attn_output&quot; and &quot;ffn_output&quot;.</span>
+<span class="sd">        :param attn_mask: Attention mask for the Attention block.</span>
+<span class="sd">        :type attn_mask: torch.Tensor, optional</span>
 
+<span class="sd">        :param pos: Position indices for Positional Encoding.</span>
+<span class="sd">        :type pos: torch.Tensor, optional</span>
+
+<span class="sd">        :param flash_attn: Tuple of Arguments for Flash Attention.</span>
+<span class="sd">        :type flash_attn: Tuple[bool, Union[list[torch.nn.attention.SDPBackend], torch.nn.attention.SDPBackend], bool], optional</span>
+
+<span class="sd">        :param return_states: If True, return a dictionary of intermediate outputs. Default: False</span>
+<span class="sd">        :type return_states: bool, optional</span>
+
+<span class="sd">        :return: Output tensor (batch_size, seq_len, d_model) if not return_states,</span>
+<span class="sd">            else a dict containing the keys: &quot;output&quot;, &quot;attn_output&quot; and &quot;ffn_output&quot;.</span>
+<span class="sd">        :rtype: Union[torch.Tensor, Dict]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">extract</span><span class="p">(</span><span class="n">out</span><span class="p">):</span>
@@ -481,18 +497,21 @@
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transformer language model, compatible with the HuggingFace interface.</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        config (TransformerConfig): Model configuration.</span>
+<span class="sd">    :param config: Model configuration.</span>
+<span class="sd">    :type config: TransformerConfig</span>
 
-<span class="sd">        attn_kwargs (Dict, optional): Additional Keyword Arguments passed to the Attention Module. Default: ``{&quot;pos_encoding_kwargs&quot;: **pos_encoding_kwargs}``</span>
+<span class="sd">    :param attn_kwargs: Additional Keyword Arguments passed to the Attention Module. Default: ``{&quot;pos_encoding_kwargs&quot;: **pos_encoding_kwargs}``</span>
+<span class="sd">    :type attn_kwargs: Dict, optional</span>
 
-<span class="sd">        pos_encoding_kwargs (Dict, optional): Additional Arguments for Positional Encoding. Default: ``{}``</span>
-<span class="sd">            Example: ``{&quot;rope_base&quot;: 12000, &quot;persistent&quot;: False}``</span>
+<span class="sd">    :param pos_encoding_kwargs: Additional Arguments for Positional Encoding. Default: ``{}``</span>
+<span class="sd">        Example: ``{&quot;rope_base&quot;: 12000, &quot;persistent&quot;: False}``</span>
+<span class="sd">    :type pos_encoding_kwargs: Dict, optional</span>
 
-<span class="sd">        ffn_kwargs (Dict, optional): Additional Keyword Arguments passed to the Feed-Forward Module. Default: ``{}``</span>
+<span class="sd">    :param ffn_kwargs: Additional Keyword Arguments passed to the Feed-Forward Module. Default: ``{}``</span>
+<span class="sd">    :type ffn_kwargs: Dict, optional</span>
 
-<span class="sd">        norm_kwargs (Dict, optional): Additional Keyword Arguments passed to the Normalization Layer. Default: ``{}``</span>
-
+<span class="sd">    :param norm_kwargs: Additional Keyword Arguments passed to the Normalization Layer. Default: ``{}``</span>
+<span class="sd">    :type norm_kwargs: Dict, optional</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">config_class</span> <span class="o">=</span> <span class="n">TransformerConfig</span>
@@ -519,9 +538,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">d_model</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">emb</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Embedding</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">vocab_size</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">d_model</span><span class="p">)</span>
+        <span class="n">block_class</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">block_class</span> <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">block_class</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">TransformerBlock</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">(</span>
             <span class="p">[</span>
-                <span class="n">TransformerBlock</span><span class="p">(</span>
+                <span class="n">block_class</span><span class="p">(</span>
                     <span class="n">config</span><span class="p">,</span>
                     <span class="p">(</span>
                         <span class="n">attn_kwargs</span>
@@ -581,20 +602,36 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Forward pass of the Transformer model.</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            input_ids (torch.Tensor): Token indices of shape :math:`(B, N)`</span>
-<span class="sd">            labels (torch.Tensor, optional): Target token indices for loss computation, same shape as input_ids.</span>
-<span class="sd">            is_causal (bool, optional): If True, create a causal attention mask. Default: True</span>
-<span class="sd">            attn_mask (torch.Tensor, optional): Custom attention mask. If None and is_causal, a upper triangular causal mask is generated.</span>
-<span class="sd">            pos (torch.Tensor, optional): Position indices. If None, uses ``torch.arange(N)``.</span>
-<span class="sd">            flash_attn (Tuple[bool, Union[list[torch.nn.attention.SDPBackend], torch.nn.attention.SDPBackend], bool], optional): Tuple of Arguments for Flash Attention.</span>
-<span class="sd">            return_states (bool, optional): If True, return hidden states of all layers. Default: False</span>
-<span class="sd">            ``**loss_kwargs`` (dict, optional): Additional keyword arguments passed to `F.cross_entropy` for loss computation.</span>
-<span class="sd">            ``**kwargs`` (dict, optional): Additional keyword arguments</span>
+<span class="sd">        :param input_ids: Token indices of shape :math:`(B, N)`</span>
+<span class="sd">        :type input_ids: torch.LongTensor</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">            CausalLMOutput: Contains loss (if labels given else None), logits, and optionally hidden states being a tuple of (input_embs, hidden_states)</span>
-<span class="sd">                where `hidden_states` is a list of dictionaries for the output of each layer.</span>
+<span class="sd">        :param labels: Target token indices for loss computation, same shape as input_ids.</span>
+<span class="sd">        :type labels: torch.LongTensor, optional</span>
+
+<span class="sd">        :param is_causal: If True, create a causal attention mask. Default: True</span>
+<span class="sd">        :type is_causal: bool, optional</span>
+
+<span class="sd">        :param attn_mask: Custom attention mask. If None and is_causal, a upper triangular causal mask is generated.</span>
+<span class="sd">        :type attn_mask: torch.Tensor, optional</span>
+
+<span class="sd">        :param pos: Position indices. If None, uses ``torch.arange(N)``.</span>
+<span class="sd">        :type pos: torch.Tensor, optional</span>
+
+<span class="sd">        :param flash_attn: Tuple of Arguments for Flash Attention.</span>
+<span class="sd">        :type flash_attn: Tuple[bool, Union[list[torch.nn.attention.SDPBackend], torch.nn.attention.SDPBackend], bool], optional</span>
+
+<span class="sd">        :param return_states: If True, return hidden states of all layers. Default: False</span>
+<span class="sd">        :type return_states: bool, optional</span>
+
+<span class="sd">        :param loss_kwargs: Additional keyword arguments passed to `F.cross_entropy` for loss computation.</span>
+<span class="sd">        :type loss_kwargs: Dict, optional</span>
+
+<span class="sd">        :param kwargs: Additional keyword arguments</span>
+<span class="sd">        :type kwargs: Dict, optional</span>
+
+<span class="sd">        :return: Contains loss (if labels given else None), logits, and optionally hidden states being a tuple of (input_embs, hidden_states)</span>
+<span class="sd">            where `hidden_states` is a list of dictionaries for the output of each layer.</span>
+<span class="sd">        :rtype: CausalLMOutput</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">B</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="n">input_ids</span><span class="o">.</span><span class="n">shape</span>
 

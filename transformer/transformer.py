@@ -8,27 +8,34 @@ from transformers import GenerationMixin, PretrainedConfig, PreTrainedModel
 from transformers.modeling_layers import GradientCheckpointingLayer
 from transformers.modeling_outputs import CausalLMOutput
 
-from .attns import MHA
+from .attns import GQA, MHA, CrossAttention
 from .config import TransformerConfig
-from .ffn import SwiGLU
-from .pos import RoPE
+from .ffn import MLP, SwiGLU
+from .pos import PartialRoPE, RoPE
 from .utils import check_type
 
 
 class TransformerBlock(GradientCheckpointingLayer):
     """
-    A Single Transformer Decoder Block consisting of Multi-Head Attention and Feed-Forward layers,
+    A Single Transformer Decoder Block with support for Gradient Checkpointing consisting of Multi-Head Attention and Feed-Forward layers,
     each with Pre-Normalization (RMSNorm) and Standard Residual Connections.
 
-    Args:
-        config (TransformerConfig): Configuration object.
-        attn_kwargs: (Dict, optional): Additional Arguments for the attention class passed from ``TransformerConfig.attn_class``.
-            It is only used if ``TransformerConfig.attn_class`` is ``Type[nn.Module]``
-        ffn_kwargs: (Dict, optional): Additional Arguments for the ffn class passed from ``TransformerConfig.ffn_class``.
-            It is only used if ``TransformerConfig.ffn_class`` is ``Type[nn.Module]``
-        norm_kwargs: (Dict, optional): Additional Arguments for the normalization class passed from ``TransformerConfig.norm_class``. It is always passed.
-        layer_idx (int, optional): Index of this block (used for debugging/logging).
+    :param config: Configuration object.
+    :type config: TransformerConfig
 
+    :param attn_kwargs: Additional Arguments for the attention class passed from ``TransformerConfig.attn_class``.
+        It is only used if ``TransformerConfig.attn_class`` is ``Type[nn.Module]``
+    :type attn_kwargs: Dict, optional
+
+    :param ffn_kwargs: Additional Arguments for the ffn class passed from ``TransformerConfig.ffn_class``.
+        It is only used if ``TransformerConfig.ffn_class`` is ``Type[nn.Module]``
+    :type ffn_kwargs: Dict, optional
+
+    :param norm_kwargs: Additional Arguments for the normalization class passed from ``TransformerConfig.norm_class``. It is always passed.
+    :type norm_kwargs: Dict, optional
+
+    :param layer_idx: Index of this block (used for debugging/logging).
+    :type layer_idx: int, optional
     """
 
     def __init__(
@@ -173,17 +180,24 @@ class TransformerBlock(GradientCheckpointingLayer):
         r"""
         Forward pass of the transformer block.
 
-        Args:
-            x (torch.Tensor): Input tensor of shape :math:`(B, N, D)`.
-            attn_mask (torch.Tensor, optional): Attention mask for the Attention block.
-            pos (torch.Tensor, optional): Position indices for Positional Encoding.
-            flash_attn (Tuple[bool, Union[list[torch.nn.attention.SDPBackend], torch.nn.attention.SDPBackend], bool], optional): Tuple of Arguments for Flash Attention.
-            return_states (bool, optional): If True, return a dictionary of intermediate outputs. Default: False
+        :param x: Input tensor of shape :math:`(B, N, D)`.
+        :type x: torch.Tensor
 
-        Returns:
-            Union[torch.Tensor, Dict]: Output tensor (batch_size, seq_len, d_model) if not return_states,
-                else a dict containing the keys: "output", "attn_output" and "ffn_output".
+        :param attn_mask: Attention mask for the Attention block.
+        :type attn_mask: torch.Tensor, optional
 
+        :param pos: Position indices for Positional Encoding.
+        :type pos: torch.Tensor, optional
+
+        :param flash_attn: Tuple of Arguments for Flash Attention.
+        :type flash_attn: Tuple[bool, Union[list[torch.nn.attention.SDPBackend], torch.nn.attention.SDPBackend], bool], optional
+
+        :param return_states: If True, return a dictionary of intermediate outputs. Default: False
+        :type return_states: bool, optional
+
+        :return: Output tensor (batch_size, seq_len, d_model) if not return_states,
+            else a dict containing the keys: "output", "attn_output" and "ffn_output".
+        :rtype: Union[torch.Tensor, Dict]
         """
 
         def extract(out):
@@ -232,18 +246,21 @@ class Transformer(PreTrainedModel, GenerationMixin):
     r"""
     Transformer language model, compatible with the HuggingFace interface.
 
-    Args:
-        config (TransformerConfig): Model configuration.
+    :param config: Model configuration.
+    :type config: TransformerConfig
 
-        attn_kwargs (Dict, optional): Additional Keyword Arguments passed to the Attention Module. Default: ``{"pos_encoding_kwargs": **pos_encoding_kwargs}``
+    :param attn_kwargs: Additional Keyword Arguments passed to the Attention Module. Default: ``{"pos_encoding_kwargs": **pos_encoding_kwargs}``
+    :type attn_kwargs: Dict, optional
 
-        pos_encoding_kwargs (Dict, optional): Additional Arguments for Positional Encoding. Default: ``{}``
-            Example: ``{"rope_base": 12000, "persistent": False}``
+    :param pos_encoding_kwargs: Additional Arguments for Positional Encoding. Default: ``{}``
+        Example: ``{"rope_base": 12000, "persistent": False}``
+    :type pos_encoding_kwargs: Dict, optional
 
-        ffn_kwargs (Dict, optional): Additional Keyword Arguments passed to the Feed-Forward Module. Default: ``{}``
+    :param ffn_kwargs: Additional Keyword Arguments passed to the Feed-Forward Module. Default: ``{}``
+    :type ffn_kwargs: Dict, optional
 
-        norm_kwargs (Dict, optional): Additional Keyword Arguments passed to the Normalization Layer. Default: ``{}``
-
+    :param norm_kwargs: Additional Keyword Arguments passed to the Normalization Layer. Default: ``{}``
+    :type norm_kwargs: Dict, optional
     """
 
     config_class = TransformerConfig
@@ -329,20 +346,36 @@ class Transformer(PreTrainedModel, GenerationMixin):
         """
         Forward pass of the Transformer model.
 
-        Args:
-            input_ids (torch.Tensor): Token indices of shape :math:`(B, N)`
-            labels (torch.Tensor, optional): Target token indices for loss computation, same shape as input_ids.
-            is_causal (bool, optional): If True, create a causal attention mask. Default: True
-            attn_mask (torch.Tensor, optional): Custom attention mask. If None and is_causal, a upper triangular causal mask is generated.
-            pos (torch.Tensor, optional): Position indices. If None, uses ``torch.arange(N)``.
-            flash_attn (Tuple[bool, Union[list[torch.nn.attention.SDPBackend], torch.nn.attention.SDPBackend], bool], optional): Tuple of Arguments for Flash Attention.
-            return_states (bool, optional): If True, return hidden states of all layers. Default: False
-            ``**loss_kwargs`` (dict, optional): Additional keyword arguments passed to `F.cross_entropy` for loss computation.
-            ``**kwargs`` (dict, optional): Additional keyword arguments
+        :param input_ids: Token indices of shape :math:`(B, N)`
+        :type input_ids: torch.LongTensor
 
-        Returns:
-            CausalLMOutput: Contains loss (if labels given else None), logits, and optionally hidden states being a tuple of (input_embs, hidden_states)
-                where `hidden_states` is a list of dictionaries for the output of each layer.
+        :param labels: Target token indices for loss computation, same shape as input_ids.
+        :type labels: torch.LongTensor, optional
+
+        :param is_causal: If True, create a causal attention mask. Default: True
+        :type is_causal: bool, optional
+
+        :param attn_mask: Custom attention mask. If None and is_causal, a upper triangular causal mask is generated.
+        :type attn_mask: torch.Tensor, optional
+
+        :param pos: Position indices. If None, uses ``torch.arange(N)``.
+        :type pos: torch.Tensor, optional
+
+        :param flash_attn: Tuple of Arguments for Flash Attention.
+        :type flash_attn: Tuple[bool, Union[list[torch.nn.attention.SDPBackend], torch.nn.attention.SDPBackend], bool], optional
+
+        :param return_states: If True, return hidden states of all layers. Default: False
+        :type return_states: bool, optional
+
+        :param loss_kwargs: Additional keyword arguments passed to `F.cross_entropy` for loss computation.
+        :type loss_kwargs: Dict, optional
+
+        :param kwargs: Additional keyword arguments
+        :type kwargs: Dict, optional
+
+        :return: Contains loss (if labels given else None), logits, and optionally hidden states being a tuple of (input_embs, hidden_states)
+            where `hidden_states` is a list of dictionaries for the output of each layer.
+        :rtype: CausalLMOutput
         """
         B, N = input_ids.shape
 

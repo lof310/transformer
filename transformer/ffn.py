@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Union
+from typing import Dict, Optional, Tuple, Type, Union
 
 import torch
 import torch.nn as nn
@@ -9,10 +9,14 @@ class SwiGLU(nn.Module):
     r"""
     SwiGLU feed-forward module
 
-    Args:
-        d_model (int): Model dimension.
-        d_ff (int): Intermediate dimension (should be even, as it's split into two halves).
-        bias (bool, optional): Whether to use bias in linear layers. Default: ``True``
+    :param d_model: Model dimension.
+    :type d_model: int
+
+    :param d_ff: Intermediate dimension (should be even, as it's split into two halves).
+    :type d_ff: int
+
+    :param bias: Whether to use bias in linear layers. Default: ``True``
+    :type bias: bool, optional
     """
 
     def __init__(self, d_model: int, d_ff: int, bias: Optional[bool] = True):
@@ -26,13 +30,15 @@ class SwiGLU(nn.Module):
         r"""
         Forward pass of SwiGLU.
 
-        Args:
-            x (torch.Tensor): Input tensor of shape :math:`(..., D)`
-            return_states (bool, optional): If True, return intermediate activations and input. Default: ``False``
+        :param x: Input tensor of shape :math:`(..., D)`
+        :type x: torch.Tensor
 
-        Returns:
-            Union[torch.Tensor, Dict]: Output tensor :math:`(..., D)` or dict with intermediates states
-                containing the keys: "output", "y1", "y2" and "input".
+        :param return_states: If True, return intermediate activations and input. Default: ``False``
+        :type return_states: bool, optional
+
+        :return: Output tensor :math:`(..., D)` or dict with intermediates states
+            containing the keys: "output", "y1", "y2" and "input".
+        :rtype: Union[torch.Tensor, Dict]
         """
         y1, y2 = self.W1(x).chunk(2, dim=-1)
         if return_states:
@@ -45,10 +51,14 @@ class MLP(nn.Module):
     r"""
     Classic MLP with GELU activation (as used in the original Transformer).
 
-    Args:
-        d_model (int): Model dimension.
-        d_ff (int): Intermediate dimension.
-        bias (bool, optional): Whether to use bias in linear layers. Default: ``True``
+    :param d_model: Model dimension.
+    :type d_model: int
+
+    :param d_ff: Intermediate dimension.
+    :type d_ff: int
+
+    :param bias: Whether to use bias in linear layers. Default: ``True``
+    :type bias: bool, optional
     """
 
     def __init__(self, d_model: int, d_ff: int, bias: Optional[bool] = True):
@@ -63,13 +73,15 @@ class MLP(nn.Module):
         r"""
         Forward pass of MLP.
 
-        Args:
-            x (torch.Tensor): Input tensor of shape :math:`(..., D)`
-            return_states (bool, optional): If True, return intermediate activations. Default: ``False``
+        :param x: Input tensor of shape :math:`(..., D)`
+        :type x: torch.Tensor
 
-        Returns:
-            Union[torch.Tensor, Dict]: Output tensor :math:`(..., D)` or dict with intermediates states
-                containing the keys: "output", "h1", "h2" and "input".
+        :param return_states: If True, return intermediate activations. Default: ``False``
+        :type return_states: bool, optional
+
+        :return: Output tensor :math:`(..., D)` or dict with intermediates states
+            containing the keys: "output", "h1", "h2" and "input".
+        :rtype: Union[torch.Tensor, Dict]
         """
         if return_states:
             h1 = self.net[0](x)

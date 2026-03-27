@@ -5,82 +5,103 @@ import torch
 import torch.nn as nn
 from transformers import PretrainedConfig
 
+
 class TransformerConfig(PretrainedConfig):
     r"""
     Configuration class for Transformer models.
     Inherits from `PretrainedConfig` for HuggingFace compatibility.
 
-    Args:
+    :param n_layers: Number of Transformer Blocks (layers).
+    :type n_layers: int
 
-        n_layers (int): Number of Transformer Blocks (layers).
+    :param d_model: Model Dimension.
+    :type d_model: int
 
-        n_heads (int): Number of Attention Heads.
+    :param n_heads: Number of Attention Heads.
+    :type n_heads: int
 
-        vocab_size (int): Vocabulary size of the model. Defines the number of different tokens.
+    :param n_kv_heads: Number of key/value heads for Grouped-Query Attention(GQA). Default: ``n_heads``
+    :type n_kv_heads: int, optional
 
-        d_model (int): Model Dimension.
+    :param vocab_size: Vocabulary size of the model. Defines the number of different tokens.
+    :type vocab_size: int
 
-        d_ff (int, optional): Dimension of the Feed-Forward Hidden Layer.
+    :param d_ff: Dimension of the Feed-Forward Hidden Layer.
+    :type d_ff: int, optional
 
-        seq_len (int): Sequence Length.
+    :param norm_design: Normalization Design, one of ``pre-norm``, ``post-norm`` or ``both``. Default: ``pre-norm``
+    :type norm_design: str
 
-        max_seq_len (int): Maximum sequence length for positional embeddings.
+    :param norm_class: Normalization class or type.
+        - If ``str``, one of ``rms_norm`` or ``layer_norm``.
+        - If ``Type[nn.Module]`` then will be instantiated inside the model.
+          Should have the same API as a torch Normalization Layer.
+        - If ``List[Union[Type[nn.Module], str]]`` and len(ffn_class) == n_layers
+          then will be instantiated inside the model for the corresponding layers.
+    :type norm_class: Union[List[Union[Type[nn.Module], str]], Type[nn.Module], str]
 
-        ffn_class (Union[List[Union[Type[nn.Module], str]], Type[nn.Module], str], optional): Feed-Forward Network class or type.
-            - If ``str``, one of ``SwiGLU``, ``MLP``.
-            - If ``Type[nn.Module]`` then will be instantiated inside the model.
-              Should have the same API as ``SwiGLU`` and ``MLP``.
-              Default ``SwiGLU``
-            - If ``List[Union[Type[nn.Module], str]]`` and len(ffn_class) == n_layers
-              then will be instantiated inside the model for the corresponding layers.
-              Default ``SwiGLU`` for every layer.
+    :param ffn_class: Feed-Forward Network class or type.
+        - If ``str``, one of ``SwiGLU``, ``MLP``.
+        - If ``Type[nn.Module]`` then will be instantiated inside the model.
+          Should have the same API as ``SwiGLU`` and ``MLP``.
+          Default ``SwiGLU``
+        - If ``List[Union[Type[nn.Module], str]]`` and len(ffn_class) == n_layers
+          then will be instantiated inside the model for the corresponding layers.
+          Default ``SwiGLU`` for every layer.
+    :type ffn_class: Union[List[Union[Type[nn.Module], str]], Type[nn.Module], str]
 
-        attn_bias (bool, optional): Whether to use bias in attention Linear Projections. Default: ``False``
+    :param attn_class: Attention class or type.
+        - If ``str``, one of ``MHA``, ``GQA``, ``CrossAttention``. For ``GQA``, also specify `n_kv_heads`.
+        - If ``Type[nn.Module]`` then will be instantiated inside the model.
+          Should have the same API as ``transformer.attn.MHA``.
+          Default ``MHA``
+        - If ``List[Union[Type[nn.Module], str]]`` and len(ffn_class) == n_layers
+          then will be instantiated inside the model for the corresponding layers.
+          Default ``SwiGLU`` for every layer.
+    :type attn_class: Union[List[Union[Type[nn.Module], str]], Type[nn.Module], str]
 
-        attn_qk_norm (bool, optional): Whether to apply Normalization to Queries and Keys before the Attention Computation. Default: ``True``
+    :param block_class: Transformer Block class for every layer. Default: ``None``
+        - If ``Type[nn.Module]`` then will be instantiated for every layer inside the model.
+        - If ``None`` then the default ``transformer.TransformerBlock`` will be used
+    :type block_class: Optional[Type[nn.Module]]
 
-        norm_class (Union[List[Union[Type[nn.Module], str]], Type[nn.Module], str], optional): Normalization class or type. Default: ``SwiGLU``
-            - If ``str``, one of ``rms_norm`` or ``layer_norm``.
-            - If ``Type[nn.Module]`` then will be instantiated inside the model.
-              Should have the same API as a torch Normalization Layer.
-            - If ``List[Union[Type[nn.Module], str]]`` and len(ffn_class) == n_layers
-              then will be instantiated inside the model for the corresponding layers.
+    :param attn_bias: Whether to use bias in attention Linear Projections. Default: ``False``
+    :type attn_bias: bool, optional
 
-        norm_design (str, optional): Normalization Design, one of ``pre-norm``, ``post-norm`` or ``both``. Default: ``pre-norm``
+    :param ffn_bias: Whether to use bias in Feed-Forward Linear layers. Default: ``True``
+    :type ffn_bias: bool, optional
 
-        attn_dropout (float, optional): Dropout probability for the Attention Layer. Default: ``0.0``
+    :param lm_head_bias: Whether to use bias in the Language Modeling Head. Default: ``False``
+    :type lm_head_bias: bool, optional
 
-        ffn_bias (bool, optional): Whether to use bias in Feed-Forward Linear layers. Default: ``True``
+    :param attn_qk_norm: Whether to apply Normalization to Queries and Keys before the Attention Computation. Default: ``True``
+    :type attn_qk_norm: bool, optional
 
-        lm_head_bias (bool, optional): Whether to use bias in the Language Modeling Head. Default: ``False``
+    :param attn_dropout: Dropout probability for the Attention Layer. Default: ``0.0``
+    :type attn_dropout: float, optional
 
-        tied_weights (bool, optional): If True, tie the input embedding and output projection weights. Default: ``False``
+    :param tied_weights: If True, tie the input embedding and output projection weights. Default: ``False``
+    :type tied_weights: bool, optional
 
-        attn_class (Union[List[Union[Type[nn.Module], str]], Type[nn.Module], str], optional): Attention class or type.
-            - If ``str``, one of ``MHA``, ``GQA``, ``CrossAttention``. For ``GQA``, also specify `n_kv_heads`.
-            - If ``Type[nn.Module]`` then will be instantiated inside the model.
-              Should have the same API as ``transformer.attn.MHA``.
-              Default ``MHA``
-            - If ``List[Union[Type[nn.Module], str]]`` and len(ffn_class) == n_layers
-              then will be instantiated inside the model for the corresponding layers.
-              Default ``SwiGLU`` for every layer.
+    :param seq_len: Sequence Length.
+    :type seq_len: int
 
-        block_class (Optional[Type[nn.Module]], optional) Transformer Block class for every layer. Default: ``None``
-           - If ``Type[nn.Module]`` then will be instantiated for every layer inside the model.
-           - If ``None`` then the default ``transformer.TransformerBlock`` will be used
+    :param pos_encoding: Positional Encoding for attention.
+        - If ``List[Union[Type[nn.Module], str]]`` and len(ffn_class) == n_layers
+          then will be instantiated inside the model for the corresponding layers.
+          Default ``SwiGLU`` for every layer.
+        - If ``str`` one of ``RoPE``, ``AliBI``, ``PartialRoPE``. Default: ``RoPE``
+        Note: Is recommended to change the default to ``PartialRoPE`` which is used in SOTA models like Qwen3-Next-80B-A3B
+    :type pos_encoding: Union[List[str], str]
 
-        n_kv_heads (int, optional): Number of key/value heads for Grouped-Query Attention(GQA). Default: ``n_heads``
+    :param rope_base: Base for the Exponential Frequency Calculation in RoPE. Default: ``10000.0``
+    :type rope_base: float, optional
 
-        pos_encoding (Union[List[str], str], optional): Positional Encoding for attention.
-            - If ``List[Union[Type[nn.Module], str]]`` and len(ffn_class) == n_layers
-              then will be instantiated inside the model for the corresponding layers.
-              Default ``SwiGLU`` for every layer.
-            - If ``str`` one of ``RoPE``, ``AliBI``, ``PartialRoPE``. Default: ``RoPE``
-            Note: Is recommended to change the default to ``PartialRoPE`` which is used in SOTA models like Qwen3-Next-80B-A3B
+    :param max_seq_len: Maximum sequence length for positional embeddings.
+    :type max_seq_len: int
 
-        rope_base (float, optinal): Base for the Exponential Frequency Calculation in RoPE. Default: ``10000.0``
-
-        ``**kwargs`` (dict, optional): Additional keyword arguments passed to `PretrainedConfig`
+    :param kwargs: Additional keyword arguments passed to `PretrainedConfig`
+    :type kwargs: dict, optional
 
     """
 

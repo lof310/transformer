@@ -2,7 +2,7 @@
 
 ## Introduction
 
-`transformer` is a polished and fully configurable implementation of the latest SOTA Transformer architecture design in PyTorch. It is designed with the following goals:
+The `transformer` library is a polished and fully configurable implementation of the latest SOTA Transformer architecture design in PyTorch. It is designed with the following goals:
 
 - **Clarity**: Each component is self-contained, well-documented, and easy to understand.
 - **Reproducibility**: The default configuration matches current state-of-the-art practices (e.g., pre‑RMSNorm, SwiGLU, RoPE, no attention dropout).
@@ -52,11 +52,11 @@ config = TransformerConfig(
 model = Transformer(config)
 
 # 3. Prepare input
-input_ids = torch.randint(0, config.vocab_size, (2, 128))
+input_ids = torch.randint(0, config.vocab_size, (2, 1024))
 
 # 4. Forward pass
 outputs = model(input_ids)
-logits = outputs.logits  # shape: [2, 128, 65]
+logits = outputs.logits  # shape: [2, 1024, 65]
 print(logits.shape)
 ```
 
@@ -76,21 +76,23 @@ config = TransformerConfig()  # All defaults
 
 | Parameter         | Default Value |      Why?      |
 |-------------------|---------------|----------------|
-| `n_layers`        | `12` | --- |
-| `n_heads`         | `32` | Multi-head attention with 32 heads allows the model to attend to information from different representation subspaces; works well with `d_model=1536` (48 dimensions per head). |
-| `d_model`         | `1536` | Embedding dimension of 1536 offers a good trade‑off between expressiveness and parameter count (≈150M parameters with 12 layers). Matches the "base" scale of many modern LMs. |
-| `d_ff`            | `None` (automatically set to `ceil(d_model * 2.666) ≈ 4096`) | The feed‑forward hidden dimension is typically 2–4× the model dimension. 2.666× (8/3) is the exact ratio used in LLaMA and PaLM, yielding 4096 for `d_model=1536`. This value is chosen to keep the FFN parameters roughly 2× the attention parameters. |
-| `attn_type`       | `"MHA"` | Multi‑Head Attention is the standard and most flexible. GQA can be enabled for memory efficiency when scaling to very large models. |
-| `n_kv_heads`      | `n_heads` | For `attn_type="GQA"`, defaults to the same as `n_heads` (equivalent to MHA). Must be explicitly set lower to activate grouped‑query attention. |
-| `attn_bias`       | `False` | SOTA models (LLaMA, GPT‑3) omit biases in attention projections to reduce parameters and improve throughput; normalization layers provide sufficient learnable shifts. |
-| `attn_dropout`    | `0.0` | Modern large transformers typically use **no dropout** in attention, relying on other regularisation (weight decay, gradient clipping) and large‑scale training. Using dropout is not usually not recomended for Research Purposes|
-| `ffn_bias`        | `True` | Biases in feed‑forward layers are retained because they add minimal overhead and can help with training stability; some models (e.g., LLaMA) also use biases in FFNs. |
-| `attn_qk_norm`    | `True` | Applying RMSNorm to queries and keys **before** the attention computation stabilises training, especially at deeper layers and with low‑precision (FP16/BF16). Adopted by LLaMA and others. |
-| `lm_head_bias`    | `False` | The language modeling head typically does not include a bias term; the logits are directly projected from the final hidden states. This is consistent with GPT‑2/3, Llama,etc. |
-| `tied_weights`    | `False` | Weight tying (sharing embeddings with the output layer) reduces parameters but may limit expressiveness. SOTA decoupled models (LLaMA, GPT‑3) do not tie weights by default. |
-| `seq_len`         | `1024` | Default context length for training; many models are trained on 1024 tokens before extrapolation to longer sequences. |
-| `max_seq_len`     | `4096` | Maximum sequence length for which RoPE frequencies are precomputed. |
-| `rope_base`       | `10000.0` | Base for the exponential frequency computation in Rotary Position Embedding. The value 10000 is standard from the original RoPE paper and works well across various lengths. |
+| `n_layers`        | `12`          | --             |
+| `n_heads`         | `32`          | Multi-head attention with 32 heads allows the model to attend to information from different representation subspaces; works well with `d_model=1536` (48 dimensions per head). |
+| `d_model`         | `1536`        | Embedding dimension of 1536 offers a good trade‑off between expressiveness and parameter count (≈150M parameters with 12 layers). Matches the "base" scale of many modern LMs. |
+| `d_ff`            | `None` (automatically set to `ceil(d_model * 2.666) ≈ 4096`) | The feed‑forward hidden dimension is typically 2-4x the model dimension. 2.666× (8/3) is the exact ratio used in LLaMA and PaLM, yielding 4096 for `d_model=1536`. This value is chosen to keep the FFN parameters roughly 2× the attention parameters. |
+| `attn_class`      | `"MHA"`       | Multi‑Head Attention is the standard and most flexible. GQA can be enabled for memory efficiency when scaling to very large models. |
+| `norm_design`     | `"pre_norm"`  | Standard Pre-Norm Design used in almost all SOTA Transformers. |
+| `n_kv_heads`      | `n_heads`     | For `attn_type="GQA"`, defaults to the same as `n_heads` (equivalent to MHA). Must be explicitly set lower to activate grouped‑query attention. |
+| `attn_bias`       | `False`       | SOTA models (LLaMA, Qwen, etc) omit biases in attention projections to reduce parameters and improve throughput; normalization layers provide sufficient learnable shifts. |
+| `attn_dropout`    | `0.0`         | Modern large transformers typically use **no dropout** in attention, relying on other regularisation (weight decay, gradient clipping) and large‑scale training. Using dropout is not usually not recomended for Research Purposes|
+| `ffn_bias`        | `True`        | Biases in feed‑forward layers are retained because they add minimal overhead and can help with training stability; some models (e.g., Qwen, LLaMA) also use biases in FFNs. |
+| `attn_qk_norm`    | `True`        | Applying RMSNorm to queries and keys **before** the attention computation stabilises training, especially at deeper layers and with low‑precision (FP16/BF16). Adopted by LLaMA and others. |
+| `lm_head_bias`    | `False`       | The language modeling head typically does not include a bias term; the logits are directly projected from the final hidden states. This is consistent with GPT‑2/3, Llama,etc. |
+| `tied_weights`    | `False`       | Weight tying (sharing embeddings with the output layer) reduces parameters but may limit expressiveness. SOTA decoupled models (LLaMA, GPT‑3) do not tie weights by default. |
+| `seq_len`         | `1024`        | Default context length for training; many models are trained on 1024 tokens before extrapolation to longer sequences. |
+| `max_seq_len`     | `4096`        | Maximum sequence length for which RoPE frequencies are precomputed. |
+| `pos_encoding`    | `RoPE`        | Standard Positiona Encoding. There are SOTA models that implement `PartialRoPE` you can switch to it in any moment. |
+| `rope_base`       | `10000.0`     | Base for the exponential frequency computation in Rotary Position Embedding. The value 10000 is standard from the original RoPE paper and works well across various lengths. |
 
 ---
 
@@ -120,6 +122,7 @@ Both have a `return_states` option to retrieve intermediate activations.
 ### 3. Positional Embedding
 
 - **`RoPE`** – Rotary Position Embedding (Su et al.). Applied directly to queries and keys.
+- **`PartialRoPE`** - Rotary Position Embedding only applied to a subset of queries and keys.
 
 ### 4. Transformer Components
 
@@ -273,6 +276,32 @@ Set `return_states=True` in any forward call to get the intermediate tensors:
 - For `TransformerBlock`: returns dict with `output`, `attn_output` (dict), `ffn_output` (dict).
 - For `Transformer`: returns a `CausalLMOutput` where `hidden_states` is a tuple `(input_embeddings, list_of_layer_dicts)`.
 
+### The `hidden_states[1]` is a list of Dictionaries for each layer containing the following dictionary structure for each layer:
+```
+{
+    "output": torch.Tensor,  # Shape: [B, N, D]
+    "attn_output": {
+        "output": torch.Tensor,       # Shape: [B, N, D]
+        "queries": torch.Tensor,      # Shape: [B, H, N, d]
+        "keys": torch.Tensor,         # Shape: [B, H, N, d]
+        "values": torch.Tensor,       # Shape: [B, H, N, d]
+        "attn_weights": torch.Tensor, # Shape: [B, H, N, N] or [B, H, Lq, Lk] depending on if you use the Cross Attention module
+        "attn_scores": torch.Tensor,  # Shape: [B, H, N, N] or [B, H, Lq, Lk] depending on if you use the Cross Attention module
+        "output_before_proj": torch.Tensor, # Shape: [B, N, D]
+        "input": Union[torch.Tensor, Tuple] # Can be Tensor of shape [B, N, D] or Tuple (query, kv) both of shape [B, N, D]
+                                             # depending on if you use the Cross Attention module
+    },
+    "ffn_output": {
+        "output": torch.Tensor, # Shape: [B, N, D]
+        "y1": torch.Tensor, # Shape: [B, N, D_ff//2]
+        "y2": torch.Tensor, # Shape: [B, N, D_ff//2]
+        "input": torch.Tensor # Shape: [B, N, D]
+    }
+}
+```
+**Note: The keys "attn_weights" and "attn_scores" will not be available when FlashAttention is used**
+
+
 This is useful for debugging, visualization, or extracting features for downstream tasks.
 
 ---
@@ -319,7 +348,7 @@ The modular design makes it easy to add new components.
 
 1. Create a class in `pos.py` with a `forward(q, k, pos_q, pos_k)` method.
 2. Export it.
-3. Modify attention modules to use the new positional encoding.
+3. Modify attention modules to use the new positional encoding if needed.
 
 ---
 
