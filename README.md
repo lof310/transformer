@@ -44,12 +44,12 @@ from transformer import Transformer, TransformerConfig
 # Configure the model
 config = TransformerConfig(
     n_layers = 12,
-    n_heads: int = 32,
-    d_model: int = 1536,
-    attn_qk_norm: bool = False,     
-    tied_weights: bool = False,
-    seq_len: int = 1024,
-    max_seq_len: int = 4096,
+    n_heads = 32,
+    d_model = 1536,
+    attn_qk_norm = False,     
+    tied_weights = False,
+    seq_len = 1024,
+    max_seq_len = 4096,
 )
 
 # Initialize model

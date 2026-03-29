@@ -137,7 +137,7 @@ class TransformerConfig(PretrainedConfig):
         self.n_layer = n_layers
         self.d_model = d_model
         self.n_heads = n_heads
-        self.n_kv_heads = n_kv_heads if attn_class == "GQA" else n_heads
+        self.n_kv_heads = n_kv_heads if n_kv_heads is not None else n_heads
         self.vocab_size = vocab_size
 
         self.attn_class = attn_class

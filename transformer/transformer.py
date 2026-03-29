@@ -83,19 +83,17 @@ class TransformerBlock(GradientCheckpointingLayer):
             self.attn = config.attn_class(
                 self.d_model,
                 self.n_heads,
-                config.attn_bias,
-                **{
-                    "layer_idx": layer_idx,
-                    "max_seq_len": config.max_seq_len,
-                    "dropout": config.attn_dropout,
-                    "qk_norm": config.attn_qk_norm,
-                    "pos_encoding": config.pos_encoding,
-                    **attn_kwargs,
-                },
+                dropout=config.attn_dropout,
+                attn_bias=config.attn_bias,
+                qk_norm=config.attn_qk_norm,
+                layer_idx=layer_idx,
+                max_seq_len=config.max_seq_len,
+                pos_encoding=config.pos_encoding,
+                **attn_kwargs,
             )
         else:
             raise RuntimeError(
-                "TransformerConfig.attn_class Should be str or Type[nn.Module] but found: {config.attn_class}"
+                f"TransformerConfig.attn_class Should be str or Type[nn.Module] but found: {config.attn_class}"
             )
 
         if config.ffn_class == "SwiGLU":
@@ -110,7 +108,7 @@ class TransformerBlock(GradientCheckpointingLayer):
             self.ffn = config.ffn_class(self.d_model, self.d_ff, bias=config.ffn_bias, **ffn_kwargs)
         else:
             raise RuntimeError(
-                "TransformerConfig.ffn_class Should be str or Type[nn.Module] but found: {config.ffn_class}"
+                f"TransformerConfig.ffn_class Should be str or Type[nn.Module] but found: {config.ffn_class}"
             )
 
         if config.norm_class == "rms_norm":
@@ -162,7 +160,7 @@ class TransformerBlock(GradientCheckpointingLayer):
                 raise ValueError(f"Invalid norm_design: {config.norm_design}")
         else:
             raise RuntimeError(
-                "TransformerConfig.norm_class Should be str or Type[nn.Module] but found: {config.norm_class}"
+                f"TransformerConfig.norm_class Should be str or Type[nn.Module] but found: {config.norm_class}"
             )
 
     def forward(
