@@ -36,7 +36,7 @@ class TransformerConfig(PretrainedConfig):
         - If ``str``, one of ``rms_norm`` or ``layer_norm``.
         - If ``Type[nn.Module]`` then will be instantiated inside the model.
           Should have the same API as a torch Normalization Layer.
-        - If ``List[Union[Type[nn.Module], str]]`` and len(ffn_class) == n_layers
+        - If ``List[Union[Type[nn.Module], str]]`` and len(norm_class) == n_layers
           then will be instantiated inside the model for the corresponding layers.
     :type norm_class: Union[List[Union[Type[nn.Module], str]], Type[nn.Module], str]
 
@@ -55,9 +55,9 @@ class TransformerConfig(PretrainedConfig):
         - If ``Type[nn.Module]`` then will be instantiated inside the model.
           Should have the same API as ``transformer.attn.MHA``.
           Default ``MHA``
-        - If ``List[Union[Type[nn.Module], str]]`` and len(ffn_class) == n_layers
+        - If ``List[Union[Type[nn.Module], str]]`` and len(attn_class) == n_layers
           then will be instantiated inside the model for the corresponding layers.
-          Default ``SwiGLU`` for every layer.
+          Default ``MHA`` for every layer.
     :type attn_class: Union[List[Union[Type[nn.Module], str]], Type[nn.Module], str]
 
     :param block_class: Transformer Block class for every layer. Default: ``None``
@@ -87,11 +87,9 @@ class TransformerConfig(PretrainedConfig):
     :type seq_len: int
 
     :param pos_encoding: Positional Encoding for attention.
-        - If ``List[Union[Type[nn.Module], str]]`` and len(ffn_class) == n_layers
-          then will be instantiated inside the model for the corresponding layers.
-          Default ``SwiGLU`` for every layer.
         - If ``str`` one of ``RoPE``, ``AliBI``, ``PartialRoPE``. Default: ``RoPE``
         Note: Is recommended to change the default to ``PartialRoPE`` which is used in SOTA models like Qwen3-Next-80B-A3B
+        - If ``List[str]`` and len(pos_encoding) == n_layers, applies different positional encodings per layer.
     :type pos_encoding: Union[List[str], str]
 
     :param rope_base: Base for the Exponential Frequency Calculation in RoPE. Default: ``10000.0``
@@ -99,6 +97,12 @@ class TransformerConfig(PretrainedConfig):
 
     :param max_seq_len: Maximum sequence length for positional embeddings.
     :type max_seq_len: int
+
+    :param use_cache: Whether to use KV cache during generation. Default: ``True``
+    :type use_cache: bool, optional
+
+    :param is_decoder: Whether this is a decoder model. Default: ``True``
+    :type is_decoder: bool, optional
 
     :param kwargs: Additional keyword arguments passed to `PretrainedConfig`
     :type kwargs: dict, optional
@@ -127,9 +131,11 @@ class TransformerConfig(PretrainedConfig):
         attn_dropout: Optional[float] = 0.0,
         tied_weights: bool = False,
         seq_len: int = 1024,
-        pos_encoding: str = "RoPE",
+        pos_encoding: Union[List[str], str] = "RoPE",
         rope_base: float = 10000.0,
         max_seq_len: int = 4096,
+        use_cache: bool = True,
+        is_decoder: bool = True,
         **kwargs: Dict,
     ):
         super().__init__(**kwargs)
@@ -162,3 +168,6 @@ class TransformerConfig(PretrainedConfig):
         self.pos_encoding = pos_encoding
         self.rope_base = rope_base
         self.max_seq_len = max_seq_len
+        
+        self.use_cache = use_cache
+        self.is_decoder = is_decoder
