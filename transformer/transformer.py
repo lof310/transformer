@@ -1,5 +1,5 @@
 import math
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import torch
 import torch.nn as nn
@@ -11,8 +11,8 @@ from transformers.modeling_outputs import CausalLMOutput
 from .attns import GQA, MHA, CrossAttention
 from .config import TransformerConfig
 from .ffn import MLP, SwiGLU
-from .pos import PartialRoPE, RoPE
-from .utils import check_type
+from .pos import PartialRoPE, RoPE, ALiBi
+from .utils import check_type, resolve_layer_config
 
 
 class TransformerBlock(GradientCheckpointingLayer):
@@ -49,8 +49,16 @@ class TransformerBlock(GradientCheckpointingLayer):
         super().__init__()
         self.d_model, self.d_ff, self.n_heads, self.layer_idx = config.d_model, config.d_ff, config.n_heads, layer_idx
         self.norm_design = config.norm_design
+        self.n_layers = config.n_layer
+        
+        # Resolve per-layer configurations
+        attn_class = resolve_layer_config(config.attn_class, layer_idx, self.n_layers)
+        ffn_class = resolve_layer_config(config.ffn_class, layer_idx, self.n_layers)
+        norm_class = resolve_layer_config(config.norm_class, layer_idx, self.n_layers)
+        pos_encoding = resolve_layer_config(config.pos_encoding, layer_idx, self.n_layers) if isinstance(config.pos_encoding, list) else config.pos_encoding
 
-        if config.attn_class == "MHA":
+        # Create attention module
+        if attn_class == "MHA":
             self.attn = MHA(
                 self.d_model,
                 self.n_heads,
@@ -58,11 +66,11 @@ class TransformerBlock(GradientCheckpointingLayer):
                 attn_bias=config.attn_bias,
                 qk_norm=config.attn_qk_norm,
                 layer_idx=layer_idx,
-                pos_encoding=config.pos_encoding,
+                pos_encoding=pos_encoding,
                 max_seq_len=config.max_seq_len,
                 **attn_kwargs,
             )
-        elif config.attn_class == "GQA":
+        elif attn_class == "GQA":
             self.attn = GQA(
                 self.d_model,
                 self.n_heads,
@@ -71,16 +79,23 @@ class TransformerBlock(GradientCheckpointingLayer):
                 attn_bias=config.attn_bias,
                 qk_norm=config.attn_qk_norm,
                 layer_idx=layer_idx,
-                pos_encoding=config.pos_encoding,
+                pos_encoding=pos_encoding,
                 max_seq_len=config.max_seq_len,
                 **attn_kwargs,
             )
-        elif config.attn_class == "CrossAttention":
-            raise ValueError(f"Under Development: {config.attn_class}")
-        elif check_type(config.attn_class) == 0:
-            raise ValueError(f"Unknown attention type: {config.attn_class}")
-        elif check_type(config.attn_class) == 1:
-            self.attn = config.attn_class(
+        elif attn_class == "CrossAttention":
+            self.attn = CrossAttention(
+                self.d_model,
+                self.n_heads,
+                dropout=config.attn_dropout,
+                attn_bias=config.attn_bias,
+                qk_norm=config.attn_qk_norm,
+                layer_idx=layer_idx,
+                rope_base=config.rope_base,
+                max_seq_len=config.max_seq_len,
+            )
+        elif check_type(attn_class) == 1:
+            self.attn = attn_class(
                 self.d_model,
                 self.n_heads,
                 dropout=config.attn_dropout,
@@ -88,30 +103,24 @@ class TransformerBlock(GradientCheckpointingLayer):
                 qk_norm=config.attn_qk_norm,
                 layer_idx=layer_idx,
                 max_seq_len=config.max_seq_len,
-                pos_encoding=config.pos_encoding,
+                pos_encoding=pos_encoding,
                 **attn_kwargs,
             )
         else:
-            raise RuntimeError(
-                f"TransformerConfig.attn_class Should be str or Type[nn.Module] but found: {config.attn_class}"
-            )
+            raise ValueError(f"Unknown attention type: {attn_class}")
 
-        if config.ffn_class == "SwiGLU":
+        # Create feed-forward module
+        if ffn_class == "SwiGLU":
             self.ffn = SwiGLU(self.d_model, self.d_ff, bias=config.ffn_bias, **ffn_kwargs)
-        elif config.ffn_class == "MLP":
+        elif ffn_class == "MLP":
             self.ffn = MLP(self.d_model, self.d_ff, bias=config.ffn_bias, **ffn_kwargs)
-        elif config.ffn_class == "MoE":
-            raise ValueError(f"Under Development: {config.ffn_class}")
-        elif check_type(config.ffn_class) == 0:
-            raise ValueError(f"Unknown ffn class: {config.ffn_class}")
-        elif check_type(config.ffn_class) == 1:
-            self.ffn = config.ffn_class(self.d_model, self.d_ff, bias=config.ffn_bias, **ffn_kwargs)
+        elif check_type(ffn_class) == 1:
+            self.ffn = ffn_class(self.d_model, self.d_ff, bias=config.ffn_bias, **ffn_kwargs)
         else:
-            raise RuntimeError(
-                f"TransformerConfig.ffn_class Should be str or Type[nn.Module] but found: {config.ffn_class}"
-            )
+            raise ValueError(f"Unknown ffn class: {ffn_class}")
 
-        if config.norm_class == "rms_norm":
+        # Create normalization modules
+        if norm_class == "rms_norm":
             if config.norm_design == "pre_norm" or config.norm_design == "post_norm":
                 self.norm_attn, self.norm_ffn = (
                     nn.RMSNorm(self.d_model, **norm_kwargs),
@@ -126,7 +135,7 @@ class TransformerBlock(GradientCheckpointingLayer):
                 )
             else:
                 raise ValueError(f"Invalid norm_design: {config.norm_design}")
-        elif config.norm_class == "layer_norm":
+        elif norm_class == "layer_norm":
             if config.norm_design == "pre_norm" or config.norm_design == "post_norm":
                 self.norm_attn, self.norm_ffn = (
                     nn.LayerNorm(self.d_model, **norm_kwargs),
@@ -141,27 +150,23 @@ class TransformerBlock(GradientCheckpointingLayer):
                 )
             else:
                 raise ValueError(f"Invalid norm_design: {config.norm_design}")
-        elif check_type(config.norm_class) == 0:
-            raise ValueError(f"Unknown normalization class: {config.norm_class}")
-        elif check_type(config.norm_class) == 1:
+        elif check_type(norm_class) == 1:
             if config.norm_design == "pre_norm" or config.norm_design == "post_norm":
                 self.norm_attn, self.norm_ffn = (
-                    config.norm_class(self.d_model, **norm_kwargs),
-                    config.norm_class(self.d_model, **norm_kwargs),
+                    norm_class(self.d_model, **norm_kwargs),
+                    norm_class(self.d_model, **norm_kwargs),
                 )
             elif config.norm_design == "both":
                 self.pre_norm_attn, self.pre_norm_ffn, self.post_norm_attn, self.post_norm_ffn = (
-                    config.norm_class(self.d_model, **norm_kwargs),
-                    config.norm_class(self.d_model, **norm_kwargs),
-                    config.norm_class(self.d_model, **norm_kwargs),
-                    config.norm_class(self.d_model, **norm_kwargs),
+                    norm_class(self.d_model, **norm_kwargs),
+                    norm_class(self.d_model, **norm_kwargs),
+                    norm_class(self.d_model, **norm_kwargs),
+                    norm_class(self.d_model, **norm_kwargs),
                 )
             else:
                 raise ValueError(f"Invalid norm_design: {config.norm_design}")
         else:
-            raise RuntimeError(
-                f"TransformerConfig.norm_class Should be str or Type[nn.Module] but found: {config.norm_class}"
-            )
+            raise ValueError(f"Unknown normalization class: {norm_class}")
 
     def forward(
         self,
@@ -259,6 +264,15 @@ class Transformer(PreTrainedModel, GenerationMixin):
 
     :param norm_kwargs: Additional Keyword Arguments passed to the Normalization Layer. Default: ``{}``
     :type norm_kwargs: Dict, optional
+    
+    :param patch_size: Patch size for Vision Transformer (ViT) compatibility. If specified, adds a patch embedding layer.
+    :type patch_size: Optional[int], optional
+    
+    :param img_size: Image size for ViT compatibility. Used with patch_size to compute number of patches.
+    :type img_size: Optional[Union[int, Tuple[int, int]]], optional
+    
+    :param num_channels: Number of input channels for ViT. Default: 3 (RGB).
+    :type num_channels: int, optional
     """
 
     config_class = TransformerConfig
@@ -268,7 +282,7 @@ class Transformer(PreTrainedModel, GenerationMixin):
     _supports_flash_attn = True
     _supports_sdpa = True
 
-    input_modalities = "text"  # Will add "image" for v0.4.0
+    input_modalities = ["text", "image"]
 
     def __init__(
         self,
@@ -277,10 +291,31 @@ class Transformer(PreTrainedModel, GenerationMixin):
         pos_encoding_kwargs: Dict = {},
         ffn_kwargs: Dict = {},
         norm_kwargs: Dict = {},
+        patch_size: Optional[int] = None,
+        img_size: Optional[Union[int, Tuple[int, int]]] = None,
+        num_channels: int = 3,
     ):
         super().__init__(config)
         self.config = config
         self.d_model = config.d_model
+        self.patch_size = patch_size
+        self.img_size = img_size
+        
+        # Vision Transformer (ViT) support
+        if patch_size is not None and img_size is not None:
+            if isinstance(img_size, int):
+                img_size = (img_size, img_size)
+            self.num_patches = (img_size[0] // patch_size) * (img_size[1] // patch_size)
+            self.patch_embed = nn.Conv2d(
+                num_channels, config.d_model, kernel_size=patch_size, stride=patch_size
+            )
+            self.cls_token = nn.Parameter(torch.zeros(1, 1, config.d_model))
+            self.pos_embed = nn.Parameter(torch.zeros(1, self.num_patches + 1, config.d_model))
+        else:
+            self.patch_embed = None
+            self.cls_token = None
+            self.pos_embed = None
+            self.num_patches = None
 
         self.emb = nn.Embedding(config.vocab_size, config.d_model)
         block_class = config.block_class if config.block_class is not None else TransformerBlock
@@ -312,6 +347,11 @@ class Transformer(PreTrainedModel, GenerationMixin):
             self.lm_head.weight = self.emb.weight
         else:
             self.lm_head.weight.data.normal_(mean=0.0, std=0.025)
+        
+        # Initialize ViT-specific parameters
+        if self.patch_embed is not None:
+            nn.init.normal_(self.cls_token, std=0.02)
+            nn.init.normal_(self.pos_embed, std=0.02)
 
         self.post_init()
 

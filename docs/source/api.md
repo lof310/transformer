@@ -51,6 +51,24 @@ This section provides detailed documentation of all public modules and classes.
    :show-inheritance:
 ```
 
+### PartialRoPE
+
+```{eval-rst}
+.. autoclass:: transformer.pos.PartialRoPE
+   :members:
+   :undoc-members:
+   :show-inheritance:
+```
+
+### ALiBi (Attention with Linear Biases)
+
+```{eval-rst}
+.. autoclass:: transformer.pos.ALiBi
+   :members:
+   :undoc-members:
+   :show-inheritance:
+```
+
 ## Feed-Forward Modules
 
 ### SwiGLU
@@ -90,4 +108,13 @@ This section provides detailed documentation of all public modules and classes.
    :undoc-members:
    :show-inheritance:
    :special-members: __init__
+```
+
+## Utilities
+
+```{eval-rst}
+.. automodule:: transformer.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
 ```
