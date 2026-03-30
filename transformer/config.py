@@ -168,6 +168,6 @@ class TransformerConfig(PretrainedConfig):
         self.pos_encoding = pos_encoding
         self.rope_base = rope_base
         self.max_seq_len = max_seq_len
-        
+
         self.use_cache = use_cache
         self.is_decoder = is_decoder

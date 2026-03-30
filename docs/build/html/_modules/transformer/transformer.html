@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>transformer.transformer - transformer 0.3.0 documentation</title>
+        <title>transformer.transformer - transformer 0.4.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
@@ -160,7 +160,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">transformer 0.3.0 documentation</div></a>
+      <a href="../../index.html"><div class="brand">transformer 0.4.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -181,7 +181,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
-  <span class="sidebar-brand-text">transformer 0.3.0 documentation</span>
+  <span class="sidebar-brand-text">transformer 0.4.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -189,20 +189,25 @@
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
-  <ul>
+  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quick Start</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../guide.html">Transformer: A PyTorch SOTA Transformer Implementation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../guide.html#configuration">Configuration</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Usage Examples</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../examples.html">Usage Examples</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Project Info</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
 </ul>
@@ -239,7 +244,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for transformer.transformer</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nn</span>
@@ -251,8 +256,8 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.attns</span><span class="w"> </span><span class="kn">import</span> <span class="n">GQA</span><span class="p">,</span> <span class="n">MHA</span><span class="p">,</span> <span class="n">CrossAttention</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransformerConfig</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.ffn</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLP</span><span class="p">,</span> <span class="n">SwiGLU</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.pos</span><span class="w"> </span><span class="kn">import</span> <span class="n">PartialRoPE</span><span class="p">,</span> <span class="n">RoPE</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_type</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.pos</span><span class="w"> </span><span class="kn">import</span> <span class="n">PartialRoPE</span><span class="p">,</span> <span class="n">RoPE</span><span class="p">,</span> <span class="n">ALiBi</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_type</span><span class="p">,</span> <span class="n">resolve_layer_config</span>
 
 
 <div class="viewcode-block" id="TransformerBlock">
@@ -293,8 +298,16 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_ff</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_heads</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">layer_idx</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">d_ff</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">n_heads</span><span class="p">,</span> <span class="n">layer_idx</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">norm_design</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">norm_design</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_layers</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">n_layer</span>
+        
+        <span class="c1"># Resolve per-layer configurations</span>
+        <span class="n">attn_class</span> <span class="o">=</span> <span class="n">resolve_layer_config</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">attn_class</span><span class="p">,</span> <span class="n">layer_idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_layers</span><span class="p">)</span>
+        <span class="n">ffn_class</span> <span class="o">=</span> <span class="n">resolve_layer_config</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">ffn_class</span><span class="p">,</span> <span class="n">layer_idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_layers</span><span class="p">)</span>
+        <span class="n">norm_class</span> <span class="o">=</span> <span class="n">resolve_layer_config</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">norm_class</span><span class="p">,</span> <span class="n">layer_idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_layers</span><span class="p">)</span>
+        <span class="n">pos_encoding</span> <span class="o">=</span> <span class="n">resolve_layer_config</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">pos_encoding</span><span class="p">,</span> <span class="n">layer_idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_layers</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">pos_encoding</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="n">config</span><span class="o">.</span><span class="n">pos_encoding</span>
 
-        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">attn_class</span> <span class="o">==</span> <span class="s2">&quot;MHA&quot;</span><span class="p">:</span>
+        <span class="c1"># Create attention module</span>
+        <span class="k">if</span> <span class="n">attn_class</span> <span class="o">==</span> <span class="s2">&quot;MHA&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">attn</span> <span class="o">=</span> <span class="n">MHA</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">n_heads</span><span class="p">,</span>
@@ -302,11 +315,11 @@
                 <span class="n">attn_bias</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">attn_bias</span><span class="p">,</span>
                 <span class="n">qk_norm</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">attn_qk_norm</span><span class="p">,</span>
                 <span class="n">layer_idx</span><span class="o">=</span><span class="n">layer_idx</span><span class="p">,</span>
-                <span class="n">pos_encoding</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">pos_encoding</span><span class="p">,</span>
+                <span class="n">pos_encoding</span><span class="o">=</span><span class="n">pos_encoding</span><span class="p">,</span>
                 <span class="n">max_seq_len</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">max_seq_len</span><span class="p">,</span>
                 <span class="o">**</span><span class="n">attn_kwargs</span><span class="p">,</span>
             <span class="p">)</span>
-        <span class="k">elif</span> <span class="n">config</span><span class="o">.</span><span class="n">attn_class</span> <span class="o">==</span> <span class="s2">&quot;GQA&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">attn_class</span> <span class="o">==</span> <span class="s2">&quot;GQA&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">attn</span> <span class="o">=</span> <span class="n">GQA</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">n_heads</span><span class="p">,</span>
@@ -315,49 +328,48 @@
                 <span class="n">attn_bias</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">attn_bias</span><span class="p">,</span>
                 <span class="n">qk_norm</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">attn_qk_norm</span><span class="p">,</span>
                 <span class="n">layer_idx</span><span class="o">=</span><span class="n">layer_idx</span><span class="p">,</span>
-                <span class="n">pos_encoding</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">pos_encoding</span><span class="p">,</span>
+                <span class="n">pos_encoding</span><span class="o">=</span><span class="n">pos_encoding</span><span class="p">,</span>
                 <span class="n">max_seq_len</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">max_seq_len</span><span class="p">,</span>
                 <span class="o">**</span><span class="n">attn_kwargs</span><span class="p">,</span>
             <span class="p">)</span>
-        <span class="k">elif</span> <span class="n">config</span><span class="o">.</span><span class="n">attn_class</span> <span class="o">==</span> <span class="s2">&quot;CrossAttention&quot;</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Under Development: </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">attn_class</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">check_type</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">attn_class</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown attention type: </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">attn_class</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">check_type</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">attn_class</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">attn</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">attn_class</span><span class="p">(</span>
+        <span class="k">elif</span> <span class="n">attn_class</span> <span class="o">==</span> <span class="s2">&quot;CrossAttention&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">attn</span> <span class="o">=</span> <span class="n">CrossAttention</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">n_heads</span><span class="p">,</span>
-                <span class="n">config</span><span class="o">.</span><span class="n">attn_bias</span><span class="p">,</span>
-                <span class="o">**</span><span class="p">{</span>
-                    <span class="s2">&quot;layer_idx&quot;</span><span class="p">:</span> <span class="n">layer_idx</span><span class="p">,</span>
-                    <span class="s2">&quot;max_seq_len&quot;</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">max_seq_len</span><span class="p">,</span>
-                    <span class="s2">&quot;dropout&quot;</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">attn_dropout</span><span class="p">,</span>
-                    <span class="s2">&quot;qk_norm&quot;</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">attn_qk_norm</span><span class="p">,</span>
-                    <span class="s2">&quot;pos_encoding&quot;</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">pos_encoding</span><span class="p">,</span>
-                    <span class="o">**</span><span class="n">attn_kwargs</span><span class="p">,</span>
-                <span class="p">},</span>
+                <span class="n">dropout</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">attn_dropout</span><span class="p">,</span>
+                <span class="n">attn_bias</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">attn_bias</span><span class="p">,</span>
+                <span class="n">qk_norm</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">attn_qk_norm</span><span class="p">,</span>
+                <span class="n">layer_idx</span><span class="o">=</span><span class="n">layer_idx</span><span class="p">,</span>
+                <span class="n">rope_base</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">rope_base</span><span class="p">,</span>
+                <span class="n">max_seq_len</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">max_seq_len</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">check_type</span><span class="p">(</span><span class="n">attn_class</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">attn</span> <span class="o">=</span> <span class="n">attn_class</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">n_heads</span><span class="p">,</span>
+                <span class="n">dropout</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">attn_dropout</span><span class="p">,</span>
+                <span class="n">attn_bias</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">attn_bias</span><span class="p">,</span>
+                <span class="n">qk_norm</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">attn_qk_norm</span><span class="p">,</span>
+                <span class="n">layer_idx</span><span class="o">=</span><span class="n">layer_idx</span><span class="p">,</span>
+                <span class="n">max_seq_len</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">max_seq_len</span><span class="p">,</span>
+                <span class="n">pos_encoding</span><span class="o">=</span><span class="n">pos_encoding</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">attn_kwargs</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                <span class="s2">&quot;TransformerConfig.attn_class Should be str or Type[nn.Module] but found: </span><span class="si">{config.attn_class}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown attention type: </span><span class="si">{</span><span class="n">attn_class</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">ffn_class</span> <span class="o">==</span> <span class="s2">&quot;SwiGLU&quot;</span><span class="p">:</span>
+        <span class="c1"># Create feed-forward module</span>
+        <span class="k">if</span> <span class="n">ffn_class</span> <span class="o">==</span> <span class="s2">&quot;SwiGLU&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ffn</span> <span class="o">=</span> <span class="n">SwiGLU</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_ff</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">ffn_bias</span><span class="p">,</span> <span class="o">**</span><span class="n">ffn_kwargs</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">config</span><span class="o">.</span><span class="n">ffn_class</span> <span class="o">==</span> <span class="s2">&quot;MLP&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">ffn_class</span> <span class="o">==</span> <span class="s2">&quot;MLP&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ffn</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_ff</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">ffn_bias</span><span class="p">,</span> <span class="o">**</span><span class="n">ffn_kwargs</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">config</span><span class="o">.</span><span class="n">ffn_class</span> <span class="o">==</span> <span class="s2">&quot;MoE&quot;</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Under Development: </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">ffn_class</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">check_type</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">ffn_class</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown ffn class: </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">ffn_class</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">check_type</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">ffn_class</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ffn</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">ffn_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_ff</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">ffn_bias</span><span class="p">,</span> <span class="o">**</span><span class="n">ffn_kwargs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">check_type</span><span class="p">(</span><span class="n">ffn_class</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ffn</span> <span class="o">=</span> <span class="n">ffn_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_ff</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">ffn_bias</span><span class="p">,</span> <span class="o">**</span><span class="n">ffn_kwargs</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                <span class="s2">&quot;TransformerConfig.ffn_class Should be str or Type[nn.Module] but found: </span><span class="si">{config.ffn_class}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown ffn class: </span><span class="si">{</span><span class="n">ffn_class</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">norm_class</span> <span class="o">==</span> <span class="s2">&quot;rms_norm&quot;</span><span class="p">:</span>
+        <span class="c1"># Create normalization modules</span>
+        <span class="k">if</span> <span class="n">norm_class</span> <span class="o">==</span> <span class="s2">&quot;rms_norm&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">norm_design</span> <span class="o">==</span> <span class="s2">&quot;pre_norm&quot;</span> <span class="ow">or</span> <span class="n">config</span><span class="o">.</span><span class="n">norm_design</span> <span class="o">==</span> <span class="s2">&quot;post_norm&quot;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">norm_attn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_ffn</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="n">nn</span><span class="o">.</span><span class="n">RMSNorm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="o">**</span><span class="n">norm_kwargs</span><span class="p">),</span>
@@ -372,7 +384,7 @@
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid norm_design: </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">norm_design</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">config</span><span class="o">.</span><span class="n">norm_class</span> <span class="o">==</span> <span class="s2">&quot;layer_norm&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">norm_class</span> <span class="o">==</span> <span class="s2">&quot;layer_norm&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">norm_design</span> <span class="o">==</span> <span class="s2">&quot;pre_norm&quot;</span> <span class="ow">or</span> <span class="n">config</span><span class="o">.</span><span class="n">norm_design</span> <span class="o">==</span> <span class="s2">&quot;post_norm&quot;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">norm_attn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_ffn</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="o">**</span><span class="n">norm_kwargs</span><span class="p">),</span>
@@ -387,27 +399,23 @@
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid norm_design: </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">norm_design</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">check_type</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">norm_class</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown normalization class: </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">norm_class</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">check_type</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">norm_class</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">check_type</span><span class="p">(</span><span class="n">norm_class</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">norm_design</span> <span class="o">==</span> <span class="s2">&quot;pre_norm&quot;</span> <span class="ow">or</span> <span class="n">config</span><span class="o">.</span><span class="n">norm_design</span> <span class="o">==</span> <span class="s2">&quot;post_norm&quot;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">norm_attn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_ffn</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="n">config</span><span class="o">.</span><span class="n">norm_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="o">**</span><span class="n">norm_kwargs</span><span class="p">),</span>
-                    <span class="n">config</span><span class="o">.</span><span class="n">norm_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="o">**</span><span class="n">norm_kwargs</span><span class="p">),</span>
+                    <span class="n">norm_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="o">**</span><span class="n">norm_kwargs</span><span class="p">),</span>
+                    <span class="n">norm_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="o">**</span><span class="n">norm_kwargs</span><span class="p">),</span>
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="n">config</span><span class="o">.</span><span class="n">norm_design</span> <span class="o">==</span> <span class="s2">&quot;both&quot;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">pre_norm_attn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pre_norm_ffn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">post_norm_attn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">post_norm_ffn</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="n">config</span><span class="o">.</span><span class="n">norm_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="o">**</span><span class="n">norm_kwargs</span><span class="p">),</span>
-                    <span class="n">config</span><span class="o">.</span><span class="n">norm_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="o">**</span><span class="n">norm_kwargs</span><span class="p">),</span>
-                    <span class="n">config</span><span class="o">.</span><span class="n">norm_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="o">**</span><span class="n">norm_kwargs</span><span class="p">),</span>
-                    <span class="n">config</span><span class="o">.</span><span class="n">norm_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="o">**</span><span class="n">norm_kwargs</span><span class="p">),</span>
+                    <span class="n">norm_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="o">**</span><span class="n">norm_kwargs</span><span class="p">),</span>
+                    <span class="n">norm_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="o">**</span><span class="n">norm_kwargs</span><span class="p">),</span>
+                    <span class="n">norm_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="o">**</span><span class="n">norm_kwargs</span><span class="p">),</span>
+                    <span class="n">norm_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="o">**</span><span class="n">norm_kwargs</span><span class="p">),</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid norm_design: </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">norm_design</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                <span class="s2">&quot;TransformerConfig.norm_class Should be str or Type[nn.Module] but found: </span><span class="si">{config.norm_class}</span><span class="s2">&quot;</span>
-            <span class="p">)</span></div>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown normalization class: </span><span class="si">{</span><span class="n">norm_class</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="TransformerBlock.forward">
@@ -512,6 +520,15 @@
 
 <span class="sd">    :param norm_kwargs: Additional Keyword Arguments passed to the Normalization Layer. Default: ``{}``</span>
 <span class="sd">    :type norm_kwargs: Dict, optional</span>
+<span class="sd">    </span>
+<span class="sd">    :param patch_size: Patch size for Vision Transformer (ViT) compatibility. If specified, adds a patch embedding layer.</span>
+<span class="sd">    :type patch_size: Optional[int], optional</span>
+<span class="sd">    </span>
+<span class="sd">    :param img_size: Image size for ViT compatibility. Used with patch_size to compute number of patches.</span>
+<span class="sd">    :type img_size: Optional[Union[int, Tuple[int, int]]], optional</span>
+<span class="sd">    </span>
+<span class="sd">    :param num_channels: Number of input channels for ViT. Default: 3 (RGB).</span>
+<span class="sd">    :type num_channels: int, optional</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">config_class</span> <span class="o">=</span> <span class="n">TransformerConfig</span>
@@ -521,7 +538,7 @@
     <span class="n">_supports_flash_attn</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">_supports_sdpa</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="n">input_modalities</span> <span class="o">=</span> <span class="s2">&quot;text&quot;</span>  <span class="c1"># Will add &quot;image&quot; for v0.4.0</span>
+    <span class="n">input_modalities</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="s2">&quot;image&quot;</span><span class="p">]</span>
 
 <div class="viewcode-block" id="Transformer.__init__">
 <a class="viewcode-back" href="../../api.html#transformer.transformer.Transformer.__init__">[docs]</a>
@@ -532,10 +549,31 @@
         <span class="n">pos_encoding_kwargs</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="p">{},</span>
         <span class="n">ffn_kwargs</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="p">{},</span>
         <span class="n">norm_kwargs</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="p">{},</span>
+        <span class="n">patch_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">img_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">num_channels</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">d_model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">patch_size</span> <span class="o">=</span> <span class="n">patch_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">img_size</span> <span class="o">=</span> <span class="n">img_size</span>
+        
+        <span class="c1"># Vision Transformer (ViT) support</span>
+        <span class="k">if</span> <span class="n">patch_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">img_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">img_size</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                <span class="n">img_size</span> <span class="o">=</span> <span class="p">(</span><span class="n">img_size</span><span class="p">,</span> <span class="n">img_size</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_patches</span> <span class="o">=</span> <span class="p">(</span><span class="n">img_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="n">patch_size</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">img_size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">//</span> <span class="n">patch_size</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">patch_embed</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span>
+                <span class="n">num_channels</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="n">patch_size</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="n">patch_size</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cls_token</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">d_model</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pos_embed</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_patches</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">d_model</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">patch_embed</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cls_token</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pos_embed</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_patches</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">emb</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Embedding</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">vocab_size</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">d_model</span><span class="p">)</span>
         <span class="n">block_class</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">block_class</span> <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">block_class</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">TransformerBlock</span>
@@ -567,6 +605,11 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">lm_head</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">emb</span><span class="o">.</span><span class="n">weight</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">lm_head</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">normal_</span><span class="p">(</span><span class="n">mean</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="mf">0.025</span><span class="p">)</span>
+        
+        <span class="c1"># Initialize ViT-specific parameters</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">patch_embed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">normal_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cls_token</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="mf">0.02</span><span class="p">)</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">normal_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos_embed</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="mf">0.02</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">post_init</span><span class="p">()</span></div>
 
@@ -715,7 +758,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=e259d695"></script>
+</div><script src="../../_static/documentation_options.js?v=6c02275b"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>

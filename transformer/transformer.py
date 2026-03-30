@@ -11,7 +11,7 @@ from transformers.modeling_outputs import CausalLMOutput
 from .attns import GQA, MHA, CrossAttention
 from .config import TransformerConfig
 from .ffn import MLP, SwiGLU
-from .pos import PartialRoPE, RoPE, ALiBi
+from .pos import ALiBi, PartialRoPE, RoPE
 from .utils import check_type, resolve_layer_config
 
 
@@ -50,12 +50,16 @@ class TransformerBlock(GradientCheckpointingLayer):
         self.d_model, self.d_ff, self.n_heads, self.layer_idx = config.d_model, config.d_ff, config.n_heads, layer_idx
         self.norm_design = config.norm_design
         self.n_layers = config.n_layer
-        
+
         # Resolve per-layer configurations
         attn_class = resolve_layer_config(config.attn_class, layer_idx, self.n_layers)
         ffn_class = resolve_layer_config(config.ffn_class, layer_idx, self.n_layers)
         norm_class = resolve_layer_config(config.norm_class, layer_idx, self.n_layers)
-        pos_encoding = resolve_layer_config(config.pos_encoding, layer_idx, self.n_layers) if isinstance(config.pos_encoding, list) else config.pos_encoding
+        pos_encoding = (
+            resolve_layer_config(config.pos_encoding, layer_idx, self.n_layers)
+            if isinstance(config.pos_encoding, list)
+            else config.pos_encoding
+        )
 
         # Create attention module
         if attn_class == "MHA":
@@ -264,13 +268,13 @@ class Transformer(PreTrainedModel, GenerationMixin):
 
     :param norm_kwargs: Additional Keyword Arguments passed to the Normalization Layer. Default: ``{}``
     :type norm_kwargs: Dict, optional
-    
+
     :param patch_size: Patch size for Vision Transformer (ViT) compatibility. If specified, adds a patch embedding layer.
     :type patch_size: Optional[int], optional
-    
+
     :param img_size: Image size for ViT compatibility. Used with patch_size to compute number of patches.
     :type img_size: Optional[Union[int, Tuple[int, int]]], optional
-    
+
     :param num_channels: Number of input channels for ViT. Default: 3 (RGB).
     :type num_channels: int, optional
     """
@@ -300,15 +304,13 @@ class Transformer(PreTrainedModel, GenerationMixin):
         self.d_model = config.d_model
         self.patch_size = patch_size
         self.img_size = img_size
-        
+
         # Vision Transformer (ViT) support
         if patch_size is not None and img_size is not None:
             if isinstance(img_size, int):
                 img_size = (img_size, img_size)
             self.num_patches = (img_size[0] // patch_size) * (img_size[1] // patch_size)
-            self.patch_embed = nn.Conv2d(
-                num_channels, config.d_model, kernel_size=patch_size, stride=patch_size
-            )
+            self.patch_embed = nn.Conv2d(num_channels, config.d_model, kernel_size=patch_size, stride=patch_size)
             self.cls_token = nn.Parameter(torch.zeros(1, 1, config.d_model))
             self.pos_embed = nn.Parameter(torch.zeros(1, self.num_patches + 1, config.d_model))
         else:
@@ -347,7 +349,7 @@ class Transformer(PreTrainedModel, GenerationMixin):
             self.lm_head.weight = self.emb.weight
         else:
             self.lm_head.weight.data.normal_(mean=0.0, std=0.025)
-        
+
         # Initialize ViT-specific parameters
         if self.patch_embed is not None:
             nn.init.normal_(self.cls_token, std=0.02)

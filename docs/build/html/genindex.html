@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="#"><link rel="search" title="Search" href="search.html">
 
-    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 --><title>Index - transformer 0.3.0 documentation</title>
+    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 --><title>Index - transformer 0.4.0 documentation</title>
 <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
@@ -159,7 +159,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">transformer 0.3.0 documentation</div></a>
+      <a href="index.html"><div class="brand">transformer 0.4.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -180,7 +180,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
-  <span class="sidebar-brand-text">transformer 0.3.0 documentation</span>
+  <span class="sidebar-brand-text">transformer 0.4.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -244,7 +244,7 @@
           
 <section class="genindex-section">
   <h1 id="index">Index</h1>
-  <div class="genindex-jumpbox"><a href="#_"><strong>_</strong></a> | <a href="#B"><strong>B</strong></a> | <a href="#C"><strong>C</strong></a> | <a href="#F"><strong>F</strong></a> | <a href="#G"><strong>G</strong></a> | <a href="#I"><strong>I</strong></a> | <a href="#M"><strong>M</strong></a> | <a href="#R"><strong>R</strong></a> | <a href="#S"><strong>S</strong></a> | <a href="#T"><strong>T</strong></a></div>
+  <div class="genindex-jumpbox"><a href="#_"><strong>_</strong></a> | <a href="#A"><strong>A</strong></a> | <a href="#B"><strong>B</strong></a> | <a href="#C"><strong>C</strong></a> | <a href="#F"><strong>F</strong></a> | <a href="#G"><strong>G</strong></a> | <a href="#I"><strong>I</strong></a> | <a href="#M"><strong>M</strong></a> | <a href="#P"><strong>P</strong></a> | <a href="#R"><strong>R</strong></a> | <a href="#S"><strong>S</strong></a> | <a href="#T"><strong>T</strong></a></div>
 </section>
 <section id="_" class="genindex-section">
   <h2>_</h2>
@@ -263,6 +263,10 @@
 </li>
           <li><a href="api.html#transformer.ffn.SwiGLU.__init__">(transformer.ffn.SwiGLU method)</a>
 </li>
+          <li><a href="api.html#transformer.pos.ALiBi.__init__">(transformer.pos.ALiBi method)</a>
+</li>
+          <li><a href="api.html#transformer.pos.PartialRoPE.__init__">(transformer.pos.PartialRoPE method)</a>
+</li>
           <li><a href="api.html#transformer.pos.RoPE.__init__">(transformer.pos.RoPE method)</a>
 </li>
           <li><a href="api.html#transformer.transformer.Transformer.__init__">(transformer.transformer.Transformer method)</a>
@@ -270,6 +274,16 @@
           <li><a href="api.html#transformer.transformer.TransformerBlock.__init__">(transformer.transformer.TransformerBlock method)</a>
 </li>
         </ul></li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="A" class="genindex-section">
+  <h2>A</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api.html#transformer.pos.ALiBi">ALiBi (class in transformer.pos)</a>
+</li>
     </ul></td>
   </tr></table>
 </section>
@@ -288,10 +302,12 @@
   <h2>C</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
-        <li><a href="api.html#transformer.transformer.Transformer.config_class">config_class (transformer.transformer.Transformer attribute)</a>
+        <li><a href="api.html#transformer.utils.check_type">check_type() (in module transformer.utils)</a>
 </li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api.html#transformer.transformer.Transformer.config_class">config_class (transformer.transformer.Transformer attribute)</a>
+</li>
         <li><a href="api.html#transformer.attns.CrossAttention">CrossAttention (class in transformer.attns)</a>
 </li>
     </ul></td>
@@ -312,6 +328,10 @@
           <li><a href="api.html#transformer.ffn.MLP.forward">(transformer.ffn.MLP method)</a>
 </li>
           <li><a href="api.html#transformer.ffn.SwiGLU.forward">(transformer.ffn.SwiGLU method)</a>
+</li>
+          <li><a href="api.html#transformer.pos.ALiBi.forward">(transformer.pos.ALiBi method)</a>
+</li>
+          <li><a href="api.html#transformer.pos.PartialRoPE.forward">(transformer.pos.PartialRoPE method)</a>
 </li>
           <li><a href="api.html#transformer.pos.RoPE.forward">(transformer.pos.RoPE method)</a>
 </li>
@@ -358,17 +378,29 @@
 </li>
         <li><a href="api.html#transformer.ffn.MLP">MLP (class in transformer.ffn)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api.html#transformer.config.TransformerConfig.model_type">model_type (transformer.config.TransformerConfig attribute)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     module
 
         <ul>
           <li><a href="api.html#module-transformer.config">transformer.config</a>
 </li>
+          <li><a href="api.html#module-transformer.utils">transformer.utils</a>
+</li>
         </ul></li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="P" class="genindex-section">
+  <h2>P</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api.html#transformer.pos.PartialRoPE">PartialRoPE (class in transformer.pos)</a>
+</li>
     </ul></td>
   </tr></table>
 </section>
@@ -376,6 +408,10 @@
 <section id="R" class="genindex-section">
   <h2>R</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api.html#transformer.utils.resolve_layer_config">resolve_layer_config() (in module transformer.utils)</a>
+</li>
+    </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api.html#transformer.pos.RoPE">RoPE (class in transformer.pos)</a>
 </li>
@@ -414,6 +450,13 @@
         </ul></li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li>
+    transformer.utils
+
+        <ul>
+          <li><a href="api.html#module-transformer.utils">module</a>
+</li>
+        </ul></li>
         <li><a href="api.html#transformer.transformer.TransformerBlock">TransformerBlock (class in transformer.transformer)</a>
 </li>
         <li><a href="api.html#transformer.config.TransformerConfig">TransformerConfig (class in transformer.config)</a>
@@ -454,7 +497,7 @@
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=e259d695"></script>
+</div><script src="_static/documentation_options.js?v=6c02275b"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>

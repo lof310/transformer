@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>transformer.config - transformer 0.3.0 documentation</title>
+        <title>transformer.config - transformer 0.4.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
@@ -160,7 +160,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">transformer 0.3.0 documentation</div></a>
+      <a href="../../index.html"><div class="brand">transformer 0.4.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -181,7 +181,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
-  <span class="sidebar-brand-text">transformer 0.3.0 documentation</span>
+  <span class="sidebar-brand-text">transformer 0.4.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -189,20 +189,25 @@
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
-  <ul>
+  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quick Start</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../guide.html">Transformer: A PyTorch SOTA Transformer Implementation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../guide.html#configuration">Configuration</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Usage Examples</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../examples.html">Usage Examples</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Project Info</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
 </ul>
@@ -278,7 +283,7 @@
 <span class="sd">        - If ``str``, one of ``rms_norm`` or ``layer_norm``.</span>
 <span class="sd">        - If ``Type[nn.Module]`` then will be instantiated inside the model.</span>
 <span class="sd">          Should have the same API as a torch Normalization Layer.</span>
-<span class="sd">        - If ``List[Union[Type[nn.Module], str]]`` and len(ffn_class) == n_layers</span>
+<span class="sd">        - If ``List[Union[Type[nn.Module], str]]`` and len(norm_class) == n_layers</span>
 <span class="sd">          then will be instantiated inside the model for the corresponding layers.</span>
 <span class="sd">    :type norm_class: Union[List[Union[Type[nn.Module], str]], Type[nn.Module], str]</span>
 
@@ -297,9 +302,9 @@
 <span class="sd">        - If ``Type[nn.Module]`` then will be instantiated inside the model.</span>
 <span class="sd">          Should have the same API as ``transformer.attn.MHA``.</span>
 <span class="sd">          Default ``MHA``</span>
-<span class="sd">        - If ``List[Union[Type[nn.Module], str]]`` and len(ffn_class) == n_layers</span>
+<span class="sd">        - If ``List[Union[Type[nn.Module], str]]`` and len(attn_class) == n_layers</span>
 <span class="sd">          then will be instantiated inside the model for the corresponding layers.</span>
-<span class="sd">          Default ``SwiGLU`` for every layer.</span>
+<span class="sd">          Default ``MHA`` for every layer.</span>
 <span class="sd">    :type attn_class: Union[List[Union[Type[nn.Module], str]], Type[nn.Module], str]</span>
 
 <span class="sd">    :param block_class: Transformer Block class for every layer. Default: ``None``</span>
@@ -329,11 +334,9 @@
 <span class="sd">    :type seq_len: int</span>
 
 <span class="sd">    :param pos_encoding: Positional Encoding for attention.</span>
-<span class="sd">        - If ``List[Union[Type[nn.Module], str]]`` and len(ffn_class) == n_layers</span>
-<span class="sd">          then will be instantiated inside the model for the corresponding layers.</span>
-<span class="sd">          Default ``SwiGLU`` for every layer.</span>
 <span class="sd">        - If ``str`` one of ``RoPE``, ``AliBI``, ``PartialRoPE``. Default: ``RoPE``</span>
 <span class="sd">        Note: Is recommended to change the default to ``PartialRoPE`` which is used in SOTA models like Qwen3-Next-80B-A3B</span>
+<span class="sd">        - If ``List[str]`` and len(pos_encoding) == n_layers, applies different positional encodings per layer.</span>
 <span class="sd">    :type pos_encoding: Union[List[str], str]</span>
 
 <span class="sd">    :param rope_base: Base for the Exponential Frequency Calculation in RoPE. Default: ``10000.0``</span>
@@ -341,6 +344,12 @@
 
 <span class="sd">    :param max_seq_len: Maximum sequence length for positional embeddings.</span>
 <span class="sd">    :type max_seq_len: int</span>
+
+<span class="sd">    :param use_cache: Whether to use KV cache during generation. Default: ``True``</span>
+<span class="sd">    :type use_cache: bool, optional</span>
+
+<span class="sd">    :param is_decoder: Whether this is a decoder model. Default: ``True``</span>
+<span class="sd">    :type is_decoder: bool, optional</span>
 
 <span class="sd">    :param kwargs: Additional keyword arguments passed to `PretrainedConfig`</span>
 <span class="sd">    :type kwargs: dict, optional</span>
@@ -371,9 +380,11 @@
         <span class="n">attn_dropout</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
         <span class="n">tied_weights</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">seq_len</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1024</span><span class="p">,</span>
-        <span class="n">pos_encoding</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;RoPE&quot;</span><span class="p">,</span>
+        <span class="n">pos_encoding</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;RoPE&quot;</span><span class="p">,</span>
         <span class="n">rope_base</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10000.0</span><span class="p">,</span>
         <span class="n">max_seq_len</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4096</span><span class="p">,</span>
+        <span class="n">use_cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">is_decoder</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -381,7 +392,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">n_layer</span> <span class="o">=</span> <span class="n">n_layers</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span> <span class="o">=</span> <span class="n">d_model</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_heads</span> <span class="o">=</span> <span class="n">n_heads</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_kv_heads</span> <span class="o">=</span> <span class="n">n_kv_heads</span> <span class="k">if</span> <span class="n">attn_class</span> <span class="o">==</span> <span class="s2">&quot;GQA&quot;</span> <span class="k">else</span> <span class="n">n_heads</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_kv_heads</span> <span class="o">=</span> <span class="n">n_kv_heads</span> <span class="k">if</span> <span class="n">n_kv_heads</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">n_heads</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vocab_size</span> <span class="o">=</span> <span class="n">vocab_size</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">attn_class</span> <span class="o">=</span> <span class="n">attn_class</span>
@@ -405,7 +416,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">seq_len</span> <span class="o">=</span> <span class="n">seq_len</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pos_encoding</span> <span class="o">=</span> <span class="n">pos_encoding</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rope_base</span> <span class="o">=</span> <span class="n">rope_base</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">max_seq_len</span> <span class="o">=</span> <span class="n">max_seq_len</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_seq_len</span> <span class="o">=</span> <span class="n">max_seq_len</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_cache</span> <span class="o">=</span> <span class="n">use_cache</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_decoder</span> <span class="o">=</span> <span class="n">is_decoder</span></div>
 </div>
 
 </pre></div>
@@ -440,7 +454,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=e259d695"></script>
+</div><script src="../../_static/documentation_options.js?v=6c02275b"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>
