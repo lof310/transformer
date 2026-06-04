@@ -76,11 +76,7 @@ class PartialRoPE(nn.Module):
     r"""
     Partial Rotary Positional Embedding (PartialRoPE).
 
-    This module applies rotary positional embeddings (RoPE) to only a fraction
-    of the head dimension (the first `d_rot` channels) while leaving the
-    remaining channels unchanged. The rotation is applied pairwise (as in
-    standard RoPE) and supports position indices provided either per-sequence
-    (shape :math:`(N,)`) or per-batch (shape :math:`(B, N)`).
+    Applies RoPE to only a fraction of the head dimension while leaving the rest unchanged.
 
     :param max_seq_len: Maximum sequence length for which to precompute cos/sin.
     :type max_seq_len: int
@@ -88,9 +84,7 @@ class PartialRoPE(nn.Module):
     :param d_head: Dimension per head (must be even).
     :type d_head: int
 
-    :param rot_frac: Fraction of head dimensions to rotate in (0, 1].
-        The number of rotated dimensions is `int(d_head * rot_frac)` rounded
-        down to the nearest even integer. Default: 0.5
+    :param rot_frac: Fraction of head dimensions to rotate in (0, 1]. Default: 0.5
     :type rot_frac: float, optional
 
     :param rope_base: Base for the exponential frequency calculation. Default: 10000.0
@@ -110,28 +104,21 @@ class PartialRoPE(nn.Module):
     ):
         super().__init__()
         assert d_head % 2 == 0, "d_head must be even"
-        assert 0.0 < rot_frac <= 1.0, "rot_frac must be in (0, 1]"
+        assert 0.0 <= rot_frac <= 1.0, "rot_frac must be in [0, 1]"
 
-        # Determine number of rotated dimensions (ensure even)
         d_rot = int(d_head * float(rot_frac))
         d_rot = d_rot - (d_rot % 2)
         self.d_head = d_head
         self.d_rot = d_rot
         self.d_pass = d_head - d_rot
 
-        # Precompute cos/sin only for the rotated half-dimensions.
         if self.d_rot > 0:
-            # Use d_head in denominator to keep frequency scale consistent with full RoPE.
             half_rot = self.d_rot // 2
             inv_freq = 1.0 / (rope_base ** (torch.arange(0, half_rot, dtype=torch.float32) * 2.0 / d_head))
-            pos = torch.arange(max_seq_len, dtype=torch.float32).unsqueeze(1)  # (max_seq_len, 1)
-            freqs = pos * inv_freq.unsqueeze(0)  # (max_seq_len, half_rot)
-            self.register_buffer("cos", torch.cos(freqs), persistent=persistent)  # (max_seq_len, half_rot)
-            self.register_buffer("sin", torch.sin(freqs), persistent=persistent)  # (max_seq_len, half_rot)
-        else:
-            # Keep empty buffers to preserve attribute existence and API
-            self.register_buffer("cos", torch.empty(0), persistent=persistent)
-            self.register_buffer("sin", torch.empty(0), persistent=persistent)
+            pos = torch.arange(max_seq_len, dtype=torch.float32).unsqueeze(1)
+            freqs = pos * inv_freq.unsqueeze(0)
+            self.register_buffer("cos", torch.cos(freqs), persistent=persistent)
+            self.register_buffer("sin", torch.sin(freqs), persistent=persistent)
 
     def forward(
         self, q: torch.Tensor, k: torch.Tensor, pos_q: torch.LongTensor, pos_k: torch.LongTensor
@@ -144,50 +131,34 @@ class PartialRoPE(nn.Module):
 
         :param k: Key tensor of shape :math:`(B, H, N, d)`
         :type k: torch.Tensor
+
         :param pos_q: Positions for queries, shape :math:`(N,)` or :math:`(B, N)`
-
         :type pos_q: torch.LongTensor
+
         :param pos_k: Positions for keys, shape :math:`(N,)` or :math:`(B, N)`
-
         :type pos_k: torch.LongTensor
-        :return: Rotated queries and keys.
 
+        :return: Rotated queries and keys.
         :rtype: Tuple[torch.Tensor, torch.Tensor]
         """
-        pos_q, pos_k = pos_q.long(), pos_k.long()
-
-        # If no rotation requested, return inputs unchanged
         if self.d_rot == 0:
             return (q, k)
 
-        # Extract rotated and passthrough slices
-        q_rot, k_rot = q[..., : self.d_rot], k[..., : self.d_rot]  # (B, H, N, d_rot)
-        q_pass, k_pass = q[..., self.d_rot :], k[..., self.d_rot :]  # (B, H, N, d_pass) may be empty
+        pos_q, pos_k = pos_q.long(), pos_k.long()
 
-        # Prepare cos/sin for queries and keys
-        # (N, d_half) or (B, N, d_half)
+        q_rot, k_rot = q[..., : self.d_rot], k[..., : self.d_rot]
+        q_pass, k_pass = q[..., self.d_rot :], k[..., self.d_rot :]
+
         cos_q, sin_q = self.cos[pos_q].to(q.device, dtype=q.dtype), self.sin[pos_q].to(q.device, dtype=q.dtype)
         cos_k, sin_k = self.cos[pos_k].to(k.device, dtype=k.dtype), self.sin[pos_k].to(k.device, dtype=k.dtype)
 
-        # Number of pairs in rotated slice
-        d_half = self.d_rot // 2  # number of complex pairs
-
-        # Reshape rotated slices to (..., d_half, 2) to operate on pairs efficiently.
-        # This avoids slicing with ::2 which can be slightly less cache-friendly.
-        # After reshape: (B, H, N, d_half, 2)
+        d_half = self.d_rot // 2
         q_pairs, k_pairs = q_rot.view(*q_rot.shape[:-1], d_half, 2), k_rot.view(*k_rot.shape[:-1], d_half, 2)
 
-        # Align cos/sin for broadcasting to (B, 1, N, d_half)
-        # If cos has shape (N, d_half) -> unsqueeze to (1, 1, N, d_half)
-        # If cos has shape (B, N, d_half) -> unsqueeze to (1, 1, B, N, d_half) then we will
-        # permute to (B, 1, N, d_half) for broadcasting with (B, H, N, d_half, 2).
         if cos_q.dim() == 2:
-            # pos provided as (N,)
-            cos_q_b = cos_q.unsqueeze(0).unsqueeze(0)  # (1, 1, N, d_half)
+            cos_q_b = cos_q.unsqueeze(0).unsqueeze(0)
             sin_q_b = sin_q.unsqueeze(0).unsqueeze(0)
         else:
-            # pos provided as (B, N)
-            # cos_q: (B, N, d_half) -> (B, 1, N, d_half)
             cos_q_b = cos_q.unsqueeze(1)
             sin_q_b = sin_q.unsqueeze(1)
 
@@ -198,31 +169,21 @@ class PartialRoPE(nn.Module):
             cos_k_b = cos_k.unsqueeze(1)
             sin_k_b = sin_k.unsqueeze(1)
 
-        # Compute rotated pairs using pair arithmetic:
-        cos_q_b, sin_q_b = cos_q_b.unsqueeze(-1), sin_q_b.unsqueeze(-1)  # (1 or B, 1, N, d_half, 1)
+        cos_q_b, sin_q_b = cos_q_b.unsqueeze(-1), sin_q_b.unsqueeze(-1)
         cos_k_b, sin_k_b = cos_k_b.unsqueeze(-1), sin_k_b.unsqueeze(-1)
 
-        # Perform rotation with fused elementwise ops (keeps memory overhead low)
-        q0, q1 = q_pairs[..., 0:1], q_pairs[..., 1:2]  # (B, H, N, d_half, 1)
+        q0, q1 = q_pairs[..., 0:1], q_pairs[..., 1:2]
         q_rotated_pairs = torch.cat([q0 * cos_q_b - q1 * sin_q_b, q0 * sin_q_b + q1 * cos_q_b], dim=-1)
 
         k0, k1 = k_pairs[..., 0:1], k_pairs[..., 1:2]
         k_rotated_pairs = torch.cat([k0 * cos_k_b - k1 * sin_k_b, k0 * sin_k_b + k1 * cos_k_b], dim=-1)
 
-        # Restore last-dimension layout: (..., d_rot)
         q_rot = q_rotated_pairs.view(*q_rot.shape[:-1], self.d_rot)
         k_rot = k_rotated_pairs.view(*k_rot.shape[:-1], self.d_rot)
 
-        # Concatenate rotated and passthrough parts (passthrough may be empty)
-        q_out, k_out = None, None
         if self.d_pass == 0:
-            q_out = q_rot
-            k_out = k_rot
-        else:
-            q_out = torch.cat([q_rot, q_pass], dim=-1)
-            k_out = torch.cat([k_rot, k_pass], dim=-1)
-
-        return q_out, k_out
+            return q_rot, k_rot
+        return torch.cat([q_rot, q_pass], dim=-1), torch.cat([k_rot, k_pass], dim=-1)
 
 
 class ALiBi(nn.Module):
