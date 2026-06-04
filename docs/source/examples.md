@@ -203,3 +203,129 @@ combined_mask = combined_mask | pad_mask.unsqueeze(1).unsqueeze(2)  # (B,1,N,N)
 
 outputs = model(input_ids, attn_mask=combined_mask)
 ```
+
+## Encoder-Decoder Model (Seq2Seq)
+
+The `EncoderDecoderModel` class provides a complete encoder-decoder architecture with cross-attention support.
+
+```python
+import torch
+from transformer import EncoderDecoderModel, TransformerConfig
+
+# Encoder config
+encoder_config = TransformerConfig(
+    n_layers=6,
+    n_heads=8,
+    d_model=512,
+    pos_encoding="RoPE",
+)
+
+# Decoder config (with cross-attention)
+decoder_config = TransformerConfig(
+    n_layers=6,
+    n_heads=8,
+    d_model=512,
+    attn_class="GQA",
+    n_kv_heads=4,
+    pos_encoding="RoPE",
+)
+
+# Create encoder-decoder model
+model = EncoderDecoderModel(encoder_config, decoder_config)
+
+# Forward pass
+encoder_input = torch.randint(0, encoder_config.vocab_size, (4, 20))
+decoder_input = torch.randint(0, decoder_config.vocab_size, (4, 10))
+
+output = model(
+    input_ids=decoder_input,
+    encoder_input_ids=encoder_input,
+    return_dict=True
+)
+logits = output.logits
+print(f"Logits shape: {logits.shape}")  # [batch_size, decoder_seq_len, vocab_size]
+```
+
+### Incremental Decoding with KV-Cache
+
+```python
+import torch
+from transformer import EncoderDecoderModel, TransformerConfig
+
+encoder_config = TransformerConfig(n_layers=6, n_heads=8, d_model=512)
+decoder_config = TransformerConfig(n_layers=6, n_heads=8, d_model=512)
+model = EncoderDecoderModel(encoder_config, decoder_config)
+model.eval()
+
+# Encode source sequence
+encoder_input = torch.randint(0, encoder_config.vocab_size, (1, 20))
+encoder_outputs = model.encode(encoder_input, return_dict=True)
+encoder_hidden_states = encoder_outputs["last_hidden_state"]
+
+# Initial decoder prompt
+decoder_input = torch.randint(0, decoder_config.vocab_size, (1, 5))
+
+# First forward pass (no cache)
+with torch.no_grad():
+    output = model.decode(
+        decoder_input,
+        encoder_hidden_states=encoder_hidden_states,
+        use_cache=True
+    )
+    logits = output.logits
+    past_key_values = output.past_key_values
+
+# Incremental decoding (one token at a time)
+next_token_id = logits[:, -1:].argmax(dim=-1)
+with torch.no_grad():
+    output = model.decode(
+        next_token_id,
+        encoder_hidden_states=encoder_hidden_states,
+        past_key_values=past_key_values,
+        use_cache=True
+    )
+    new_past_key_values = output.past_key_values
+```
+
+## Applying LoRA Adapters
+
+LoRA (Low-Rank Adaptation) enables parameter-efficient fine-tuning by adding small trainable adapters to frozen model weights.
+
+```python
+from transformer import Transformer, TransformerConfig, apply_lora_to_model
+
+# Create model
+config = TransformerConfig(n_layers=6, n_heads=8, d_model=512)
+model = Transformer(config)
+
+# Apply LoRA to query/key/value projections
+apply_lora_to_model(model, target_modules=["qkv_proj"], lora_rank=8, lora_alpha=16)
+
+# Freeze base model parameters
+for param in model.parameters():
+    param.requires_grad = False
+
+# Only train LoRA parameters
+for name, param in model.named_parameters():
+    if "lora_" in name:
+        param.requires_grad = True
+
+# Now you can train with only LoRA parameters being updated
+optimizer = torch.optim.AdamW(
+    [p for p in model.parameters() if p.requires_grad],
+    lr=1e-4
+)
+```
+
+### LoRA on Multiple Module Types
+
+```python
+# Apply LoRA to both attention projections and feed-forward layers
+apply_lora_to_model(
+    model,
+    target_modules=["qkv_proj", "W1", "W2"],  # attention and FFN layers
+    lora_rank=16,
+    lora_alpha=32,
+    lora_dropout=0.1
+)
+```
