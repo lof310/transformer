@@ -56,14 +56,29 @@ class EncoderDecoderModel(nn.Module, GenerationMixin):
         :return: Encoder hidden states of shape (B, L_enc, D).
         :rtype: Union[Tuple[torch.Tensor], Dict]
         """
-        encoder_outputs = self.encoder(
-            input_ids=input_ids,
-            attn_mask=None if attention_mask is None else (1.0 - attention_mask.unsqueeze(1).unsqueeze(2)).bool(),
-            is_causal=False,
-            return_states=False,
-        )
-        hidden_states = encoder_outputs.last_hidden_state if hasattr(encoder_outputs, "last_hidden_state") else encoder_outputs[0]
-
+        # Run encoder forward manually to get hidden states (before lm_head projection)
+        input_embs = self.encoder.emb(input_ids)
+        out = input_embs
+        
+        B, N = input_ids.shape
+        pos = torch.arange(N, device=out.device)
+        
+        # Generate causal mask
+        attn_mask = None
+        if attention_mask is not None:
+            attn_mask = (1.0 - attention_mask.unsqueeze(1).unsqueeze(2)).bool()
+        
+        for block in self.encoder.blocks:
+            block_out = block(
+                out,
+                attn_mask=attn_mask,
+                pos=pos,
+                return_states=False,
+            )
+            out = block_out
+        
+        hidden_states = self.encoder.norm_out(out)
+        
         if return_dict:
             return {"last_hidden_state": hidden_states}
         return (hidden_states,)
@@ -101,13 +116,15 @@ class EncoderDecoderModel(nn.Module, GenerationMixin):
         :return: Decoder logits and optionally past_key_values.
         :rtype: Union[Tuple[torch.Tensor], CausalLMOutput]
         """
+        # CrossAttention doesn't support causal masking in the same way as self-attention
+        # The decoder uses cross-attention to encoder, so is_causal should be False
         decoder_outputs = self.decoder(
             input_ids=input_ids,
             encoder_hidden_states=encoder_hidden_states,
             encoder_attn_mask=encoder_attention_mask,
             past_key_values=past_key_values,
             use_cache=use_cache,
-            is_causal=True,
+            is_causal=False,  # Cross-attention doesn't use causal masking
             return_states=False,
         )
         return decoder_outputs
