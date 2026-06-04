@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .pos import PartialRoPE, RoPE
+from .pos import ALiBi, PartialRoPE, RoPE
 
 
 class MHA(nn.Module):
@@ -92,7 +92,9 @@ class MHA(nn.Module):
             False,
         ),
         return_states: Optional[bool] = False,
-    ) -> Union[torch.Tensor, Dict]:
+        cache: Optional[Tuple[torch.Tensor, torch.Tensor]] = None,
+        return_cache: Optional[bool] = False,
+    ) -> Union[torch.Tensor, Dict, Tuple[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]]:
         r"""
         Forward pass of MHA.
 
@@ -120,16 +122,34 @@ class MHA(nn.Module):
         :param return_states: If ``True``, return a dictionary of intermediate tensors. Default: ``False``
         :type return_states: bool, optional
 
+        :param cache: Optional KV cache tuple `(k_prev, v_prev)` of shape `(B, H, L_prev, d)` each.
+            If provided, new keys/values are concatenated with cached ones along sequence dimension.
+        :type cache: Tuple[torch.Tensor, torch.Tensor], optional
+
         :return: Output tensor :math:`(B, N, D)` if not return_states, else a dict containing
-            the keys: {`output`, `queries`, `keys`, `values`, `attn_weights`, `attn_scores`, `output_before_proj` and `input`}
-        :rtype: Union[torch.Tensor, Dict]
+            the keys: {`output`, `queries`, `keys`, `values`, `attn_weights`, `attn_scores`, `output_before_proj` and `input`}.
+            If cache is provided, returns a tuple `(output, new_cache)` where `new_cache` is `(k, v)`.
+        :rtype: Union[torch.Tensor, Dict, Tuple[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]]
         """
 
         B, N, D, H, d = *x.shape, self.n_heads, self.d_head
 
-        q, k, v = self.qkv_proj(x).view(B, N, H, d * 3).transpose(1, 2).chunk(3, dim=-1)
-        q, k = (self.q_norm(q), self.k_norm(k)) if self.qk_norm else (q, k)
-        q, k = self.rope(q, k, pos, pos) if pos is not None else (q, k)
+        qkv = self.qkv_proj(x).view(B, N, 3, H, d).permute(2, 0, 3, 1, 4)
+        q, k, v = qkv.unbind(0)
+
+        if self.qk_norm:
+            q, k = self.q_norm(q), self.k_norm(k)
+
+        if pos is not None:
+            q, k = self.rope(q, k, pos, pos)
+
+        if cache is not None:
+            k_prev, v_prev = cache
+            k = torch.cat((k_prev, k), dim=2)
+            v = torch.cat((v_prev, v), dim=2)
+        new_cache = (k, v)
+
+        L_total = k.shape[2]
 
         y, A_weights, A_scores = None, None, None
         if flash_attn[0]:
@@ -139,60 +159,61 @@ class MHA(nn.Module):
                         q,
                         k,
                         v,
-                        attn_mask=~mask if mask is not None else None,
-                        dropout_p=self.dropout if self.dropout is not None else 0.0,
+                        attn_mask=(~mask) if mask is not None else None,
+                        dropout_p=self.dropout,
                         is_causal=False,
                         scale=self.scale,
                         enable_gqa=False,
                     )
                     .transpose(1, 2)
-                    .contiguous()
-                    .view(B, N, D)
+                    .reshape(B, N, D)
                 )
         else:
-            A_weights = torch.matmul(q, k.transpose(-1, -2)) * self.scale
-            A_scores = (
-                F.softmax(A_weights.masked_fill(mask, float("-inf")), dim=-1)
-                if mask is not None
-                else F.softmax(A_weights, dim=-1)
-            )
-            y = (
-                torch.matmul(
-                    (
-                        F.dropout(A_scores, p=self.dropout, training=self.training, inplace=False)
-                        if self.dropout is not None and self.dropout != 0.0
-                        else A_scores
-                    ),
-                    v,
-                )
-                .transpose(1, 2)
-                .contiguous()
-                .view(B, N, D)
-            )
+            A_weights = torch.matmul(q, k.transpose(-1, -2)).mul_(self.scale)
+            if mask is not None:
+                A_weights = A_weights.masked_fill_(mask, float("-inf"))
+            A_scores = A_weights.softmax(dim=-1)
 
+            if self.dropout > 0.0 and self.training:
+                A_scores = F.dropout(A_scores, p=self.dropout, inplace=False)
+
+            y = torch.matmul(A_scores, v).transpose(1, 2).reshape(B, N, D)
+
+        out = self.out_proj(y)
+
+        # Return cache tuple when explicitly requested via return_cache flag or when cache was provided
+        # This allows first-pass cache building as well as incremental decoding
+        if cache is not None or return_cache:
+            if return_states:
+                result = {
+                    "output": out,
+                    "queries": q,
+                    "keys": k,
+                    "values": v,
+                    "output_before_proj": y,
+                    "input": x,
+                }
+                if not flash_attn[0]:
+                    result["attn_weights"] = A_weights
+                    result["attn_scores"] = A_scores
+                return result, new_cache
+            return out, new_cache
+
+        # No cache provided, return standard output
         if return_states:
-            if flash_attn[0]:
-                return {
-                    "output": self.out_proj(y),
-                    "queries": q,
-                    "keys": k,
-                    "values": v,
-                    "output_before_proj": y,
-                    "input": x,
-                }
-            else:
-                return {
-                    "output": self.out_proj(y),
-                    "queries": q,
-                    "keys": k,
-                    "values": v,
-                    "attn_weights": A_weights,
-                    "attn_scores": A_scores,
-                    "output_before_proj": y,
-                    "input": x,
-                }
-        else:
-            return self.out_proj(y)
+            result = {
+                "output": out,
+                "queries": q,
+                "keys": k,
+                "values": v,
+                "output_before_proj": y,
+                "input": x,
+            }
+            if not flash_attn[0]:
+                result["attn_weights"] = A_weights
+                result["attn_scores"] = A_scores
+            return result
+        return out
 
 
 class GQA(nn.Module):
@@ -295,7 +316,9 @@ class GQA(nn.Module):
             False,
         ),
         return_states: Optional[bool] = False,
-    ) -> Union[torch.Tensor, Dict]:
+        cache: Optional[Tuple[torch.Tensor, torch.Tensor]] = None,
+        return_cache: Optional[bool] = False,
+    ) -> Union[torch.Tensor, Dict, Tuple[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]]:
         """
         Forward pass of GQA.
 
@@ -323,9 +346,17 @@ class GQA(nn.Module):
         :param return_states: If ``True``, return a dictionary of intermediate tensors. Default: ``False``
         :type return_states: bool, optional
 
+        :param cache: Optional KV cache tuple `(k_prev, v_prev)` of shape `(B, H_kv, L_prev, d)` each.
+            For GQA, cache stores compressed key/value heads before repeat_interleave.
+        :type cache: Tuple[torch.Tensor, torch.Tensor], optional
+
+        :param return_cache: If True, always return cache tuple even on first pass. Used for building initial cache.
+        :type return_cache: bool, optional
+
         :return: Output tensor of shape :math:`(B, N, D)` if not return_states, else a dict containing
-            the keys: {`output`, `queries`, `keys`, `values`, `attn_weights`, `attn_scores`, `output_before_proj` and `input`}
-        :rtype: Union[torch.Tensor, Dict]
+            the keys: {`output`, `queries`, `keys`, `values`, `attn_weights`, `attn_scores`, `output_before_proj` and `input`}.
+            If cache is provided or return_cache=True, returns a tuple `(output, new_cache)` where `new_cache` is `(k, v)`.
+        :rtype: Union[torch.Tensor, Dict, Tuple[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]]
 
         """
 
@@ -333,7 +364,16 @@ class GQA(nn.Module):
 
         q, k, v = self.qkv_proj(x).view(B, N, H_q + (H_kv * 2), d).transpose(1, 2).split([H_q, H_kv, H_kv], dim=1)
         q, k = (self.q_norm(q), self.k_norm(k)) if self.qk_norm else (q, k)
+
         q, k = self.rope(q, k, pos, pos) if pos is not None else (q, k)
+
+        if cache is not None:
+            k_prev, v_prev = cache
+            k = torch.cat((k_prev, k), dim=2)
+            v = torch.cat((v_prev, v), dim=2)
+        new_cache = (k, v)
+
+        L_total = k.shape[2]
 
         y, A_weights, A_scores = None, None, None
         if flash_attn[0]:
@@ -343,63 +383,64 @@ class GQA(nn.Module):
                         q,
                         k,
                         v,
-                        attn_mask=~mask if mask is not None else None,
-                        dropout_p=self.dropout if self.dropout is not None else 0.0,
+                        attn_mask=(~mask) if mask is not None else None,
+                        dropout_p=self.dropout,
                         is_causal=False,
                         scale=self.scale,
                         enable_gqa=True,
                     )
                     .transpose(1, 2)
-                    .contiguous()
-                    .view(B, N, D)
+                    .reshape(B, N, D)
                 )
         else:
-            k = k.repeat_interleave(self.groups, dim=1)
-            v = v.repeat_interleave(self.groups, dim=1)
+            k_expanded = k.repeat_interleave(self.groups, dim=1)
+            v_expanded = v.repeat_interleave(self.groups, dim=1)
 
-            A_weights = torch.matmul(q, k.transpose(-1, -2)) * self.scale
-            A_scores = (
-                F.softmax(A_weights.masked_fill(mask, float("-inf")), dim=-1)
-                if mask is not None
-                else F.softmax(A_weights, dim=-1)
-            )
-            y = (
-                torch.matmul(
-                    (
-                        F.dropout(A_scores, p=self.dropout, training=self.training, inplace=False)
-                        if self.dropout is not None and self.dropout != 0.0
-                        else A_scores
-                    ),
-                    v,
-                )
-                .transpose(1, 2)
-                .contiguous()
-                .view(B, N, D)
-            )
+            A_weights = torch.matmul(q, k_expanded.transpose(-1, -2)).mul_(self.scale)
+            if mask is not None:
+                A_weights = A_weights.masked_fill_(mask, float("-inf"))
+            A_scores = A_weights.softmax(dim=-1)
 
+            if self.dropout > 0.0 and self.training:
+                A_scores = F.dropout(A_scores, p=self.dropout, inplace=False)
+
+            y = torch.matmul(A_scores, v_expanded).transpose(1, 2).reshape(B, N, D)
+
+        out = self.out_proj(y)
+
+        # Return cache tuple when explicitly requested via return_cache flag or when cache was provided
+        # This allows first-pass cache building as well as incremental decoding
+        if cache is not None or return_cache:
+            if return_states:
+                result = {
+                    "output": out,
+                    "queries": q,
+                    "keys": k,
+                    "values": v,
+                    "output_before_proj": y,
+                    "input": x,
+                }
+                if not flash_attn[0]:
+                    result["attn_weights"] = A_weights
+                    result["attn_scores"] = A_scores
+                return result, new_cache
+            return out, new_cache
+
+        # No cache provided, return standard output
         if return_states:
-            if flash_attn[0]:
-                return {
-                    "output": self.out_proj(y),
-                    "queries": q,
-                    "keys": k,
-                    "values": v,
-                    "output_before_proj": y,
-                    "input": x,
-                }
-            else:
-                return {
-                    "output": self.out_proj(y),
-                    "queries": q,
-                    "keys": k,
-                    "values": v,
-                    "attn_weights": A_weights,
-                    "attn_scores": A_scores,
-                    "output_before_proj": y,
-                    "input": x,
-                }
-        else:
-            return self.out_proj(y)
+            result = {
+                "output": out,
+                "queries": q,
+                "keys": k,
+                "values": v,
+                "output_before_proj": y,
+                "input": x,
+            }
+            if not flash_attn[0]:
+                result["attn_weights"] = A_weights
+                result["attn_scores"] = A_scores
+            return result
+        return out
 
 
 class CrossAttention(nn.Module):
@@ -428,8 +469,12 @@ class CrossAttention(nn.Module):
     :param layer_idx: Index of the layer (used for debugging/logging).
     :type layer_idx: int, optional
 
-    :param rope_base: Base for the Exponential Frequency Calculation in RoPE. Default: ``10000.0``
-    :type rope_base: float, optional
+    :param pos_encoding: Positional Encoding to use. Default: ``RoPE``
+    :type pos_encoding: str, optional
+
+    :param pos_encoding_kwargs: Dictionary of Additional Arguments for Positional Encoding.
+        Example: {"rope_base": 10000.0, "rot_frac": 0.5}.
+    :type pos_encoding_kwargs: Dict, optional
 
     :param max_seq_len: Maximum sequence length for RoPE.
     :type max_seq_len: int
@@ -444,13 +489,15 @@ class CrossAttention(nn.Module):
         attn_bias: Optional[bool] = False,
         qk_norm: Optional[bool] = True,
         layer_idx: int = 0,
-        rope_base: float = 10000.0,
+        pos_encoding: str = "RoPE",
+        pos_encoding_kwargs: Dict = {},
         max_seq_len: int = 1024,
     ):
         super().__init__()
         assert d_model % n_heads == 0, "d_model must be divisible by n_heads"
         self.d_model, self.n_heads, self.d_head, self.layer_idx = d_model, n_heads, d_model // n_heads, layer_idx
         self.qk_norm = qk_norm
+        self.pos_encoding = pos_encoding
 
         self.q_proj, self.kv_proj, self.out_proj = (
             nn.Linear(self.d_model, self.d_model, bias=attn_bias),
@@ -458,7 +505,18 @@ class CrossAttention(nn.Module):
             nn.Linear(self.d_model, self.d_model, bias=attn_bias),
         )
 
-        self.rope = RoPE(max_seq_len, self.d_head, rope_base=rope_base)
+        if pos_encoding == "RoPE":
+            self.rope = RoPE(max_seq_len, self.d_head, **pos_encoding_kwargs)
+        elif pos_encoding == "PartialRoPE":
+            self.rope = PartialRoPE(max_seq_len, self.d_head, **pos_encoding_kwargs)
+        elif pos_encoding == "ALiBi":
+            self.alibi = ALiBi(max_seq_len, self.n_heads, **pos_encoding_kwargs)
+        elif pos_encoding == "None" or pos_encoding is None:
+            self.rope = None
+            self.alibi = None
+        else:
+            raise ValueError(f"Unknown positional encoding: {pos_encoding}")
+
         self.scale = self.d_head**-0.5
 
         self.dropout = dropout
@@ -527,67 +585,61 @@ class CrossAttention(nn.Module):
             B, Lk, H, d * 2
         ).transpose(1, 2).chunk(2, dim=-1)
         q, k = (self.q_norm(q), self.k_norm(k)) if self.qk_norm else (q, k)
-        q, k = self.rope(q, k, pos_q, pos_k) if pos_q is not None and pos_k is not None else (q, k)
+
+        if hasattr(self, "rope") and self.rope is not None and pos_q is not None and pos_k is not None:
+            q, k = self.rope(q, k, pos_q, pos_k)
+        elif hasattr(self, "alibi") and self.alibi is not None:
+            pass
+
+        # Get ALiBi bias if applicable
+        alibi_bias = None
+        if hasattr(self, "alibi") and self.alibi is not None:
+            alibi_bias = self.alibi(Lq + Lk, device=q.device, dtype=q.dtype)[:, :, :Lq, :Lk]
 
         y, A_weights, A_scores = None, None, None
         if flash_attn[0]:
             with torch.nn.attention.sdpa_kernel(backends=flash_attn[1], set_priority=flash_attn[2]):
+                attn_mask_sdpa = (~mask) if (mask is not None and alibi_bias is None) else None
                 y = (
                     F.scaled_dot_product_attention(
                         q,
                         k,
                         v,
-                        attn_mask=~mask if mask is not None else None,
-                        dropout_p=self.dropout if self.dropout is not None else 0.0,
+                        attn_mask=attn_mask_sdpa,
+                        attn_bias=alibi_bias,
+                        dropout_p=self.dropout,
                         is_causal=False,
                         scale=self.scale,
                         enable_gqa=False,
                     )
                     .transpose(1, 2)
-                    .contiguous()
-                    .view(B, Lq, D)
+                    .reshape(B, Lq, D)
                 )
         else:
-            A_weights = torch.matmul(q, k.transpose(-1, -2)) * self.scale
-            A_scores = (
-                F.softmax(A_weights.masked_fill(mask, float("-inf")), dim=-1)
-                if mask is not None
-                else F.softmax(A_weights, dim=-1)
-            )
-            y = (
-                torch.matmul(
-                    (
-                        F.dropout(A_scores, p=self.dropout, training=self.training, inplace=False)
-                        if self.dropout is not None and self.dropout != 0.0
-                        else A_scores
-                    ),
-                    v,
-                )
-                .transpose(1, 2)
-                .contiguous()
-                .view(B, Lq, D)
-            )
+            A_weights = torch.matmul(q, k.transpose(-1, -2)).mul_(self.scale)
+            if alibi_bias is not None:
+                A_weights = A_weights + alibi_bias
+            if mask is not None:
+                A_weights = A_weights.masked_fill_(mask, float("-inf"))
+            A_scores = A_weights.softmax(dim=-1)
 
+            if self.dropout > 0.0 and self.training:
+                A_scores = F.dropout(A_scores, p=self.dropout, inplace=False)
+
+            y = torch.matmul(A_scores, v).transpose(1, 2).reshape(B, Lq, D)
+
+        out_proj_y = self.out_proj(y)
         if return_states:
-            if flash_attn[0]:
-                return {
-                    "output": self.out_proj(y),
-                    "queries": q,
-                    "keys": k,
-                    "values": v,
-                    "output_before_proj": y,
-                    "input": (queries, kv),
-                }
-            else:
-                return {
-                    "output": self.out_proj(y),
-                    "queries": q,
-                    "keys": k,
-                    "values": v,
-                    "attn_weights": A_weights,
-                    "attn_scores": A_scores,
-                    "output_before_proj": y,
-                    "input": (queries, kv),
-                }
-        else:
-            return self.out_proj(y)
+            result = {
+                "output": out_proj_y,
+                "queries": q,
+                "keys": k,
+                "values": v,
+                "output_before_proj": y,
+                "input": (queries, kv),
+            }
+            if not flash_attn[0]:
+                result["attn_weights"] = A_weights
+                result["attn_scores"] = A_scores
+            return result
+        return out_proj_y

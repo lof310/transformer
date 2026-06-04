@@ -22,7 +22,7 @@ class RoPE(nn.Module):
     :type persistent: bool, optional
     """
 
-    def __init__(self, max_seq_len: int, d_head: int, rope_base: float = 10000.0, persistent: bool = True):
+    def __init__(self, max_seq_len: int, d_head: int, rope_base: float = 10000.0, persistent: bool = False):
         super().__init__()
         assert d_head % 2 == 0
         self.half = d_head // 2
@@ -106,7 +106,7 @@ class PartialRoPE(nn.Module):
         d_head: int,
         rot_frac: float = 0.5,
         rope_base: float = 10000.0,
-        persistent: bool = True,
+        persistent: bool = False,
     ):
         super().__init__()
         assert d_head % 2 == 0, "d_head must be even"
@@ -257,7 +257,7 @@ class ALiBi(nn.Module):
     :type persistent: bool, optional
     """
 
-    def __init__(self, max_seq_len: int, n_heads: int, base: float = 2.0, persistent: bool = True):
+    def __init__(self, max_seq_len: int, n_heads: int, base: float = 2.0, persistent: bool = False):
         super().__init__()
         assert n_heads > 0, "n_heads must be positive"
         assert max_seq_len > 0, "max_seq_len must be positive"
@@ -304,10 +304,9 @@ class ALiBi(nn.Module):
             slopes = slopes.to(dtype)
 
         # Create relative distance matrix (i - j) of shape (L, L)
-        # Using int64 then cast to slopes dtype for numerical stability
-        idx = torch.arange(L, device=slopes.device, dtype=torch.long)
+        # Create idx directly in float32 to avoid unnecessary cast
+        idx = torch.arange(L, device=slopes.device, dtype=torch.float32)
         rel = idx.unsqueeze(1) - idx.unsqueeze(0)  # (L, L), positive when i>j
-        rel = rel.to(slopes.dtype)  # cast to float
 
         # Compute per-head biases: (-slopes[:, None, None]) * rel[None, :, :]
         # Result shape: (n_heads, L, L)

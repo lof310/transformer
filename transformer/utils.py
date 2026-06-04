@@ -1,7 +1,4 @@
-import math
-import os
-import random
-import sys
+from enum import Enum, auto
 from typing import Dict, List, Optional, Tuple, Type, Union
 
 import torch
@@ -9,24 +6,38 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-def check_type(x: Union[Type[nn.Module], str]) -> int:
+class LayerType(Enum):
+    """Type enumeration for layer configuration resolution."""
+
+    STRING = auto()
+    NN_MODULE = auto()
+    LIST = auto()
+
+
+def get_layer_type(x: Union[str, Type[nn.Module], List]) -> LayerType:
     """
-    Check the type of x and return an integer code.
+    Determine the type of a layer configuration value.
 
-    :param x: Object to check (should be a string or nn.Module subclass)
-    :type x: Union[Type[nn.Module], str]
+    This replaces the fragile integer-based check_type function with a robust Enum-based approach.
 
-    :return: 0 if string, 1 if nn.Module subclass
-    :rtype: int
+    :param x: Object to check (should be a string, nn.Module subclass, or list)
+    :type x: Union[Type[nn.Module], str, List]
 
-    :raises TypeError: If x is neither a string nor an nn.Module subclass
+    :return: LayerType.STRING if string, LayerType.NN_MODULE if nn.Module subclass, LayerType.LIST if list
+    :rtype: LayerType
+
+    :raises TypeError: If x is not a valid type
     """
     if isinstance(x, str):
-        return 0
+        return LayerType.STRING
     elif isinstance(x, type) and issubclass(x, nn.Module):
-        return 1
+        return LayerType.NN_MODULE
+    elif isinstance(x, list):
+        return LayerType.LIST
     else:
-        raise TypeError(f"Type not valid: {x}")
+        raise TypeError(
+            f"Invalid layer configuration type: {type(x).__name__}. Expected str, nn.Module subclass, or list."
+        )
 
 
 def resolve_layer_config(config_value: Union[str, Type[nn.Module], List], layer_idx: int, n_layers: int):
