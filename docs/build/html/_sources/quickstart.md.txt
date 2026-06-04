@@ -14,7 +14,7 @@ config = TransformerConfig(
     d_model=512,
     d_ff=2048,
     max_seq_len=1024,
-    attn_type="MHA", # or "GQA", "MQA", "CrossAttention", etc
+    attn_class="MHA", # or "GQA", "CrossAttention", etc
     attn_qk_norm=True,
     tied_weights=False,
 )

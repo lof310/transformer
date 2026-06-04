@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Contributing" href="contributing.html"><link rel="prev" title="API Reference" href="api.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>Usage Examples - transformer 0.4.0 documentation</title>
+        <title>Usage Examples - transformer 0.5.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">transformer 0.4.0 documentation</div></a>
+      <a href="index.html"><div class="brand">transformer 0.5.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -182,7 +182,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
-  <span class="sidebar-brand-text">transformer 0.4.0 documentation</span>
+  <span class="sidebar-brand-text">transformer 0.5.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -455,6 +455,130 @@
 </pre></div>
 </div>
 </section>
+<section id="encoder-decoder-model-seq2seq">
+<h2>Encoder-Decoder Model (Seq2Seq)<a class="headerlink" href="#encoder-decoder-model-seq2seq" title="Link to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">EncoderDecoderModel</span></code> class provides a complete encoder-decoder architecture with cross-attention support.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">transformer</span><span class="w"> </span><span class="kn">import</span> <span class="n">EncoderDecoderModel</span><span class="p">,</span> <span class="n">TransformerConfig</span>
+
+<span class="c1"># Encoder config</span>
+<span class="n">encoder_config</span> <span class="o">=</span> <span class="n">TransformerConfig</span><span class="p">(</span>
+    <span class="n">n_layers</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+    <span class="n">n_heads</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+    <span class="n">d_model</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span>
+    <span class="n">pos_encoding</span><span class="o">=</span><span class="s2">&quot;RoPE&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Decoder config (with cross-attention)</span>
+<span class="n">decoder_config</span> <span class="o">=</span> <span class="n">TransformerConfig</span><span class="p">(</span>
+    <span class="n">n_layers</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+    <span class="n">n_heads</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+    <span class="n">d_model</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span>
+    <span class="n">attn_class</span><span class="o">=</span><span class="s2">&quot;GQA&quot;</span><span class="p">,</span>
+    <span class="n">n_kv_heads</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">pos_encoding</span><span class="o">=</span><span class="s2">&quot;RoPE&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Create encoder-decoder model</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">EncoderDecoderModel</span><span class="p">(</span><span class="n">encoder_config</span><span class="p">,</span> <span class="n">decoder_config</span><span class="p">)</span>
+
+<span class="c1"># Forward pass</span>
+<span class="n">encoder_input</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">encoder_config</span><span class="o">.</span><span class="n">vocab_size</span><span class="p">,</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">20</span><span class="p">))</span>
+<span class="n">decoder_input</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">decoder_config</span><span class="o">.</span><span class="n">vocab_size</span><span class="p">,</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+
+<span class="n">output</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span>
+    <span class="n">input_ids</span><span class="o">=</span><span class="n">decoder_input</span><span class="p">,</span>
+    <span class="n">encoder_input_ids</span><span class="o">=</span><span class="n">encoder_input</span><span class="p">,</span>
+    <span class="n">return_dict</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+<span class="n">logits</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">logits</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Logits shape: </span><span class="si">{</span><span class="n">logits</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># [batch_size, decoder_seq_len, vocab_size]</span>
+</pre></div>
+</div>
+<section id="incremental-decoding-with-kv-cache">
+<h3>Incremental Decoding with KV-Cache<a class="headerlink" href="#incremental-decoding-with-kv-cache" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">transformer</span><span class="w"> </span><span class="kn">import</span> <span class="n">EncoderDecoderModel</span><span class="p">,</span> <span class="n">TransformerConfig</span>
+
+<span class="n">encoder_config</span> <span class="o">=</span> <span class="n">TransformerConfig</span><span class="p">(</span><span class="n">n_layers</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">n_heads</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">d_model</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span>
+<span class="n">decoder_config</span> <span class="o">=</span> <span class="n">TransformerConfig</span><span class="p">(</span><span class="n">n_layers</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">n_heads</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">d_model</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">EncoderDecoderModel</span><span class="p">(</span><span class="n">encoder_config</span><span class="p">,</span> <span class="n">decoder_config</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+
+<span class="c1"># Encode source sequence</span>
+<span class="n">encoder_input</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">encoder_config</span><span class="o">.</span><span class="n">vocab_size</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">20</span><span class="p">))</span>
+<span class="n">encoder_outputs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">encoder_input</span><span class="p">,</span> <span class="n">return_dict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">encoder_hidden_states</span> <span class="o">=</span> <span class="n">encoder_outputs</span><span class="p">[</span><span class="s2">&quot;last_hidden_state&quot;</span><span class="p">]</span>
+
+<span class="c1"># Initial decoder prompt</span>
+<span class="n">decoder_input</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">decoder_config</span><span class="o">.</span><span class="n">vocab_size</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+
+<span class="c1"># First forward pass (no cache)</span>
+<span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span>
+        <span class="n">decoder_input</span><span class="p">,</span>
+        <span class="n">encoder_hidden_states</span><span class="o">=</span><span class="n">encoder_hidden_states</span><span class="p">,</span>
+        <span class="n">use_cache</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+    <span class="n">logits</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">logits</span>
+    <span class="n">past_key_values</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">past_key_values</span>
+
+<span class="c1"># Incremental decoding (one token at a time)</span>
+<span class="n">next_token_id</span> <span class="o">=</span> <span class="n">logits</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span>
+        <span class="n">next_token_id</span><span class="p">,</span>
+        <span class="n">encoder_hidden_states</span><span class="o">=</span><span class="n">encoder_hidden_states</span><span class="p">,</span>
+        <span class="n">past_key_values</span><span class="o">=</span><span class="n">past_key_values</span><span class="p">,</span>
+        <span class="n">use_cache</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+    <span class="n">new_past_key_values</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">past_key_values</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="applying-lora-adapters">
+<h2>Applying LoRA Adapters<a class="headerlink" href="#applying-lora-adapters" title="Link to this heading">¶</a></h2>
+<p>LoRA (Low-Rank Adaptation) enables parameter-efficient fine-tuning by adding small trainable adapters to frozen model weights.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">transformer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Transformer</span><span class="p">,</span> <span class="n">TransformerConfig</span><span class="p">,</span> <span class="n">apply_lora_to_model</span>
+
+<span class="c1"># Create model</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">TransformerConfig</span><span class="p">(</span><span class="n">n_layers</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">n_heads</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">d_model</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">Transformer</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+<span class="c1"># Apply LoRA to query/key/value projections</span>
+<span class="n">apply_lora_to_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">target_modules</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;qkv_proj&quot;</span><span class="p">],</span> <span class="n">lora_rank</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">lora_alpha</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+
+<span class="c1"># Freeze base model parameters</span>
+<span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">():</span>
+    <span class="n">param</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="c1"># Only train LoRA parameters</span>
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">named_parameters</span><span class="p">():</span>
+    <span class="k">if</span> <span class="s2">&quot;lora_&quot;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+        <span class="n">param</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="kc">True</span>
+
+<span class="c1"># Now you can train with only LoRA parameters being updated</span>
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">AdamW</span><span class="p">(</span>
+    <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">()</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">requires_grad</span><span class="p">],</span>
+    <span class="n">lr</span><span class="o">=</span><span class="mf">1e-4</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<section id="lora-on-multiple-module-types">
+<h3>LoRA on Multiple Module Types<a class="headerlink" href="#lora-on-multiple-module-types" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Apply LoRA to both attention projections and feed-forward layers</span>
+<span class="n">apply_lora_to_model</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">,</span>
+    <span class="n">target_modules</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;qkv_proj&quot;</span><span class="p">,</span> <span class="s2">&quot;W1&quot;</span><span class="p">,</span> <span class="s2">&quot;W2&quot;</span><span class="p">],</span>  <span class="c1"># attention and FFN layers</span>
+    <span class="n">lora_rank</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+    <span class="n">lora_alpha</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+    <span class="n">lora_dropout</span><span class="o">=</span><span class="mf">0.1</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
 </section>
 
         </article>
@@ -519,6 +643,14 @@
 <li><a class="reference internal" href="#text-generation-with-huggingface-generationmixin">Text Generation with HuggingFace GenerationMixin</a></li>
 <li><a class="reference internal" href="#using-flash-attention">Using Flash Attention</a></li>
 <li><a class="reference internal" href="#custom-attention-mask">Custom Attention Mask</a></li>
+<li><a class="reference internal" href="#encoder-decoder-model-seq2seq">Encoder-Decoder Model (Seq2Seq)</a><ul>
+<li><a class="reference internal" href="#incremental-decoding-with-kv-cache">Incremental Decoding with KV-Cache</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#applying-lora-adapters">Applying LoRA Adapters</a><ul>
+<li><a class="reference internal" href="#lora-on-multiple-module-types">LoRA on Multiple Module Types</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -530,7 +662,7 @@
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=6c02275b"></script>
+</div><script src="_static/documentation_options.js?v=1dd76d02"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>

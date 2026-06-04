@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>transformer.attns - transformer 0.4.0 documentation</title>
+        <title>transformer.attns - transformer 0.5.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
@@ -160,7 +160,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">transformer 0.4.0 documentation</div></a>
+      <a href="../../index.html"><div class="brand">transformer 0.5.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -181,7 +181,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
-  <span class="sidebar-brand-text">transformer 0.4.0 documentation</span>
+  <span class="sidebar-brand-text">transformer 0.5.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -249,7 +249,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nn</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn.functional</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">F</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.pos</span><span class="w"> </span><span class="kn">import</span> <span class="n">PartialRoPE</span><span class="p">,</span> <span class="n">RoPE</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.pos</span><span class="w"> </span><span class="kn">import</span> <span class="n">ALiBi</span><span class="p">,</span> <span class="n">PartialRoPE</span><span class="p">,</span> <span class="n">RoPE</span>
 
 
 <div class="viewcode-block" id="MHA">
@@ -344,7 +344,9 @@
             <span class="kc">False</span><span class="p">,</span>
         <span class="p">),</span>
         <span class="n">return_states</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
+        <span class="n">cache</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">return_cache</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]]:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Forward pass of MHA.</span>
 
@@ -372,16 +374,34 @@
 <span class="sd">        :param return_states: If ``True``, return a dictionary of intermediate tensors. Default: ``False``</span>
 <span class="sd">        :type return_states: bool, optional</span>
 
+<span class="sd">        :param cache: Optional KV cache tuple `(k_prev, v_prev)` of shape `(B, H, L_prev, d)` each.</span>
+<span class="sd">            If provided, new keys/values are concatenated with cached ones along sequence dimension.</span>
+<span class="sd">        :type cache: Tuple[torch.Tensor, torch.Tensor], optional</span>
+
 <span class="sd">        :return: Output tensor :math:`(B, N, D)` if not return_states, else a dict containing</span>
-<span class="sd">            the keys: {`output`, `queries`, `keys`, `values`, `attn_weights`, `attn_scores`, `output_before_proj` and `input`}</span>
-<span class="sd">        :rtype: Union[torch.Tensor, Dict]</span>
+<span class="sd">            the keys: {`output`, `queries`, `keys`, `values`, `attn_weights`, `attn_scores`, `output_before_proj` and `input`}.</span>
+<span class="sd">            If cache is provided, returns a tuple `(output, new_cache)` where `new_cache` is `(k, v)`.</span>
+<span class="sd">        :rtype: Union[torch.Tensor, Dict, Tuple[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">B</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="o">*</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_heads</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_head</span>
 
-        <span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qkv_proj</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">d</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">q</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">q_norm</span><span class="p">(</span><span class="n">q</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">k_norm</span><span class="p">(</span><span class="n">k</span><span class="p">))</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qk_norm</span> <span class="k">else</span> <span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
-        <span class="n">q</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rope</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span> <span class="k">if</span> <span class="n">pos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+        <span class="n">qkv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qkv_proj</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">qkv</span><span class="o">.</span><span class="n">unbind</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qk_norm</span><span class="p">:</span>
+            <span class="n">q</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">q_norm</span><span class="p">(</span><span class="n">q</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">k_norm</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">pos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">q</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rope</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">cache</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">k_prev</span><span class="p">,</span> <span class="n">v_prev</span> <span class="o">=</span> <span class="n">cache</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">k_prev</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">v_prev</span><span class="p">,</span> <span class="n">v</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">new_cache</span> <span class="o">=</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+
+        <span class="n">L_total</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
 
         <span class="n">y</span><span class="p">,</span> <span class="n">A_weights</span><span class="p">,</span> <span class="n">A_scores</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">flash_attn</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
@@ -391,60 +411,61 @@
                         <span class="n">q</span><span class="p">,</span>
                         <span class="n">k</span><span class="p">,</span>
                         <span class="n">v</span><span class="p">,</span>
-                        <span class="n">attn_mask</span><span class="o">=~</span><span class="n">mask</span> <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-                        <span class="n">dropout_p</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mf">0.0</span><span class="p">,</span>
+                        <span class="n">attn_mask</span><span class="o">=</span><span class="p">(</span><span class="o">~</span><span class="n">mask</span><span class="p">)</span> <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                        <span class="n">dropout_p</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">,</span>
                         <span class="n">is_causal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                         <span class="n">scale</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">,</span>
                         <span class="n">enable_gqa</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                     <span class="p">)</span>
                     <span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-                    <span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
-                    <span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
                 <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">A_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">))</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span>
-            <span class="n">A_scores</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">A_weights</span><span class="o">.</span><span class="n">masked_fill</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">)),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                <span class="k">else</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">A_weights</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-            <span class="p">)</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span>
-                    <span class="p">(</span>
-                        <span class="n">F</span><span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="n">A_scores</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="o">!=</span> <span class="mf">0.0</span>
-                        <span class="k">else</span> <span class="n">A_scores</span>
-                    <span class="p">),</span>
-                    <span class="n">v</span><span class="p">,</span>
-                <span class="p">)</span>
-                <span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-                <span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
-                <span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
-            <span class="p">)</span>
+            <span class="n">A_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">))</span><span class="o">.</span><span class="n">mul_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">A_weights</span> <span class="o">=</span> <span class="n">A_weights</span><span class="o">.</span><span class="n">masked_fill_</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">))</span>
+            <span class="n">A_scores</span> <span class="o">=</span> <span class="n">A_weights</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
 
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="o">&gt;</span> <span class="mf">0.0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">:</span>
+                <span class="n">A_scores</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="n">A_scores</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="n">y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">A_scores</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_proj</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+        <span class="c1"># Return cache tuple when explicitly requested via return_cache flag or when cache was provided</span>
+        <span class="c1"># This allows first-pass cache building as well as incremental decoding</span>
+        <span class="k">if</span> <span class="n">cache</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">return_cache</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">return_states</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="n">out</span><span class="p">,</span>
+                    <span class="s2">&quot;queries&quot;</span><span class="p">:</span> <span class="n">q</span><span class="p">,</span>
+                    <span class="s2">&quot;keys&quot;</span><span class="p">:</span> <span class="n">k</span><span class="p">,</span>
+                    <span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="n">v</span><span class="p">,</span>
+                    <span class="s2">&quot;output_before_proj&quot;</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span>
+                    <span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span>
+                <span class="p">}</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">flash_attn</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="n">result</span><span class="p">[</span><span class="s2">&quot;attn_weights&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">A_weights</span>
+                    <span class="n">result</span><span class="p">[</span><span class="s2">&quot;attn_scores&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">A_scores</span>
+                <span class="k">return</span> <span class="n">result</span><span class="p">,</span> <span class="n">new_cache</span>
+            <span class="k">return</span> <span class="n">out</span><span class="p">,</span> <span class="n">new_cache</span>
+
+        <span class="c1"># No cache provided, return standard output</span>
         <span class="k">if</span> <span class="n">return_states</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">flash_attn</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-                <span class="k">return</span> <span class="p">{</span>
-                    <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_proj</span><span class="p">(</span><span class="n">y</span><span class="p">),</span>
-                    <span class="s2">&quot;queries&quot;</span><span class="p">:</span> <span class="n">q</span><span class="p">,</span>
-                    <span class="s2">&quot;keys&quot;</span><span class="p">:</span> <span class="n">k</span><span class="p">,</span>
-                    <span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="n">v</span><span class="p">,</span>
-                    <span class="s2">&quot;output_before_proj&quot;</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span>
-                    <span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span>
-                <span class="p">}</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="p">{</span>
-                    <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_proj</span><span class="p">(</span><span class="n">y</span><span class="p">),</span>
-                    <span class="s2">&quot;queries&quot;</span><span class="p">:</span> <span class="n">q</span><span class="p">,</span>
-                    <span class="s2">&quot;keys&quot;</span><span class="p">:</span> <span class="n">k</span><span class="p">,</span>
-                    <span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="n">v</span><span class="p">,</span>
-                    <span class="s2">&quot;attn_weights&quot;</span><span class="p">:</span> <span class="n">A_weights</span><span class="p">,</span>
-                    <span class="s2">&quot;attn_scores&quot;</span><span class="p">:</span> <span class="n">A_scores</span><span class="p">,</span>
-                    <span class="s2">&quot;output_before_proj&quot;</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span>
-                    <span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span>
-                <span class="p">}</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_proj</span><span class="p">(</span><span class="n">y</span><span class="p">)</span></div>
+            <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="n">out</span><span class="p">,</span>
+                <span class="s2">&quot;queries&quot;</span><span class="p">:</span> <span class="n">q</span><span class="p">,</span>
+                <span class="s2">&quot;keys&quot;</span><span class="p">:</span> <span class="n">k</span><span class="p">,</span>
+                <span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="n">v</span><span class="p">,</span>
+                <span class="s2">&quot;output_before_proj&quot;</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span>
+                <span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">flash_attn</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">result</span><span class="p">[</span><span class="s2">&quot;attn_weights&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">A_weights</span>
+                <span class="n">result</span><span class="p">[</span><span class="s2">&quot;attn_scores&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">A_scores</span>
+            <span class="k">return</span> <span class="n">result</span>
+        <span class="k">return</span> <span class="n">out</span></div>
 </div>
 
 
@@ -556,7 +577,9 @@
             <span class="kc">False</span><span class="p">,</span>
         <span class="p">),</span>
         <span class="n">return_states</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
+        <span class="n">cache</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">return_cache</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Forward pass of GQA.</span>
 
@@ -584,9 +607,17 @@
 <span class="sd">        :param return_states: If ``True``, return a dictionary of intermediate tensors. Default: ``False``</span>
 <span class="sd">        :type return_states: bool, optional</span>
 
+<span class="sd">        :param cache: Optional KV cache tuple `(k_prev, v_prev)` of shape `(B, H_kv, L_prev, d)` each.</span>
+<span class="sd">            For GQA, cache stores compressed key/value heads before repeat_interleave.</span>
+<span class="sd">        :type cache: Tuple[torch.Tensor, torch.Tensor], optional</span>
+
+<span class="sd">        :param return_cache: If True, always return cache tuple even on first pass. Used for building initial cache.</span>
+<span class="sd">        :type return_cache: bool, optional</span>
+
 <span class="sd">        :return: Output tensor of shape :math:`(B, N, D)` if not return_states, else a dict containing</span>
-<span class="sd">            the keys: {`output`, `queries`, `keys`, `values`, `attn_weights`, `attn_scores`, `output_before_proj` and `input`}</span>
-<span class="sd">        :rtype: Union[torch.Tensor, Dict]</span>
+<span class="sd">            the keys: {`output`, `queries`, `keys`, `values`, `attn_weights`, `attn_scores`, `output_before_proj` and `input`}.</span>
+<span class="sd">            If cache is provided or return_cache=True, returns a tuple `(output, new_cache)` where `new_cache` is `(k, v)`.</span>
+<span class="sd">        :rtype: Union[torch.Tensor, Dict, Tuple[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]]</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -594,7 +625,16 @@
 
         <span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qkv_proj</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">H_q</span> <span class="o">+</span> <span class="p">(</span><span class="n">H_kv</span> <span class="o">*</span> <span class="mi">2</span><span class="p">),</span> <span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">([</span><span class="n">H_q</span><span class="p">,</span> <span class="n">H_kv</span><span class="p">,</span> <span class="n">H_kv</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">q</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">q_norm</span><span class="p">(</span><span class="n">q</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">k_norm</span><span class="p">(</span><span class="n">k</span><span class="p">))</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qk_norm</span> <span class="k">else</span> <span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+
         <span class="n">q</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rope</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span> <span class="k">if</span> <span class="n">pos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">cache</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">k_prev</span><span class="p">,</span> <span class="n">v_prev</span> <span class="o">=</span> <span class="n">cache</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">k_prev</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">v_prev</span><span class="p">,</span> <span class="n">v</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">new_cache</span> <span class="o">=</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+
+        <span class="n">L_total</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
 
         <span class="n">y</span><span class="p">,</span> <span class="n">A_weights</span><span class="p">,</span> <span class="n">A_scores</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">flash_attn</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
@@ -604,63 +644,64 @@
                         <span class="n">q</span><span class="p">,</span>
                         <span class="n">k</span><span class="p">,</span>
                         <span class="n">v</span><span class="p">,</span>
-                        <span class="n">attn_mask</span><span class="o">=~</span><span class="n">mask</span> <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-                        <span class="n">dropout_p</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mf">0.0</span><span class="p">,</span>
+                        <span class="n">attn_mask</span><span class="o">=</span><span class="p">(</span><span class="o">~</span><span class="n">mask</span><span class="p">)</span> <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                        <span class="n">dropout_p</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">,</span>
                         <span class="n">is_causal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                         <span class="n">scale</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">,</span>
                         <span class="n">enable_gqa</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                     <span class="p">)</span>
                     <span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-                    <span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
-                    <span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
                 <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">k</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">repeat_interleave</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-            <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">repeat_interleave</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">k_expanded</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">repeat_interleave</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">v_expanded</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">repeat_interleave</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
-            <span class="n">A_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">))</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span>
-            <span class="n">A_scores</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">A_weights</span><span class="o">.</span><span class="n">masked_fill</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">)),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                <span class="k">else</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">A_weights</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-            <span class="p">)</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span>
-                    <span class="p">(</span>
-                        <span class="n">F</span><span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="n">A_scores</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="o">!=</span> <span class="mf">0.0</span>
-                        <span class="k">else</span> <span class="n">A_scores</span>
-                    <span class="p">),</span>
-                    <span class="n">v</span><span class="p">,</span>
-                <span class="p">)</span>
-                <span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-                <span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
-                <span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
-            <span class="p">)</span>
+            <span class="n">A_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k_expanded</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">))</span><span class="o">.</span><span class="n">mul_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">A_weights</span> <span class="o">=</span> <span class="n">A_weights</span><span class="o">.</span><span class="n">masked_fill_</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">))</span>
+            <span class="n">A_scores</span> <span class="o">=</span> <span class="n">A_weights</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
 
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="o">&gt;</span> <span class="mf">0.0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">:</span>
+                <span class="n">A_scores</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="n">A_scores</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="n">y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">A_scores</span><span class="p">,</span> <span class="n">v_expanded</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_proj</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+        <span class="c1"># Return cache tuple when explicitly requested via return_cache flag or when cache was provided</span>
+        <span class="c1"># This allows first-pass cache building as well as incremental decoding</span>
+        <span class="k">if</span> <span class="n">cache</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">return_cache</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">return_states</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="n">out</span><span class="p">,</span>
+                    <span class="s2">&quot;queries&quot;</span><span class="p">:</span> <span class="n">q</span><span class="p">,</span>
+                    <span class="s2">&quot;keys&quot;</span><span class="p">:</span> <span class="n">k</span><span class="p">,</span>
+                    <span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="n">v</span><span class="p">,</span>
+                    <span class="s2">&quot;output_before_proj&quot;</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span>
+                    <span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span>
+                <span class="p">}</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">flash_attn</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="n">result</span><span class="p">[</span><span class="s2">&quot;attn_weights&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">A_weights</span>
+                    <span class="n">result</span><span class="p">[</span><span class="s2">&quot;attn_scores&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">A_scores</span>
+                <span class="k">return</span> <span class="n">result</span><span class="p">,</span> <span class="n">new_cache</span>
+            <span class="k">return</span> <span class="n">out</span><span class="p">,</span> <span class="n">new_cache</span>
+
+        <span class="c1"># No cache provided, return standard output</span>
         <span class="k">if</span> <span class="n">return_states</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">flash_attn</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-                <span class="k">return</span> <span class="p">{</span>
-                    <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_proj</span><span class="p">(</span><span class="n">y</span><span class="p">),</span>
-                    <span class="s2">&quot;queries&quot;</span><span class="p">:</span> <span class="n">q</span><span class="p">,</span>
-                    <span class="s2">&quot;keys&quot;</span><span class="p">:</span> <span class="n">k</span><span class="p">,</span>
-                    <span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="n">v</span><span class="p">,</span>
-                    <span class="s2">&quot;output_before_proj&quot;</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span>
-                    <span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span>
-                <span class="p">}</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="p">{</span>
-                    <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_proj</span><span class="p">(</span><span class="n">y</span><span class="p">),</span>
-                    <span class="s2">&quot;queries&quot;</span><span class="p">:</span> <span class="n">q</span><span class="p">,</span>
-                    <span class="s2">&quot;keys&quot;</span><span class="p">:</span> <span class="n">k</span><span class="p">,</span>
-                    <span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="n">v</span><span class="p">,</span>
-                    <span class="s2">&quot;attn_weights&quot;</span><span class="p">:</span> <span class="n">A_weights</span><span class="p">,</span>
-                    <span class="s2">&quot;attn_scores&quot;</span><span class="p">:</span> <span class="n">A_scores</span><span class="p">,</span>
-                    <span class="s2">&quot;output_before_proj&quot;</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span>
-                    <span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span>
-                <span class="p">}</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_proj</span><span class="p">(</span><span class="n">y</span><span class="p">)</span></div>
+            <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="n">out</span><span class="p">,</span>
+                <span class="s2">&quot;queries&quot;</span><span class="p">:</span> <span class="n">q</span><span class="p">,</span>
+                <span class="s2">&quot;keys&quot;</span><span class="p">:</span> <span class="n">k</span><span class="p">,</span>
+                <span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="n">v</span><span class="p">,</span>
+                <span class="s2">&quot;output_before_proj&quot;</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span>
+                <span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">flash_attn</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">result</span><span class="p">[</span><span class="s2">&quot;attn_weights&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">A_weights</span>
+                <span class="n">result</span><span class="p">[</span><span class="s2">&quot;attn_scores&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">A_scores</span>
+            <span class="k">return</span> <span class="n">result</span>
+        <span class="k">return</span> <span class="n">out</span></div>
 </div>
 
 
@@ -693,8 +734,12 @@
 <span class="sd">    :param layer_idx: Index of the layer (used for debugging/logging).</span>
 <span class="sd">    :type layer_idx: int, optional</span>
 
-<span class="sd">    :param rope_base: Base for the Exponential Frequency Calculation in RoPE. Default: ``10000.0``</span>
-<span class="sd">    :type rope_base: float, optional</span>
+<span class="sd">    :param pos_encoding: Positional Encoding to use. Default: ``RoPE``</span>
+<span class="sd">    :type pos_encoding: str, optional</span>
+
+<span class="sd">    :param pos_encoding_kwargs: Dictionary of Additional Arguments for Positional Encoding.</span>
+<span class="sd">        Example: {&quot;rope_base&quot;: 10000.0, &quot;rot_frac&quot;: 0.5}.</span>
+<span class="sd">    :type pos_encoding_kwargs: Dict, optional</span>
 
 <span class="sd">    :param max_seq_len: Maximum sequence length for RoPE.</span>
 <span class="sd">    :type max_seq_len: int</span>
@@ -711,13 +756,15 @@
         <span class="n">attn_bias</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">qk_norm</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">layer_idx</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="n">rope_base</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10000.0</span><span class="p">,</span>
+        <span class="n">pos_encoding</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;RoPE&quot;</span><span class="p">,</span>
+        <span class="n">pos_encoding_kwargs</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="p">{},</span>
         <span class="n">max_seq_len</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1024</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="k">assert</span> <span class="n">d_model</span> <span class="o">%</span> <span class="n">n_heads</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;d_model must be divisible by n_heads&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_heads</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_head</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">layer_idx</span> <span class="o">=</span> <span class="n">d_model</span><span class="p">,</span> <span class="n">n_heads</span><span class="p">,</span> <span class="n">d_model</span> <span class="o">//</span> <span class="n">n_heads</span><span class="p">,</span> <span class="n">layer_idx</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">qk_norm</span> <span class="o">=</span> <span class="n">qk_norm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos_encoding</span> <span class="o">=</span> <span class="n">pos_encoding</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">q_proj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kv_proj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_proj</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="n">attn_bias</span><span class="p">),</span>
@@ -725,7 +772,18 @@
             <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="n">attn_bias</span><span class="p">),</span>
         <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">rope</span> <span class="o">=</span> <span class="n">RoPE</span><span class="p">(</span><span class="n">max_seq_len</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_head</span><span class="p">,</span> <span class="n">rope_base</span><span class="o">=</span><span class="n">rope_base</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pos_encoding</span> <span class="o">==</span> <span class="s2">&quot;RoPE&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rope</span> <span class="o">=</span> <span class="n">RoPE</span><span class="p">(</span><span class="n">max_seq_len</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_head</span><span class="p">,</span> <span class="o">**</span><span class="n">pos_encoding_kwargs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">pos_encoding</span> <span class="o">==</span> <span class="s2">&quot;PartialRoPE&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rope</span> <span class="o">=</span> <span class="n">PartialRoPE</span><span class="p">(</span><span class="n">max_seq_len</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_head</span><span class="p">,</span> <span class="o">**</span><span class="n">pos_encoding_kwargs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">pos_encoding</span> <span class="o">==</span> <span class="s2">&quot;ALiBi&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">alibi</span> <span class="o">=</span> <span class="n">ALiBi</span><span class="p">(</span><span class="n">max_seq_len</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_heads</span><span class="p">,</span> <span class="o">**</span><span class="n">pos_encoding_kwargs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">pos_encoding</span> <span class="o">==</span> <span class="s2">&quot;None&quot;</span> <span class="ow">or</span> <span class="n">pos_encoding</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rope</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">alibi</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown positional encoding: </span><span class="si">{</span><span class="n">pos_encoding</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_head</span><span class="o">**-</span><span class="mf">0.5</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="n">dropout</span>
@@ -797,70 +855,64 @@
             <span class="n">B</span><span class="p">,</span> <span class="n">Lk</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">d</span> <span class="o">*</span> <span class="mi">2</span>
         <span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">q</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">q_norm</span><span class="p">(</span><span class="n">q</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">k_norm</span><span class="p">(</span><span class="n">k</span><span class="p">))</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qk_norm</span> <span class="k">else</span> <span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
-        <span class="n">q</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rope</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">pos_q</span><span class="p">,</span> <span class="n">pos_k</span><span class="p">)</span> <span class="k">if</span> <span class="n">pos_q</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pos_k</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;rope&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">rope</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pos_q</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pos_k</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">q</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rope</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">pos_q</span><span class="p">,</span> <span class="n">pos_k</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;alibi&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">alibi</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># Get ALiBi bias if applicable</span>
+        <span class="n">alibi_bias</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;alibi&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">alibi</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">alibi_bias</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alibi</span><span class="p">(</span><span class="n">Lq</span> <span class="o">+</span> <span class="n">Lk</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">q</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">q</span><span class="o">.</span><span class="n">dtype</span><span class="p">)[:,</span> <span class="p">:,</span> <span class="p">:</span><span class="n">Lq</span><span class="p">,</span> <span class="p">:</span><span class="n">Lk</span><span class="p">]</span>
 
         <span class="n">y</span><span class="p">,</span> <span class="n">A_weights</span><span class="p">,</span> <span class="n">A_scores</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">flash_attn</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
             <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">attention</span><span class="o">.</span><span class="n">sdpa_kernel</span><span class="p">(</span><span class="n">backends</span><span class="o">=</span><span class="n">flash_attn</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">set_priority</span><span class="o">=</span><span class="n">flash_attn</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
+                <span class="n">attn_mask_sdpa</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">mask</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">alibi_bias</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
                 <span class="n">y</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="n">F</span><span class="o">.</span><span class="n">scaled_dot_product_attention</span><span class="p">(</span>
                         <span class="n">q</span><span class="p">,</span>
                         <span class="n">k</span><span class="p">,</span>
                         <span class="n">v</span><span class="p">,</span>
-                        <span class="n">attn_mask</span><span class="o">=~</span><span class="n">mask</span> <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-                        <span class="n">dropout_p</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mf">0.0</span><span class="p">,</span>
+                        <span class="n">attn_mask</span><span class="o">=</span><span class="n">attn_mask_sdpa</span><span class="p">,</span>
+                        <span class="n">attn_bias</span><span class="o">=</span><span class="n">alibi_bias</span><span class="p">,</span>
+                        <span class="n">dropout_p</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">,</span>
                         <span class="n">is_causal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                         <span class="n">scale</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">,</span>
                         <span class="n">enable_gqa</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                     <span class="p">)</span>
                     <span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-                    <span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
-                    <span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">Lq</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">Lq</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
                 <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">A_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">))</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span>
-            <span class="n">A_scores</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">A_weights</span><span class="o">.</span><span class="n">masked_fill</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">)),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                <span class="k">else</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">A_weights</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-            <span class="p">)</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span>
-                    <span class="p">(</span>
-                        <span class="n">F</span><span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="n">A_scores</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="o">!=</span> <span class="mf">0.0</span>
-                        <span class="k">else</span> <span class="n">A_scores</span>
-                    <span class="p">),</span>
-                    <span class="n">v</span><span class="p">,</span>
-                <span class="p">)</span>
-                <span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-                <span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
-                <span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">Lq</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
-            <span class="p">)</span>
+            <span class="n">A_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">))</span><span class="o">.</span><span class="n">mul_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">alibi_bias</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">A_weights</span> <span class="o">=</span> <span class="n">A_weights</span> <span class="o">+</span> <span class="n">alibi_bias</span>
+            <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">A_weights</span> <span class="o">=</span> <span class="n">A_weights</span><span class="o">.</span><span class="n">masked_fill_</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">))</span>
+            <span class="n">A_scores</span> <span class="o">=</span> <span class="n">A_weights</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
 
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="o">&gt;</span> <span class="mf">0.0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">:</span>
+                <span class="n">A_scores</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="n">A_scores</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="n">y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">A_scores</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">Lq</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+
+        <span class="n">out_proj_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_proj</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">return_states</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">flash_attn</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-                <span class="k">return</span> <span class="p">{</span>
-                    <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_proj</span><span class="p">(</span><span class="n">y</span><span class="p">),</span>
-                    <span class="s2">&quot;queries&quot;</span><span class="p">:</span> <span class="n">q</span><span class="p">,</span>
-                    <span class="s2">&quot;keys&quot;</span><span class="p">:</span> <span class="n">k</span><span class="p">,</span>
-                    <span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="n">v</span><span class="p">,</span>
-                    <span class="s2">&quot;output_before_proj&quot;</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span>
-                    <span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">queries</span><span class="p">,</span> <span class="n">kv</span><span class="p">),</span>
-                <span class="p">}</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="p">{</span>
-                    <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_proj</span><span class="p">(</span><span class="n">y</span><span class="p">),</span>
-                    <span class="s2">&quot;queries&quot;</span><span class="p">:</span> <span class="n">q</span><span class="p">,</span>
-                    <span class="s2">&quot;keys&quot;</span><span class="p">:</span> <span class="n">k</span><span class="p">,</span>
-                    <span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="n">v</span><span class="p">,</span>
-                    <span class="s2">&quot;attn_weights&quot;</span><span class="p">:</span> <span class="n">A_weights</span><span class="p">,</span>
-                    <span class="s2">&quot;attn_scores&quot;</span><span class="p">:</span> <span class="n">A_scores</span><span class="p">,</span>
-                    <span class="s2">&quot;output_before_proj&quot;</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span>
-                    <span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">queries</span><span class="p">,</span> <span class="n">kv</span><span class="p">),</span>
-                <span class="p">}</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_proj</span><span class="p">(</span><span class="n">y</span><span class="p">)</span></div>
+            <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="n">out_proj_y</span><span class="p">,</span>
+                <span class="s2">&quot;queries&quot;</span><span class="p">:</span> <span class="n">q</span><span class="p">,</span>
+                <span class="s2">&quot;keys&quot;</span><span class="p">:</span> <span class="n">k</span><span class="p">,</span>
+                <span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="n">v</span><span class="p">,</span>
+                <span class="s2">&quot;output_before_proj&quot;</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span>
+                <span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">queries</span><span class="p">,</span> <span class="n">kv</span><span class="p">),</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">flash_attn</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">result</span><span class="p">[</span><span class="s2">&quot;attn_weights&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">A_weights</span>
+                <span class="n">result</span><span class="p">[</span><span class="s2">&quot;attn_scores&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">A_scores</span>
+            <span class="k">return</span> <span class="n">result</span>
+        <span class="k">return</span> <span class="n">out_proj_y</span></div>
 </div>
 
 </pre></div>
@@ -895,7 +947,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=6c02275b"></script>
+</div><script src="../../_static/documentation_options.js?v=1dd76d02"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>

@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>transformer.utils - transformer 0.4.0 documentation</title>
+        <title>transformer.utils - transformer 0.5.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
@@ -160,7 +160,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">transformer 0.4.0 documentation</div></a>
+      <a href="../../index.html"><div class="brand">transformer 0.5.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -181,7 +181,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
-  <span class="sidebar-brand-text">transformer 0.4.0 documentation</span>
+  <span class="sidebar-brand-text">transformer 0.5.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -243,10 +243,7 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for transformer.utils</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">auto</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
@@ -254,26 +251,43 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn.functional</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">F</span>
 
 
-<div class="viewcode-block" id="check_type">
-<a class="viewcode-back" href="../../api.html#transformer.utils.check_type">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">check_type</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">],</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<div class="viewcode-block" id="LayerType">
+<a class="viewcode-back" href="../../api.html#transformer.utils.LayerType">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LayerType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Type enumeration for layer configuration resolution.&quot;&quot;&quot;</span>
+
+    <span class="n">STRING</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">NN_MODULE</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">LIST</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="get_layer_type">
+<a class="viewcode-back" href="../../api.html#transformer.utils.get_layer_type">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_layer_type</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Type</span><span class="p">[</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">],</span> <span class="n">List</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">LayerType</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Check the type of x and return an integer code.</span>
-<span class="sd">    </span>
-<span class="sd">    :param x: Object to check (should be a string or nn.Module subclass)</span>
-<span class="sd">    :type x: Union[Type[nn.Module], str]</span>
-<span class="sd">    </span>
-<span class="sd">    :return: 0 if string, 1 if nn.Module subclass</span>
-<span class="sd">    :rtype: int</span>
-<span class="sd">    </span>
-<span class="sd">    :raises TypeError: If x is neither a string nor an nn.Module subclass</span>
+<span class="sd">    Determine the type of a layer configuration value.</span>
+
+<span class="sd">    This replaces the fragile integer-based check_type function with a robust Enum-based approach.</span>
+
+<span class="sd">    :param x: Object to check (should be a string, nn.Module subclass, or list)</span>
+<span class="sd">    :type x: Union[Type[nn.Module], str, List]</span>
+
+<span class="sd">    :return: LayerType.STRING if string, LayerType.NN_MODULE if nn.Module subclass, LayerType.LIST if list</span>
+<span class="sd">    :rtype: LayerType</span>
+
+<span class="sd">    :raises TypeError: If x is not a valid type</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="n">LayerType</span><span class="o">.</span><span class="n">STRING</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-        <span class="k">return</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">LayerType</span><span class="o">.</span><span class="n">NN_MODULE</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">LayerType</span><span class="o">.</span><span class="n">LIST</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Type not valid: </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Invalid layer configuration type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">. Expected str, nn.Module subclass, or list.&quot;</span>
+        <span class="p">)</span></div>
 
 
 
@@ -283,24 +297,22 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Resolve configuration value for a specific layer index.</span>
 <span class="sd">    Supports both uniform (single value) and per-layer (list) configurations.</span>
-<span class="sd">    </span>
+
 <span class="sd">    :param config_value: Configuration value (string, type, or list)</span>
 <span class="sd">    :type config_value: Union[str, Type[nn.Module], List]</span>
-<span class="sd">    </span>
+
 <span class="sd">    :param layer_idx: Index of the current layer</span>
 <span class="sd">    :type layer_idx: int</span>
-<span class="sd">    </span>
+
 <span class="sd">    :param n_layers: Total number of layers</span>
 <span class="sd">    :type n_layers: int</span>
-<span class="sd">    </span>
+
 <span class="sd">    :return: Resolved configuration value for this layer</span>
 <span class="sd">    :raises ValueError: If list length doesn&#39;t match n_layers</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config_value</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">config_value</span><span class="p">)</span> <span class="o">!=</span> <span class="n">n_layers</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;List configuration must have length </span><span class="si">{</span><span class="n">n_layers</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">config_value</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;List configuration must have length </span><span class="si">{</span><span class="n">n_layers</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">config_value</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">config_value</span><span class="p">[</span><span class="n">layer_idx</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">config_value</span></div>
 
@@ -336,7 +348,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=6c02275b"></script>
+</div><script src="../../_static/documentation_options.js?v=1dd76d02"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>

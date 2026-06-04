@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="API Reference" href="api.html"><link rel="prev" title="Quick Start" href="quickstart.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>Transformer: A PyTorch SOTA Transformer Implementation - transformer 0.4.0 documentation</title>
+        <title>Transformer: A PyTorch SOTA Transformer Implementation - transformer 0.5.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">transformer 0.4.0 documentation</div></a>
+      <a href="index.html"><div class="brand">transformer 0.5.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -182,7 +182,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
-  <span class="sidebar-brand-text">transformer 0.4.0 documentation</span>
+  <span class="sidebar-brand-text">transformer 0.5.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -356,7 +356,7 @@ pip<span class="w"> </span>install<span class="w"> </span>.
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">n_kv_heads</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">n_heads</span></code></p></td>
-<td><p>For <code class="docutils literal notranslate"><span class="pre">attn_type=&quot;GQA&quot;</span></code>, defaults to the same as <code class="docutils literal notranslate"><span class="pre">n_heads</span></code> (equivalent to MHA). Must be explicitly set lower to activate grouped‑query attention.</p></td>
+<td><p>For <code class="docutils literal notranslate"><span class="pre">attn_class=&quot;GQA&quot;</span></code>, defaults to the same as <code class="docutils literal notranslate"><span class="pre">n_heads</span></code> (equivalent to MHA). Must be explicitly set lower to activate grouped‑query attention.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">attn_bias</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
@@ -392,7 +392,7 @@ pip<span class="w"> </span>install<span class="w"> </span>.
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pos_encoding</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">RoPE</span></code></p></td>
-<td><p>Standard Positiona Encoding. There are SOTA models that implement <code class="docutils literal notranslate"><span class="pre">PartialRoPE</span></code> you can switch to it in any moment.</p></td>
+<td><p>Standard Positional Encoding. There are SOTA models that implement <code class="docutils literal notranslate"><span class="pre">PartialRoPE</span></code> you can switch to it in any moment.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rope_base</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">10000.0</span></code></p></td>
@@ -655,9 +655,18 @@ pip<span class="w"> </span>install<span class="w"> </span>.
 <p><strong>Why are attention weights/scores missing when I use FlashAttention?</strong>
 FlashAttention does not materialize the attention matrix, so weights and scores are not available. Set <code class="docutils literal notranslate"><span class="pre">flash_attn=(False,)</span></code> to obtain them.</p>
 <p><strong>How do I use CrossAttention in a decoder block?</strong>
-The current <code class="docutils literal notranslate"><span class="pre">TransformerBlock</span></code> does not yet support CrossAttention. You can use the <code class="docutils literal notranslate"><span class="pre">CrossAttention</span></code> module directly in a custom encoder‑decoder model.</p>
+The <code class="docutils literal notranslate"><span class="pre">TransformerBlock</span></code> supports cross-attention when configured with <code class="docutils literal notranslate"><span class="pre">add_cross_attention=True</span></code> in the <code class="docutils literal notranslate"><span class="pre">TransformerConfig</span></code>. The model will automatically handle encoder-decoder attention. Alternatively, you can use the <code class="docutils literal notranslate"><span class="pre">CrossAttention</span></code> module directly or use the <code class="docutils literal notranslate"><span class="pre">EncoderDecoderModel</span></code> class for seq2seq tasks.</p>
 <p><strong>Can I use this model with HuggingFace tokenizers?</strong>
 Yes, the model is compatible with HuggingFace’s <code class="docutils literal notranslate"><span class="pre">PreTrainedTokenizer</span></code> classes. You just need to ensure the vocabulary size matches.</p>
+<p><strong>How do I enable LoRA for parameter-efficient fine-tuning?</strong>
+Use the <code class="docutils literal notranslate"><span class="pre">apply_lora_to_model</span></code> function to wrap target linear layers with LoRA adapters:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">transformer</span><span class="w"> </span><span class="kn">import</span> <span class="n">apply_lora_to_model</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">Transformer</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+<span class="n">apply_lora_to_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">target_modules</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;qkv_proj&quot;</span><span class="p">],</span> <span class="n">lora_rank</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">lora_alpha</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Then freeze the base model parameters and only train LoRA parameters.</p>
 </section>
 <section id="license">
 <h2>License<a class="headerlink" href="#license" title="Link to this heading">¶</a></h2>
@@ -785,7 +794,7 @@ Yes, the model is compatible with HuggingFace’s <code class="docutils literal 
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=6c02275b"></script>
+</div><script src="_static/documentation_options.js?v=1dd76d02"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>
