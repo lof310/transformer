@@ -82,7 +82,7 @@ config = TransformerConfig()  # All defaults
 | `d_ff`            | `None` (automatically set to `ceil(d_model * 2.666) ≈ 4096`) | The feed‑forward hidden dimension is typically 2-4x the model dimension. 2.666× (8/3) is the exact ratio used in LLaMA and PaLM, yielding 4096 for `d_model=1536`. This value is chosen to keep the FFN parameters roughly 2× the attention parameters. |
 | `attn_class`      | `"MHA"`       | Multi‑Head Attention is the standard and most flexible. GQA can be enabled for memory efficiency when scaling to very large models. |
 | `norm_design`     | `"pre_norm"`  | Standard Pre-Norm Design used in almost all SOTA Transformers. |
-| `n_kv_heads`      | `n_heads`     | For `attn_type="GQA"`, defaults to the same as `n_heads` (equivalent to MHA). Must be explicitly set lower to activate grouped‑query attention. |
+| `n_kv_heads`      | `n_heads`     | For `attn_class="GQA"`, defaults to the same as `n_heads` (equivalent to MHA). Must be explicitly set lower to activate grouped‑query attention. |
 | `attn_bias`       | `False`       | SOTA models (LLaMA, Qwen, etc) omit biases in attention projections to reduce parameters and improve throughput; normalization layers provide sufficient learnable shifts. |
 | `attn_dropout`    | `0.0`         | Modern large transformers typically use **no dropout** in attention, relying on other regularisation (weight decay, gradient clipping) and large‑scale training. Using dropout is not usually not recomended for Research Purposes|
 | `ffn_bias`        | `True`        | Biases in feed‑forward layers are retained because they add minimal overhead and can help with training stability; some models (e.g., Qwen, LLaMA) also use biases in FFNs. |
@@ -91,7 +91,7 @@ config = TransformerConfig()  # All defaults
 | `tied_weights`    | `False`       | Weight tying (sharing embeddings with the output layer) reduces parameters but may limit expressiveness. SOTA decoupled models (LLaMA, GPT‑3) do not tie weights by default. |
 | `seq_len`         | `1024`        | Default context length for training; many models are trained on 1024 tokens before extrapolation to longer sequences. |
 | `max_seq_len`     | `4096`        | Maximum sequence length for which RoPE frequencies are precomputed. |
-| `pos_encoding`    | `RoPE`        | Standard Positiona Encoding. There are SOTA models that implement `PartialRoPE` you can switch to it in any moment. |
+| `pos_encoding`    | `RoPE`        | Standard Positional Encoding. There are SOTA models that implement `PartialRoPE` you can switch to it in any moment. |
 | `rope_base`       | `10000.0`     | Base for the exponential frequency computation in Rotary Position Embedding. The value 10000 is standard from the original RoPE paper and works well across various lengths. |
 
 ---
@@ -358,10 +358,20 @@ The modular design makes it easy to add new components.
 FlashAttention does not materialize the attention matrix, so weights and scores are not available. Set `flash_attn=(False,)` to obtain them.
 
 **How do I use CrossAttention in a decoder block?**
-The current `TransformerBlock` does not yet support CrossAttention. You can use the `CrossAttention` module directly in a custom encoder‑decoder model.
+The `TransformerBlock` supports cross-attention when configured with `add_cross_attention=True` in the `TransformerConfig`. The model will automatically handle encoder-decoder attention. Alternatively, you can use the `CrossAttention` module directly or use the `EncoderDecoderModel` class for seq2seq tasks.
 
 **Can I use this model with HuggingFace tokenizers?**
 Yes, the model is compatible with HuggingFace’s `PreTrainedTokenizer` classes. You just need to ensure the vocabulary size matches.
+
+**How do I enable LoRA for parameter-efficient fine-tuning?**
+Use the `apply_lora_to_model` function to wrap target linear layers with LoRA adapters:
+```python
+from transformer import apply_lora_to_model
+
+model = Transformer(config)
+apply_lora_to_model(model, target_modules=["qkv_proj"], lora_rank=8, lora_alpha=16)
+```
+Then freeze the base model parameters and only train LoRA parameters.
 
 ## License
 

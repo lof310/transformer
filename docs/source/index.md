@@ -44,8 +44,12 @@ A Polished PyTorch implementation of the current State-Of-The-Art(SOTA) Transfor
 
 - Fully configurable architecture (layers, heads, dimensions, etc.)
 - HuggingFace-compatible API (`PreTrainedModel`, `GenerationMixin`)
-- Multi-Head Attention (MHA), Grouped-Query Attention (GQA) and others
-- Rotary Position Embeddings (RoPE) and SwiGLU feed-forward
+- Multi-Head Attention (MHA), Grouped-Query Attention (GQA) and Cross-Attention
+- Rotary Position Embeddings (RoPE), PartialRoPE, and ALiBi
+- SwiGLU and MLP feed-forward networks
+- Encoder-Decoder architecture support with cross-attention
+- LoRA integration for parameter-efficient fine-tuning
+- KV-Cache support for fast incremental decoding
 - Optional weight tying, QK normalization, and bias control
 
 ### Quick Example

@@ -110,6 +110,32 @@ This section provides detailed documentation of all public modules and classes.
    :special-members: __init__
 ```
 
+### EncoderDecoderModel
+
+```{eval-rst}
+.. autoclass:: transformer.encoder_decoder.EncoderDecoderModel
+   :members:
+   :undoc-members:
+   :show-inheritance:
+```
+
+## LoRA (Parameter-Efficient Fine-Tuning)
+
+### LoRALinear
+
+```{eval-rst}
+.. autoclass:: transformer.lora.LoRALinear
+   :members:
+   :undoc-members:
+   :show-inheritance:
+```
+
+### apply_lora_to_model
+
+```{eval-rst}
+.. autofunction:: transformer.lora.apply_lora_to_model
+```
+
 ## Utilities
 
 ```{eval-rst}
