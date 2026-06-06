@@ -8,8 +8,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from transformers import GenerationMixin, PretrainedConfig, PreTrainedModel
 from transformers.modeling_layers import GradientCheckpointingLayer
-from transformers.modeling_outputs import \
-    CausalLMOutputWithPast as CausalLMOutput
+from transformers.modeling_outputs import CausalLMOutputWithPast as CausalLMOutput
 
 from .attns import GQA, MHA, CrossAttention
 from .config import TransformerConfig
@@ -602,11 +601,7 @@ class Transformer(PreTrainedModel, GenerationMixin):
 
         loss = None
         if labels is not None:
-            loss = F.cross_entropy(
-                logits.reshape(-1, logits.size(-1)),
-                labels.reshape(-1),
-                **loss_kwargs
-            )
+            loss = F.cross_entropy(logits.reshape(-1, logits.size(-1)), labels.reshape(-1), **loss_kwargs)
 
         return CausalLMOutput(
             loss=loss,

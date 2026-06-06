@@ -59,15 +59,15 @@ class EncoderDecoderModel(nn.Module, GenerationMixin):
         # Run encoder forward manually to get hidden states (before lm_head projection)
         input_embs = self.encoder.emb(input_ids)
         out = input_embs
-        
+
         B, N = input_ids.shape
         pos = torch.arange(N, device=out.device)
-        
+
         # Generate causal mask
         attn_mask = None
         if attention_mask is not None:
             attn_mask = (1.0 - attention_mask.unsqueeze(1).unsqueeze(2)).bool()
-        
+
         for block in self.encoder.blocks:
             block_out = block(
                 out,
@@ -76,9 +76,9 @@ class EncoderDecoderModel(nn.Module, GenerationMixin):
                 return_states=False,
             )
             out = block_out
-        
+
         hidden_states = self.encoder.norm_out(out)
-        
+
         if return_dict:
             return {"last_hidden_state": hidden_states}
         return (hidden_states,)
@@ -187,11 +187,7 @@ class EncoderDecoderModel(nn.Module, GenerationMixin):
 
         loss = None
         if labels is not None:
-            loss = F.cross_entropy(
-                logits.reshape(-1, logits.size(-1)),
-                labels.reshape(-1),
-                **loss_kwargs
-            )
+            loss = F.cross_entropy(logits.reshape(-1, logits.size(-1)), labels.reshape(-1), **loss_kwargs)
 
         return CausalLMOutput(
             loss=loss,
@@ -242,7 +238,9 @@ class EncoderDecoderModel(nn.Module, GenerationMixin):
             "use_cache": True,
         }
 
-    def _reorder_cache(self, past_key_values: Tuple[Tuple[torch.Tensor, torch.Tensor]], beam_idx: torch.LongTensor) -> Tuple[Tuple[torch.Tensor, torch.Tensor]]:
+    def _reorder_cache(
+        self, past_key_values: Tuple[Tuple[torch.Tensor, torch.Tensor]], beam_idx: torch.LongTensor
+    ) -> Tuple[Tuple[torch.Tensor, torch.Tensor]]:
         """
         Reorder cache for beam search.
 
@@ -257,6 +255,8 @@ class EncoderDecoderModel(nn.Module, GenerationMixin):
         """
         reordered_past = []
         for layer_past in past_key_values:
-            reordered_layer = tuple(past_state.index_select(0, beam_idx.to(past_state.device)) for past_state in layer_past)
+            reordered_layer = tuple(
+                past_state.index_select(0, beam_idx.to(past_state.device)) for past_state in layer_past
+            )
             reordered_past.append(reordered_layer)
         return tuple(reordered_past)
