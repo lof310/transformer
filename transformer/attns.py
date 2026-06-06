@@ -9,19 +9,15 @@ from .pos import ALiBi, PartialRoPE, RoPE
 
 class MHA(nn.Module):
     r"""
-    **Multi-Head Attention** ``MHA`` module using the optimized implementation of
-    ``torch.nn.functional.scaled_dot_product_attention()`` when possible.
+    Multi-Head Attention (MHA) module using optimized scaled_dot_product_attention when possible.
 
     :param d_model: Model dimension.
     :type d_model: int
 
-    :param n_heads: Number of attention heads. Note that ``d_model`` will be split
-        across ``n_heads`` (i.e. each head will have dimension ``d_head//n_heads``).
+    :param n_heads: Number of attention heads. ``d_model`` is split across ``n_heads``.
     :type n_heads: int
 
-    :param dropout: Dropout probability on ``attn_output_weights``. Default: ``0.0`` (no dropout).
-        **Note: Latest SOTA Architectures do not use Dropout at all and for Research Purposes
-        it is recommended to never use it.**
+    :param dropout: Dropout probability on attention weights. Default: ``0.0``
     :type dropout: float, optional
 
     :param attn_bias: Whether to use bias in linear projections. Default: ``False``
@@ -36,14 +32,14 @@ class MHA(nn.Module):
     :param pos_encoding: Positional Encoding to use. Default: ``RoPE``
     :type pos_encoding: str, optional
 
-    :param pos_encoding_kwargs: Dictionary of Additional Arguments for Positional Encoding.
-        Example: {"rope_base": 10000.0, "rot_frac": 0.5}.
+    :param pos_encoding_kwargs: Dictionary of additional arguments for positional encoding.
     :type pos_encoding_kwargs: Dict, optional
 
     :param max_seq_len: Maximum sequence length for RoPE.
     :type max_seq_len: int
-
     """
+
+    supports_cache = True
 
     def __init__(
         self,
@@ -181,9 +177,7 @@ class MHA(nn.Module):
 
         out = self.out_proj(y)
 
-        # Return cache tuple when explicitly requested via return_cache flag or when cache was provided
-        # This allows first-pass cache building as well as incremental decoding
-        if cache is not None or return_cache:
+        if return_cache:
             if return_states:
                 result = {
                     "output": out,
@@ -199,7 +193,6 @@ class MHA(nn.Module):
                 return result, new_cache
             return out, new_cache
 
-        # No cache provided, return standard output
         if return_states:
             result = {
                 "output": out,
@@ -218,22 +211,18 @@ class MHA(nn.Module):
 
 class GQA(nn.Module):
     """
-    **Grouped Query Attention** ``GQA`` module using the optimized implementation of
-    ``torch.nn.functional.scaled_dot_product_attention()`` when possible.
+    Grouped Query Attention (GQA) module using optimized scaled_dot_product_attention when possible.
 
     :param d_model: Model dimension.
     :type d_model: int
 
-    :param n_heads: Number of attention heads. Note that ``d_model`` will be split
-        across ``n_heads`` (i.e. each head will have dimension ``d_head//n_heads``).
+    :param n_heads: Number of attention heads. ``d_model`` is split across ``n_heads``.
     :type n_heads: int
 
     :param n_kv_heads: Number of key/value heads (must divide n_heads).
     :type n_kv_heads: int
 
-    :param dropout: Dropout probability on ``attn_output_weights``. Default: ``0.0`` (no dropout).
-        **Note: Latest SOTA Architectures do not use Dropout at all and for Research Purposes
-        it is recommended to never use it.**
+    :param dropout: Dropout probability on attention weights. Default: ``0.0``
     :type dropout: float, optional
 
     :param attn_bias: Whether to use bias in linear projections. Default: ``False``
@@ -248,14 +237,14 @@ class GQA(nn.Module):
     :param pos_encoding: Positional Encoding to use. Default: ``RoPE``
     :type pos_encoding: str, optional
 
-    :param pos_encoding_kwargs: Dictionary of Additional Arguments for Positional Encoding.
-        Example: {"rope_base": 10000.0, "rot_frac": 0.5}.
+    :param pos_encoding_kwargs: Dictionary of additional arguments for positional encoding.
     :type pos_encoding_kwargs: Dict, optional
 
     :param max_seq_len: Maximum sequence length for RoPE.
     :type max_seq_len: int
-
     """
+
+    supports_cache = True
 
     def __init__(
         self,
@@ -408,9 +397,7 @@ class GQA(nn.Module):
 
         out = self.out_proj(y)
 
-        # Return cache tuple when explicitly requested via return_cache flag or when cache was provided
-        # This allows first-pass cache building as well as incremental decoding
-        if cache is not None or return_cache:
+        if return_cache:
             if return_states:
                 result = {
                     "output": out,
@@ -426,7 +413,6 @@ class GQA(nn.Module):
                 return result, new_cache
             return out, new_cache
 
-        # No cache provided, return standard output
         if return_states:
             result = {
                 "output": out,
@@ -445,19 +431,15 @@ class GQA(nn.Module):
 
 class CrossAttention(nn.Module):
     """
-    **CrossAttention** module using the optimized implementation of
-    ``torch.nn.functional.scaled_dot_product_attention()`` when possible.
+    Cross-Attention module using optimized scaled_dot_product_attention when possible.
 
     :param d_model: Model dimension.
     :type d_model: int
 
-    :param n_heads: Number of attention heads. Note that ``d_model`` will be split
-        across ``n_heads`` (i.e. each head will have dimension ``d_head//n_heads``).
+    :param n_heads: Number of attention heads. ``d_model`` is split across ``n_heads``.
     :type n_heads: int
 
-    :param dropout: Dropout probability on ``attn_output_weights``. Default: ``0.0`` (no dropout).
-        **Note: Latest SOTA Architectures do not use Dropout at all and for Research Purposes
-        it is recommended to never use it.**
+    :param dropout: Dropout probability on attention weights. Default: ``0.0``
     :type dropout: float, optional
 
     :param attn_bias: Whether to use bias in linear projections. Default: ``False``
@@ -472,13 +454,14 @@ class CrossAttention(nn.Module):
     :param pos_encoding: Positional Encoding to use. Default: ``RoPE``
     :type pos_encoding: str, optional
 
-    :param pos_encoding_kwargs: Dictionary of Additional Arguments for Positional Encoding.
-        Example: {"rope_base": 10000.0, "rot_frac": 0.5}.
+    :param pos_encoding_kwargs: Dictionary of additional arguments for positional encoding.
     :type pos_encoding_kwargs: Dict, optional
 
     :param max_seq_len: Maximum sequence length for RoPE.
     :type max_seq_len: int
 
+    Note: CrossAttention does not support KV caching. This is a known limitation for
+        autoregressive decoding with cross-attention.
     """
 
     def __init__(

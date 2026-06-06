@@ -258,19 +258,30 @@ class TransformerBlock(GradientCheckpointingLayer):
         attn, ffn = None, None
         attn_new_cache = None
 
-        # Determine if we need to return cache (either provided or building new cache)
-        # Cache is returned when: cache was provided OR we're in a use_cache context
-        # The Transformer.forward passes cache=None on first pass but still expects cache back if use_cache=True
-        # We detect this by checking if attention returns a tuple
-
-        # Determine if we should request cache from attention (for use_cache mode)
-        # When building cache on first pass, we need return_cache=True to get the cache back
         should_return_cache = use_cache or cache is not None
 
-        if self.norm_design == "pre_norm":
-            # Self-attention with optional KV cache
+        if self.has_cross_attention:
+            # CrossAttention uses (queries, kv) interface with pos_q/pos_k
+            attn_kwargs = {"mask": attn_mask, "flash_attn": flash_attn}
+            if encoder_hidden_states is not None:
+                attn = self.attn(
+                    self.norm_attn(x),
+                    encoder_hidden_states,
+                    return_states=return_states,
+                    **attn_kwargs,
+                )
+            else:
+                raise ValueError("encoder_hidden_states required for CrossAttention")
+            attn_output = attn if not isinstance(attn, tuple) else attn[0]
+            attn_new_cache = None
+            x = x + extract(attn_output)
+
+            ffn = self.ffn(self.norm_ffn(x), return_states=return_states)
+            x = x + extract(ffn)
+
+        elif self.norm_design == "pre_norm":
             attn_kwargs = {"mask": attn_mask, "pos": pos, "flash_attn": flash_attn, "cache": cache}
-            if hasattr(self.attn, "forward") and "return_cache" in str(self.attn.forward.__code__.co_varnames):
+            if getattr(self.attn, "supports_cache", False):
                 attn_kwargs["return_cache"] = should_return_cache
             attn = self.attn(
                 self.norm_attn(x),
@@ -289,7 +300,7 @@ class TransformerBlock(GradientCheckpointingLayer):
 
         elif self.norm_design == "post_norm":
             attn_kwargs = {"mask": attn_mask, "pos": pos, "flash_attn": flash_attn, "cache": cache}
-            if hasattr(self.attn, "forward") and "return_cache" in str(self.attn.forward.__code__.co_varnames):
+            if getattr(self.attn, "supports_cache", False):
                 attn_kwargs["return_cache"] = should_return_cache
             attn = self.attn(x, return_states=return_states, **attn_kwargs)
             if isinstance(attn, tuple):
@@ -304,7 +315,7 @@ class TransformerBlock(GradientCheckpointingLayer):
 
         elif self.norm_design == "both":
             attn_kwargs = {"mask": attn_mask, "pos": pos, "flash_attn": flash_attn, "cache": cache}
-            if hasattr(self.attn, "forward") and "return_cache" in str(self.attn.forward.__code__.co_varnames):
+            if getattr(self.attn, "supports_cache", False):
                 attn_kwargs["return_cache"] = should_return_cache
             attn = self.attn(
                 self.pre_norm_attn(x),
