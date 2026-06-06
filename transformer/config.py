@@ -134,7 +134,7 @@ class TransformerConfig(PretrainedConfig):
         pos_encoding: Union[List[str], str] = "RoPE",
         rope_base: float = 10000.0,
         max_seq_len: int = 4096,
-        use_cache: bool = True,
+        use_cache: bool = False,
         is_decoder: bool = True,
         **kwargs: Dict,
     ):

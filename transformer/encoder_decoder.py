@@ -351,11 +351,10 @@ class EncoderDecoderModel(nn.Module):
 
         loss = None
         if labels is not None:
-            shift_logits = logits[..., :-1, :]
-            shift_labels = labels[..., 1:]
             loss = F.cross_entropy(
-                shift_logits.reshape(-1, shift_logits.size(-1)),
-                shift_labels.reshape(-1),
+                logits.reshape(-1, logits.size(-1)),
+                labels.reshape(-1),
+                **loss_kwargs
             )
 
         return CausalLMOutput(
