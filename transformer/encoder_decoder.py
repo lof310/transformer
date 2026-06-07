@@ -6,7 +6,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from transformers import GenerationMixin
-from transformers.modeling_outputs import CausalLMOutputWithPast as CausalLMOutput
+from transformers.modeling_outputs import \
+    CausalLMOutputWithPast as CausalLMOutput
 
 from .config import TransformerConfig
 from .transformer import Transformer

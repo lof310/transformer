@@ -8,7 +8,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 from transformers import GenerationMixin, PretrainedConfig, PreTrainedModel
 from transformers.modeling_layers import GradientCheckpointingLayer
-from transformers.modeling_outputs import CausalLMOutputWithPast as CausalLMOutput
+from transformers.modeling_outputs import \
+    CausalLMOutputWithPast as CausalLMOutput
 
 from .attns import GQA, MHA, CrossAttention
 from .config import TransformerConfig
