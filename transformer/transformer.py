@@ -308,10 +308,10 @@ class TransformerBlock(GradientCheckpointingLayer):
             else:
                 attn_output = attn
                 attn_new_cache = None
-            x = self.norm_attn(x + extract(attn_output))
+            x = x + self.norm_attn(extract(attn_output))
 
             ffn = self.ffn(x, return_states=return_states)
-            x = self.norm_ffn(x + extract(ffn))
+            x = x + self.norm_ffn(extract(ffn))
 
         elif self.norm_design == "both":
             attn_kwargs = {"mask": attn_mask, "pos": pos, "flash_attn": flash_attn, "cache": cache}
@@ -327,10 +327,10 @@ class TransformerBlock(GradientCheckpointingLayer):
             else:
                 attn_output = attn
                 attn_new_cache = None
-            x = self.post_norm_attn(x + extract(attn_output))
+            x = x + self.post_norm_attn(extract(attn_output))
 
             ffn = self.ffn(self.pre_norm_ffn(x), return_states=return_states)
-            x = self.post_norm_ffn(x + extract(ffn))
+            x = x + self.post_norm_ffn(extract(ffn))
         else:
             raise ValueError(f"Invalid norm_design: {self.norm_design}")
 
