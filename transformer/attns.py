@@ -9,7 +9,7 @@ from .pos import ALiBi, PartialRoPE, RoPE
 
 class MHA(nn.Module):
     r"""
-    Multi-Head Attention (MHA) module using optimized scaled_dot_product_attention when possible.
+    Multi-Head Attention (MHA) module using optimized scaled_dot_product_attention.
 
     :param d_model: Model dimension.
     :type d_model: int
@@ -68,10 +68,9 @@ class MHA(nn.Module):
         elif pos_encoding == "AliBI":
             raise ValueError("Under Development")
         else:
-            raise ValueError("Not implemented")
+            raise ValueError(f"Not implemented: {pos_encoding}")
 
         self.scale = self.d_head**-0.5
-
         self.dropout = dropout
 
         if qk_norm:
@@ -94,37 +93,36 @@ class MHA(nn.Module):
         r"""
         Forward pass of MHA.
 
-        :param x: Input tensor of shape :math:`(B, N, D)` where :math:`N` is the Sequence Length,
+        :param x: Input tensor of shape :math:`(B, N, D)` where :math:`N` is the sequence length,
             :math:`B` is the batch size, and :math:`D` is the embedding dimension ``d_model``.
         :type x: torch.Tensor
 
-        :param mask: If specified, a 2D or 4D mask preventing attention to certain positions. Must be of shape
-            :math:`(N, N)` or :math:`(B, H, N, N)`, where :math:`B` is the batch size, :math:`H` is the number of heads and
-            :math:`N` is the Sequence Length. A 2D mask will be broadcasted across the batch while a 4D mask allows
-            for a different mask for each entry in the batch and/or heads dimensions.
-            **Note: Should be a boolean mask where True indicates masked positions.**
-            When Flash Attention is enabled it is inverted because PyTorch expects True for allowed positions.
+        :param mask: Boolean mask preventing attention to certain positions. Shape :math:`(N, N)` or :math:`(B, H, N, N)`.
+            **True indicates masked positions.** When Flash Attention is enabled, it is inverted internally.
         :type mask: torch.BoolTensor, optional
 
         :param pos: Position indices for RoPE, shape :math:`(N)` or :math:`(B, N)`
         :type pos: torch.LongTensor, optional
 
-        :param flash_attn: Tuple of Arguments for Flash Attention and the Context manager to select which backend to use for scaled dot product attention.
-            - bool: Whether to use or not Flash Attention. Default: ``False``
-            - Union[List[SDPBackend], SDPBackend]: A backend or list of backends for scaled dot product attention. Default: ``torch.nn.attention.SPDBackend.FLASH_ATTENTION``
-            - bool: Whether the ordering of the backends is interpreted as their priority order. Default: ``False``
+        :param flash_attn: Tuple controlling Flash Attention usage:
+            - bool: Whether to use Flash Attention. Default: ``False``
+            - Union[List[SDPBackend], SDPBackend]: Backend(s) for scaled dot product attention
+            - bool: Whether backend order indicates priority. Default: ``False``
         :type flash_attn: Tuple[bool, Union[list[torch.nn.attention.SDPBackend], torch.nn.attention.SDPBackend], bool], optional
 
-        :param return_states: If ``True``, return a dictionary of intermediate tensors. Default: ``False``
+        :param return_states: If ``True``, return dictionary with intermediate tensors. Default: ``False``
         :type return_states: bool, optional
 
         :param cache: Optional KV cache tuple `(k_prev, v_prev)` of shape `(B, H, L_prev, d)` each.
-            If provided, new keys/values are concatenated with cached ones along sequence dimension.
+            New keys/values are concatenated with cached ones along sequence dimension.
         :type cache: Tuple[torch.Tensor, torch.Tensor], optional
 
-        :return: Output tensor :math:`(B, N, D)` if not return_states, else a dict containing
-            the keys: {`output`, `queries`, `keys`, `values`, `attn_weights`, `attn_scores`, `output_before_proj` and `input`}.
-            If cache is provided, returns a tuple `(output, new_cache)` where `new_cache` is `(k, v)`.
+        :param return_cache: If True, always return cache tuple. Used for building initial cache.
+        :type return_cache: bool, optional
+
+        :return: Output tensor :math:`(B, N, D)` if not return_states, else dict containing
+            keys: `output`, `queries`, `keys`, `values`, `attn_weights`, `attn_scores`, `output_before_proj`, `input`.
+            If cache is provided or return_cache=True, returns tuple `(output, new_cache)`.
         :rtype: Union[torch.Tensor, Dict, Tuple[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]]
         """
 
@@ -211,7 +209,7 @@ class MHA(nn.Module):
 
 class GQA(nn.Module):
     """
-    Grouped Query Attention (GQA) module using optimized scaled_dot_product_attention when possible.
+    Grouped Query Attention (GQA) module using optimized scaled_dot_product_attention.
 
     :param d_model: Model dimension.
     :type d_model: int
@@ -285,10 +283,9 @@ class GQA(nn.Module):
         elif pos_encoding == "AliBI":
             raise ValueError("Under Development")
         else:
-            raise ValueError("Not implemented")
+            raise ValueError(f"Not implemented: {pos_encoding}")
 
         self.scale = self.d_head**-0.5
-
         self.dropout = dropout
 
         if qk_norm:
@@ -431,7 +428,7 @@ class GQA(nn.Module):
 
 class CrossAttention(nn.Module):
     """
-    Cross-Attention module using optimized scaled_dot_product_attention when possible.
+    Cross-Attention module using optimized scaled_dot_product_attention.
 
     :param d_model: Model dimension.
     :type d_model: int
@@ -501,7 +498,6 @@ class CrossAttention(nn.Module):
             raise ValueError(f"Unknown positional encoding: {pos_encoding}")
 
         self.scale = self.d_head**-0.5
-
         self.dropout = dropout
 
         if qk_norm:
@@ -582,7 +578,7 @@ class CrossAttention(nn.Module):
         y, A_weights, A_scores = None, None, None
         if flash_attn[0]:
             with torch.nn.attention.sdpa_kernel(backends=flash_attn[1], set_priority=flash_attn[2]):
-                attn_mask_sdpa = (~mask) if (mask is not None and alibi_bias is None) else None
+                attn_mask_sdpa = (~mask) if mask is not None else None
                 y = (
                     F.scaled_dot_product_attention(
                         q,

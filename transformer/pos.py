@@ -22,7 +22,7 @@ class RoPE(nn.Module):
     :type persistent: bool, optional
     """
 
-    def __init__(self, max_seq_len: int, d_head: int, rope_base: float = 10000.0, persistent: bool = False):
+    def __init__(self, max_seq_len: int, d_head: int, rope_base: float = 10000.0, persistent: bool = True):
         super().__init__()
         assert d_head % 2 == 0
         self.half = d_head // 2
@@ -100,7 +100,7 @@ class PartialRoPE(nn.Module):
         d_head: int,
         rot_frac: float = 0.5,
         rope_base: float = 10000.0,
-        persistent: bool = False,
+        persistent: bool = True,
     ):
         super().__init__()
         assert d_head % 2 == 0, "d_head must be even"
@@ -218,7 +218,7 @@ class ALiBi(nn.Module):
     :type persistent: bool, optional
     """
 
-    def __init__(self, max_seq_len: int, n_heads: int, base: float = 2.0, persistent: bool = False):
+    def __init__(self, max_seq_len: int, n_heads: int, base: float = 2.0, persistent: bool = True):
         super().__init__()
         assert n_heads > 0, "n_heads must be positive"
         assert max_seq_len > 0, "max_seq_len must be positive"

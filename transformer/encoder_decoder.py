@@ -139,6 +139,7 @@ class EncoderDecoderModel(nn.Module, GenerationMixin):
         past_key_values: Optional[Tuple[Tuple[torch.Tensor, torch.Tensor]]] = None,
         use_cache: bool = True,
         return_dict: bool = True,
+        **kwargs,
     ) -> CausalLMOutput:
         """
         Full forward pass through encoder-decoder model.
@@ -188,7 +189,7 @@ class EncoderDecoderModel(nn.Module, GenerationMixin):
 
         loss = None
         if labels is not None:
-            loss = F.cross_entropy(logits.reshape(-1, logits.size(-1)), labels.reshape(-1), **loss_kwargs)
+            loss = F.cross_entropy(logits.reshape(-1, logits.size(-1)), labels.reshape(-1), **kwargs.get("loss_kwargs", {}))
 
         return CausalLMOutput(
             loss=loss,

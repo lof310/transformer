@@ -136,6 +136,9 @@ class TransformerConfig(PretrainedConfig):
         max_seq_len: int = 4096,
         use_cache: bool = False,
         is_decoder: bool = True,
+        patch_size: Optional[int] = None,
+        img_size: Optional[Union[int, tuple]] = None,
+        in_channels: int = 3,
         **kwargs: Dict,
     ):
         super().__init__(**kwargs)
@@ -171,3 +174,8 @@ class TransformerConfig(PretrainedConfig):
 
         self.use_cache = use_cache
         self.is_decoder = is_decoder
+        
+        # Vision Transformer (ViT) parameters
+        self.patch_size = patch_size
+        self.img_size = img_size
+        self.in_channels = in_channels

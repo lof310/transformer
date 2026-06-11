@@ -85,8 +85,9 @@ def apply_lora_to_model(
     :param model: The PyTorch model to modify.
     :type model: nn.Module
 
-    :param target_modules: List of attribute name patterns to target (e.g., ['qkv_proj', 'W1']).
-        Modules whose names contain any of these strings will be wrapped.
+    :param target_modules: List of exact attribute names to target (e.g., ['qkv_proj', 'W1']).
+        Modules whose names exactly match any of these strings will be wrapped.
+        Note: This uses full name matching, not substring matching.
     :type target_modules: List[str]
 
     :param lora_rank: Rank of the LoRA decomposition. Default: 8
@@ -121,7 +122,8 @@ def apply_lora_to_model(
             full_name = f"{name}.{child_name}" if name else child_name
 
             if isinstance(child_module, nn.Linear):
-                should_wrap = any(pattern in child_name for pattern in target_modules)
+                # Use exact name matching instead of substring matching
+                should_wrap = child_name in target_modules or full_name.split(".")[-1] in target_modules
 
                 if should_wrap:
                     lora_layer = LoRALinear(

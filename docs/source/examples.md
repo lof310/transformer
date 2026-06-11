@@ -3,6 +3,7 @@
 
 ## Basic Usage
 
+### Text Processing
 ```python
 import torch
 import torch.nn as nn
@@ -29,9 +30,111 @@ batch_size, seq_len = 2, 128
 input_ids = torch.randint(0, config.vocab_size, (batch_size, seq_len))
 
 # Forward pass
-outputs = model(input_ids)
+outputs = model(input_ids=input_ids)
 logits = outputs.logits # shape: [B, N, V]
 print(logits.shape)
+```
+
+### Image Processing with Vision Transformer (ViT)
+
+The library supports Vision Transformer (ViT) architecture for image processing. Configure the model with `patch_size` and `img_size` parameters to enable ViT mode.
+
+```python
+import torch
+from transformer import Transformer, TransformerConfig
+
+# Configure ViT for image classification
+config = TransformerConfig(
+    n_layers=12,
+    n_heads=16,
+    d_model=1024,
+    vocab_size=1000,      # Number of output classes
+    patch_size=16,        # Patch size (16x16 pixels per token)
+    img_size=224,         # Input image size (224x224)
+    in_channels=3,        # RGB images
+    max_seq_len=512,      # Must be >= num_patches + 1 (for CLS token)
+                          # For 224x224 with patch_size=16: (224/16)^2 + 1 = 197
+    pos_encoding="RoPE"   # Positional encoding type
+)
+
+model = Transformer(config)
+model.eval()
+
+# Process a batch of images
+batch_size = 4
+images = torch.randn(batch_size, 3, 224, 224)  # (B, C, H, W)
+
+with torch.no_grad():
+    outputs = model(images=images)
+    logits = outputs.logits  # Shape: (B, num_patches+1, vocab_size)
+    
+    # For classification, use the CLS token (first position)
+    cls_logits = logits[:, 0, :]  # Shape: (B, vocab_size)
+    predictions = cls_logits.argmax(dim=-1)
+    print(f"Predictions: {predictions}")
+```
+
+#### ViT for Feature Extraction
+
+Extract intermediate features from different layers of the ViT:
+
+```python
+import torch
+from transformer import Transformer, TransformerConfig
+
+config = TransformerConfig(
+    n_layers=12,
+    n_heads=16,
+    d_model=1024,
+    vocab_size=1000,
+    patch_size=16,
+    img_size=224,
+    max_seq_len=512
+)
+
+model = Transformer(config)
+model.eval()
+
+images = torch.randn(2, 3, 224, 224)
+
+# Get hidden states from all layers
+with torch.no_grad():
+    outputs = model(images=images, return_states=True)
+    hidden_states = outputs.hidden_states
+    
+    # Extract features from the last layer's CLS token
+    final_cls_features = hidden_states[-1]["output"][:, 0, :]  # Shape: (B, d_model)
+    print(f"CLS features shape: {final_cls_features.shape}")
+```
+
+#### Multi-Resolution Support
+
+ViT can handle different image resolutions by adjusting `max_seq_len`:
+
+```python
+from transformer import Transformer, TransformerConfig
+
+# Small images (e.g., CIFAR-10: 32x32)
+config_small = TransformerConfig(
+    n_layers=6,
+    n_heads=8,
+    d_model=512,
+    vocab_size=10,
+    patch_size=4,
+    img_size=32,
+    max_seq_len=128  # (32/4)^2 + 1 = 65 tokens
+)
+
+# Large images (e.g., ImageNet: 384x384)
+config_large = TransformerConfig(
+    n_layers=12,
+    n_heads=16,
+    d_model=1024,
+    vocab_size=1000,
+    patch_size=16,
+    img_size=384,
+    max_seq_len=1024  # (384/16)^2 + 1 = 577 tokens
+)
 ```
 
 ## Visualization

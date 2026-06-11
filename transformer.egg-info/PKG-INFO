@@ -1,3 +1,34 @@
+Metadata-Version: 2.4
+Name: transformer
+Version: 1.0.0
+Summary: A polished PyTorch implementation of the current State-Of-The-Art(SOTA) Transformer
+Author-email: Leinier Orama <lof310w@gmail.com>
+Maintainer-email: Leinier Orama <lof310w@gmail.com>
+License: Apache-2.0
+Project-URL: Homepage, https://github.com/lof310/transformer
+Project-URL: Repository, https://github.com/lof310/transformer.git
+Keywords: llm,transformers,pytorch,deep-learning,machine-learning
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Science/Research
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Programming Language :: Python :: 3.14
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: torch>=1.12.0
+Requires-Dist: transformers>=4.30.0
+Dynamic: license-file
+
 # Transformer
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/lof310/transformer/actions)
@@ -15,11 +46,9 @@ _A polished **PyTorch implementation** of the current **State-Of-The-Art(SOTA) T
 - **HuggingFace-compatible** API alignment with `past_key_values` support for efficient generation
 - **KV-Cache** support for fast incremental decoding
 - **Encoder-Decoder** architecture support with cross-attention
-- **Vision Transformer (ViT)** support for image classification and feature extraction
 - **Multiple Attention Variants**: MHA, GQA (Grouped Query Attention), CrossAttention
 - **Flexible Position Encodings**: RoPE, PartialRoPE, ALiBi
 - **LoRA Integration** for parameter-efficient fine-tuning
-- **Flash Attention** support for accelerated training and inference
 - **Compact and easily extensible** design for rapid prototyping and research experiments
 - **Clear, well-documented modules** to facilitate experimentation with attention, FFNs, etc.
 
@@ -65,40 +94,7 @@ model = Transformer(config)
 # Forward Pass
 B, N = 16, 1024
 input_ids = torch.randint(low=0, high=config.vocab_size, size=(B, N))
-output = model(input_ids=input_ids, return_states=False)
-```
-
-### Vision Transformer (ViT) for Image Processing
-```python
-import torch
-from transformer import Transformer, TransformerConfig
-
-# Configure ViT for image classification
-config = TransformerConfig(
-    n_layers=12,
-    n_heads=16,
-    d_model=1024,
-    vocab_size=1000,      # Number of output classes
-    patch_size=16,        # Patch size (16x16 pixels per token)
-    img_size=224,         # Input image size
-    in_channels=3,        # RGB images
-    max_seq_len=512,      # Must accommodate (img_size/patch_size)^2 + 1 CLS token
-    pos_encoding="RoPE",
-)
-
-model = Transformer(config)
-model.eval()
-
-# Process images: shape (batch_size, channels, height, width)
-images = torch.randn(4, 3, 224, 224)
-
-with torch.no_grad():
-    output = model(images=images)
-    logits = output.logits  # Shape: (4, 197, 1000)
-    
-    # Use CLS token (first position) for classification
-    cls_logits = logits[:, 0, :]  # Shape: (4, 1000)
-    predictions = cls_logits.argmax(dim=-1)
+output = model(input_ids, return_states=False)
 ```
 
 ### Incremental Decoding with KV-Cache
