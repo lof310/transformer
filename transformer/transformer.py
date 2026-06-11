@@ -262,8 +262,23 @@ class TransformerBlock(GradientCheckpointingLayer):
 
         if self.has_cross_attention:
             # CrossAttention uses (queries, kv) interface with pos_q/pos_k
-            attn_kwargs = {"mask": attn_mask, "flash_attn": flash_attn}
+            # Convert encoder_attn_mask from (B, Lk) to proper cross-attention mask format
+            cross_attn_mask = None
+            if encoder_attn_mask is not None:
+                # encoder_attn_mask is (B, Lk) where True means masked/padding
+                # We need to expand it to (B, 1, Lq, Lk) for broadcast across heads
+                B_enc, Lk = encoder_attn_mask.shape
+                Lq = x.shape[1]
+                # Expand to (B, 1, 1, Lk) then broadcast to (B, 1, Lq, Lk)
+                cross_attn_mask = encoder_attn_mask.unsqueeze(1).unsqueeze(2)  # (B, 1, 1, Lk)
+            
+            attn_kwargs = {"mask": cross_attn_mask, "flash_attn": flash_attn}
             if encoder_hidden_states is not None:
+                # Pass decoder positions as pos_q and encoder positions as pos_k
+                attn_kwargs["pos_q"] = pos
+                attn_kwargs["pos_k"] = encoder_pos if encoder_pos is not None else torch.arange(
+                    encoder_hidden_states.shape[1], device=x.device
+                )
                 attn = self.attn(
                     self.norm_attn(x),
                     encoder_hidden_states,
@@ -393,17 +408,16 @@ class Transformer(PreTrainedModel, GenerationMixin):
         pos_encoding_kwargs: Dict = {},
         ffn_kwargs: Dict = {},
         norm_kwargs: Dict = {},
-        patch_size: Optional[int] = None,
-        img_size: Optional[Union[int, Tuple[int, int]]] = None,
-        num_channels: int = 3,
     ):
         super().__init__(config)
         self.config = config
         self.d_model = config.d_model
-        self.patch_size = patch_size
-        self.img_size = img_size
-
-        # Vision Transformer (ViT) support
+        
+        # Vision Transformer (ViT) support - read parameters from config
+        patch_size = getattr(config, 'patch_size', None)
+        img_size = getattr(config, 'img_size', None)
+        num_channels = getattr(config, 'in_channels', 3)
+        
         if patch_size is not None and img_size is not None:
             if isinstance(img_size, int):
                 img_size = (img_size, img_size)
@@ -467,7 +481,8 @@ class Transformer(PreTrainedModel, GenerationMixin):
 
     def forward(
         self,
-        input_ids: torch.LongTensor,
+        input_ids: Optional[torch.LongTensor] = None,
+        images: Optional[torch.Tensor] = None,
         labels: torch.LongTensor = None,
         is_causal: Optional[bool] = True,
         attn_mask: Optional[torch.Tensor] = None,
@@ -488,8 +503,11 @@ class Transformer(PreTrainedModel, GenerationMixin):
         """
         Forward pass of the Transformer model.
 
-        :param input_ids: Token indices of shape :math:`(B, N)`
-        :type input_ids: torch.LongTensor
+        :param input_ids: Token indices of shape :math:`(B, N)` for text input. Required for text modality.
+        :type input_ids: torch.LongTensor, optional
+
+        :param images: Image tensor of shape :math:`(B, C, H, W)` for vision input. Required for image modality.
+        :type images: torch.Tensor, optional
 
         :param labels: Target token indices for loss computation, same shape as input_ids.
         :type labels: torch.LongTensor, optional
@@ -530,12 +548,37 @@ class Transformer(PreTrainedModel, GenerationMixin):
 
         :return: CausalLMOutput containing loss (if labels given), logits, and optionally past_key_values and hidden_states.
         :rtype: CausalLMOutput
+        
+        .. note::
+            Either ``input_ids`` (for text) or ``images`` (for vision) must be provided. 
+            The model automatically detects the modality based on which input is provided.
         """
-        B, N = input_ids.shape
+        # Validate input: exactly one of input_ids or images must be provided
+        if input_ids is None and images is None:
+            raise ValueError("Either input_ids (for text) or images (for vision) must be provided")
+        if input_ids is not None and images is not None:
+            raise ValueError("Only one of input_ids or images should be provided at a time")
+        
+        B = (input_ids.shape[0] if input_ids is not None else images.shape[0])
         use_cache = use_cache if use_cache is not None else self.config.use_cache
 
-        input_embs = self.emb(input_ids)
-        out = input_embs
+        # Handle ViT image input if patch_embed is available and images are provided
+        if self.patch_embed is not None and images is not None:
+            # Input is an image tensor of shape (B, C, H, W)
+            x = self.patch_embed(images)
+            x = x.flatten(2).transpose(1, 2)  # (B, num_patches, D)
+            cls_tokens = self.cls_token.expand(x.shape[0], -1, -1)
+            x = torch.cat((cls_tokens, x), dim=1)  # (B, num_patches+1, D)
+            out = x + self.pos_embed
+            N = x.shape[1]  # Sequence length for images
+            input_embs = None
+        elif input_ids is not None:
+            # Standard text input
+            input_embs = self.emb(input_ids)
+            out = input_embs
+            N = input_ids.shape[1]  # Sequence length for text
+        else:
+            raise ValueError("Image input requires patch_embed to be configured (patch_size and img_size must be set)")
 
         # Compute position indices considering cache length
         if past_key_values is not None and len(past_key_values) > 0:
@@ -593,12 +636,20 @@ class Transformer(PreTrainedModel, GenerationMixin):
                     out = block_out
 
             if return_states:
-                if use_cache and layer_cache is not None:
-                    hidden_states.append(block_out[0])
+                # Extract output tensor from block_out consistently
+                if isinstance(block_out, tuple) and len(block_out) == 2:
+                    # Cache was returned, extract output from first element
+                    if isinstance(block_out[0], dict):
+                        hidden_states.append(block_out[0]["output"])
+                    else:
+                        hidden_states.append(block_out[0])
+                elif isinstance(block_out, dict):
+                    hidden_states.append(block_out["output"])
                 else:
-                    hidden_states.append(out if isinstance(out, dict) else {"output": out})
+                    hidden_states.append(out)
 
-        logits = self.lm_head(self.norm_out(out))
+        out = self.norm_out(out)
+        logits = self.lm_head(out)
 
         loss = None
         if labels is not None:
@@ -608,13 +659,15 @@ class Transformer(PreTrainedModel, GenerationMixin):
             loss=loss,
             logits=logits,
             past_key_values=tuple(new_past_key_values) if new_past_key_values else None,
-            hidden_states=(input_embs, hidden_states) if return_states else None,
+            hidden_states=tuple(hidden_states) if return_states else None,
         )
 
     def get_input_embeddings(self) -> nn.Embedding:
+        """Get the input embeddings layer."""
         return self.emb
 
     def set_input_embeddings(self, embeddings: nn.Embedding):
+        """Set the input embeddings layer."""
         self.emb = embeddings
 
     def get_num_params(self) -> int:
@@ -688,12 +741,3 @@ class Transformer(PreTrainedModel, GenerationMixin):
             **kwargs,
         )
 
-    def get_input_embeddings(self) -> nn.Embedding:
-        return self.emb
-
-    def set_input_embeddings(self, embeddings: nn.Embedding):
-        self.emb = embeddings
-
-    def get_num_params(self) -> int:
-        """Return the number of trainable parameters."""
-        return sum(p.numel() for p in self.parameters() if p.requires_grad)
