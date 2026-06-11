@@ -1,0 +1,1054 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html">
+
+    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+        <title>transformer.transformer - transformer 0.5.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../index.html"><div class="brand">transformer 0.5.0 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
+  
+  <span class="sidebar-brand-text">transformer 0.5.0 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quick Start</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../guide.html">Transformer: A PyTorch SOTA Transformer Implementation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../guide.html#configuration">Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Usage Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Usage Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Project Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <h1>Source code for transformer.transformer</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Core Transformer model implementation.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nn</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn.functional</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">F</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">GenerationMixin</span><span class="p">,</span> <span class="n">PretrainedConfig</span><span class="p">,</span> <span class="n">PreTrainedModel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">transformers.modeling_layers</span><span class="w"> </span><span class="kn">import</span> <span class="n">GradientCheckpointingLayer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">transformers.modeling_outputs</span><span class="w"> </span><span class="kn">import</span> \
+    <span class="n">CausalLMOutputWithPast</span> <span class="k">as</span> <span class="n">CausalLMOutput</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.attns</span><span class="w"> </span><span class="kn">import</span> <span class="n">GQA</span><span class="p">,</span> <span class="n">MHA</span><span class="p">,</span> <span class="n">CrossAttention</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransformerConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.ffn</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLP</span><span class="p">,</span> <span class="n">SwiGLU</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.pos</span><span class="w"> </span><span class="kn">import</span> <span class="n">ALiBi</span><span class="p">,</span> <span class="n">PartialRoPE</span><span class="p">,</span> <span class="n">RoPE</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">LayerType</span><span class="p">,</span> <span class="n">get_layer_type</span><span class="p">,</span> <span class="n">resolve_layer_config</span>
+
+
+<div class="viewcode-block" id="TransformerBlock">
+<a class="viewcode-back" href="../../api.html#transformer.transformer.TransformerBlock">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TransformerBlock</span><span class="p">(</span><span class="n">GradientCheckpointingLayer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A Single Transformer Decoder Block with support for Gradient Checkpointing consisting of Multi-Head Attention and Feed-Forward layers,</span>
+<span class="sd">    each with Pre-Normalization (RMSNorm) and Standard Residual Connections.</span>
+
+<span class="sd">    :param config: Configuration object.</span>
+<span class="sd">    :type config: TransformerConfig</span>
+
+<span class="sd">    :param attn_kwargs: Additional Arguments for the attention class passed from ``TransformerConfig.attn_class``.</span>
+<span class="sd">        It is only used if ``TransformerConfig.attn_class`` is ``Type[nn.Module]``</span>
+<span class="sd">    :type attn_kwargs: Dict, optional</span>
+
+<span class="sd">    :param ffn_kwargs: Additional Arguments for the ffn class passed from ``TransformerConfig.ffn_class``.</span>
+<span class="sd">        It is only used if ``TransformerConfig.ffn_class`` is ``Type[nn.Module]``</span>
+<span class="sd">    :type ffn_kwargs: Dict, optional</span>
+
+<span class="sd">    :param norm_kwargs: Additional Arguments for the normalization class passed from ``TransformerConfig.norm_class``. It is always passed.</span>
+<span class="sd">    :type norm_kwargs: Dict, optional</span>
+
+<span class="sd">    :param layer_idx: Index of this block (used for debugging/logging).</span>
+<span class="sd">    :type layer_idx: int, optional</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TransformerBlock.__init__">
+<a class="viewcode-back" href="../../api.html#transformer.transformer.TransformerBlock.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">config</span><span class="p">,</span>
+        <span class="n">attn_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">{},</span>
+        <span class="n">ffn_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">{},</span>
+        <span class="n">norm_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">{},</span>
+        <span class="n">layer_idx</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_ff</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_heads</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">layer_idx</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">d_ff</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">n_heads</span><span class="p">,</span> <span class="n">layer_idx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm_design</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">norm_design</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_layers</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">n_layer</span>
+
+        <span class="c1"># Resolve per-layer configurations using resolve_layer_config which handles both uniform and per-layer configs</span>
+        <span class="n">attn_class</span> <span class="o">=</span> <span class="n">resolve_layer_config</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">attn_class</span><span class="p">,</span> <span class="n">layer_idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_layers</span><span class="p">)</span>
+        <span class="n">ffn_class</span> <span class="o">=</span> <span class="n">resolve_layer_config</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">ffn_class</span><span class="p">,</span> <span class="n">layer_idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_layers</span><span class="p">)</span>
+        <span class="n">norm_class</span> <span class="o">=</span> <span class="n">resolve_layer_config</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">norm_class</span><span class="p">,</span> <span class="n">layer_idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_layers</span><span class="p">)</span>
+        <span class="n">pos_encoding</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">resolve_layer_config</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">pos_encoding</span><span class="p">,</span> <span class="n">layer_idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_layers</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">pos_encoding</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>
+            <span class="k">else</span> <span class="n">config</span><span class="o">.</span><span class="n">pos_encoding</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Check for CrossAttention incompatibility with norm_design=&#39;both&#39;</span>
+        <span class="k">if</span> <span class="n">attn_class</span> <span class="o">==</span> <span class="s2">&quot;CrossAttention&quot;</span> <span class="ow">and</span> <span class="n">config</span><span class="o">.</span><span class="n">norm_design</span> <span class="o">==</span> <span class="s2">&quot;both&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;norm_design=&#39;both&#39; is not compatible with CrossAttention because CrossAttention expects (queries, kv) inputs while &#39;both&#39; assumes x input for residual connections.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Create attention module</span>
+        <span class="k">if</span> <span class="n">attn_class</span> <span class="o">==</span> <span class="s2">&quot;MHA&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">attn</span> <span class="o">=</span> <span class="n">MHA</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">n_heads</span><span class="p">,</span>
+                <span class="n">dropout</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">attn_dropout</span><span class="p">,</span>
+                <span class="n">attn_bias</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">attn_bias</span><span class="p">,</span>
+                <span class="n">qk_norm</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">attn_qk_norm</span><span class="p">,</span>
+                <span class="n">layer_idx</span><span class="o">=</span><span class="n">layer_idx</span><span class="p">,</span>
+                <span class="n">pos_encoding</span><span class="o">=</span><span class="n">pos_encoding</span><span class="p">,</span>
+                <span class="n">max_seq_len</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">max_seq_len</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">attn_kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">attn_class</span> <span class="o">==</span> <span class="s2">&quot;GQA&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">attn</span> <span class="o">=</span> <span class="n">GQA</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">n_heads</span><span class="p">,</span>
+                <span class="n">n_kv_heads</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">n_kv_heads</span><span class="p">,</span>
+                <span class="n">dropout</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">attn_dropout</span><span class="p">,</span>
+                <span class="n">attn_bias</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">attn_bias</span><span class="p">,</span>
+                <span class="n">qk_norm</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">attn_qk_norm</span><span class="p">,</span>
+                <span class="n">layer_idx</span><span class="o">=</span><span class="n">layer_idx</span><span class="p">,</span>
+                <span class="n">pos_encoding</span><span class="o">=</span><span class="n">pos_encoding</span><span class="p">,</span>
+                <span class="n">max_seq_len</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">max_seq_len</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">attn_kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">attn_class</span> <span class="o">==</span> <span class="s2">&quot;CrossAttention&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">attn</span> <span class="o">=</span> <span class="n">CrossAttention</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">n_heads</span><span class="p">,</span>
+                <span class="n">dropout</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">attn_dropout</span><span class="p">,</span>
+                <span class="n">attn_bias</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">attn_bias</span><span class="p">,</span>
+                <span class="n">qk_norm</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">attn_qk_norm</span><span class="p">,</span>
+                <span class="n">layer_idx</span><span class="o">=</span><span class="n">layer_idx</span><span class="p">,</span>
+                <span class="n">max_seq_len</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">max_seq_len</span><span class="p">,</span>
+                <span class="n">pos_encoding</span><span class="o">=</span><span class="n">pos_encoding</span><span class="p">,</span>
+                <span class="n">pos_encoding_kwargs</span><span class="o">=</span><span class="n">attn_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;pos_encoding_kwargs&quot;</span><span class="p">,</span> <span class="p">{}),</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">get_layer_type</span><span class="p">(</span><span class="n">attn_class</span><span class="p">)</span> <span class="o">==</span> <span class="n">LayerType</span><span class="o">.</span><span class="n">NN_MODULE</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">attn</span> <span class="o">=</span> <span class="n">attn_class</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">n_heads</span><span class="p">,</span>
+                <span class="n">dropout</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">attn_dropout</span><span class="p">,</span>
+                <span class="n">attn_bias</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">attn_bias</span><span class="p">,</span>
+                <span class="n">qk_norm</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">attn_qk_norm</span><span class="p">,</span>
+                <span class="n">layer_idx</span><span class="o">=</span><span class="n">layer_idx</span><span class="p">,</span>
+                <span class="n">max_seq_len</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">max_seq_len</span><span class="p">,</span>
+                <span class="n">pos_encoding</span><span class="o">=</span><span class="n">pos_encoding</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">attn_kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown attention type: </span><span class="si">{</span><span class="n">attn_class</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Create feed-forward module</span>
+        <span class="k">if</span> <span class="n">ffn_class</span> <span class="o">==</span> <span class="s2">&quot;SwiGLU&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ffn</span> <span class="o">=</span> <span class="n">SwiGLU</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_ff</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">ffn_bias</span><span class="p">,</span> <span class="o">**</span><span class="n">ffn_kwargs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">ffn_class</span> <span class="o">==</span> <span class="s2">&quot;MLP&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ffn</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_ff</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">ffn_bias</span><span class="p">,</span> <span class="o">**</span><span class="n">ffn_kwargs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">get_layer_type</span><span class="p">(</span><span class="n">ffn_class</span><span class="p">)</span> <span class="o">==</span> <span class="n">LayerType</span><span class="o">.</span><span class="n">NN_MODULE</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ffn</span> <span class="o">=</span> <span class="n">ffn_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_ff</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">ffn_bias</span><span class="p">,</span> <span class="o">**</span><span class="n">ffn_kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown ffn class: </span><span class="si">{</span><span class="n">ffn_class</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Determine if this block has cross-attention (only relevant for encoder-decoder models)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">has_cross_attention</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">attn</span><span class="p">,</span> <span class="n">CrossAttention</span><span class="p">)</span>
+
+        <span class="c1"># Validate norm_design compatibility with CrossAttention</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_cross_attention</span> <span class="ow">and</span> <span class="n">config</span><span class="o">.</span><span class="n">norm_design</span> <span class="o">==</span> <span class="s2">&quot;both&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;norm_design=&#39;both&#39; is not compatible with CrossAttention in layer </span><span class="si">{</span><span class="n">layer_idx</span><span class="si">}</span><span class="s2">. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;CrossAttention expects (queries, kv) inputs, not residual connections with x. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Use norm_design=&#39;pre_norm&#39; or &#39;post_norm&#39; instead.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">norm_class</span> <span class="o">==</span> <span class="s2">&quot;rms_norm&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">norm_design</span> <span class="o">==</span> <span class="s2">&quot;pre_norm&quot;</span> <span class="ow">or</span> <span class="n">config</span><span class="o">.</span><span class="n">norm_design</span> <span class="o">==</span> <span class="s2">&quot;post_norm&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">norm_attn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_ffn</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">nn</span><span class="o">.</span><span class="n">RMSNorm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="o">**</span><span class="n">norm_kwargs</span><span class="p">),</span>
+                    <span class="n">nn</span><span class="o">.</span><span class="n">RMSNorm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="o">**</span><span class="n">norm_kwargs</span><span class="p">),</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">config</span><span class="o">.</span><span class="n">norm_design</span> <span class="o">==</span> <span class="s2">&quot;both&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pre_norm_attn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pre_norm_ffn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">post_norm_attn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">post_norm_ffn</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">nn</span><span class="o">.</span><span class="n">RMSNorm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="o">**</span><span class="n">norm_kwargs</span><span class="p">),</span>
+                    <span class="n">nn</span><span class="o">.</span><span class="n">RMSNorm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="o">**</span><span class="n">norm_kwargs</span><span class="p">),</span>
+                    <span class="n">nn</span><span class="o">.</span><span class="n">RMSNorm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="o">**</span><span class="n">norm_kwargs</span><span class="p">),</span>
+                    <span class="n">nn</span><span class="o">.</span><span class="n">RMSNorm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="o">**</span><span class="n">norm_kwargs</span><span class="p">),</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid norm_design: </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">norm_design</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">norm_class</span> <span class="o">==</span> <span class="s2">&quot;layer_norm&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">norm_design</span> <span class="o">==</span> <span class="s2">&quot;pre_norm&quot;</span> <span class="ow">or</span> <span class="n">config</span><span class="o">.</span><span class="n">norm_design</span> <span class="o">==</span> <span class="s2">&quot;post_norm&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">norm_attn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_ffn</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="o">**</span><span class="n">norm_kwargs</span><span class="p">),</span>
+                    <span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="o">**</span><span class="n">norm_kwargs</span><span class="p">),</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">config</span><span class="o">.</span><span class="n">norm_design</span> <span class="o">==</span> <span class="s2">&quot;both&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pre_norm_attn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pre_norm_ffn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">post_norm_attn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">post_norm_ffn</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="o">**</span><span class="n">norm_kwargs</span><span class="p">),</span>
+                    <span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="o">**</span><span class="n">norm_kwargs</span><span class="p">),</span>
+                    <span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="o">**</span><span class="n">norm_kwargs</span><span class="p">),</span>
+                    <span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="o">**</span><span class="n">norm_kwargs</span><span class="p">),</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid norm_design: </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">norm_design</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">get_layer_type</span><span class="p">(</span><span class="n">norm_class</span><span class="p">)</span> <span class="o">==</span> <span class="n">LayerType</span><span class="o">.</span><span class="n">NN_MODULE</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">norm_design</span> <span class="o">==</span> <span class="s2">&quot;pre_norm&quot;</span> <span class="ow">or</span> <span class="n">config</span><span class="o">.</span><span class="n">norm_design</span> <span class="o">==</span> <span class="s2">&quot;post_norm&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">norm_attn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_ffn</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">norm_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="o">**</span><span class="n">norm_kwargs</span><span class="p">),</span>
+                    <span class="n">norm_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="o">**</span><span class="n">norm_kwargs</span><span class="p">),</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">config</span><span class="o">.</span><span class="n">norm_design</span> <span class="o">==</span> <span class="s2">&quot;both&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pre_norm_attn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pre_norm_ffn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">post_norm_attn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">post_norm_ffn</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">norm_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="o">**</span><span class="n">norm_kwargs</span><span class="p">),</span>
+                    <span class="n">norm_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="o">**</span><span class="n">norm_kwargs</span><span class="p">),</span>
+                    <span class="n">norm_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="o">**</span><span class="n">norm_kwargs</span><span class="p">),</span>
+                    <span class="n">norm_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="o">**</span><span class="n">norm_kwargs</span><span class="p">),</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid norm_design: </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">norm_design</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown normalization class: </span><span class="si">{</span><span class="n">norm_class</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TransformerBlock.forward">
+<a class="viewcode-back" href="../../api.html#transformer.transformer.TransformerBlock.forward">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">attn_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">pos</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">flash_attn</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">attention</span><span class="o">.</span><span class="n">SDPBackend</span><span class="p">],</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">attention</span><span class="o">.</span><span class="n">SDPBackend</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="kc">False</span><span class="p">,</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">attention</span><span class="o">.</span><span class="n">SDPBackend</span><span class="o">.</span><span class="n">FLASH_ATTENTION</span><span class="p">,</span>
+            <span class="kc">False</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">return_states</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">cache</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">encoder_hidden_states</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">encoder_attn_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">encoder_pos</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">use_cache</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]],</span> <span class="n">Dict</span><span class="p">]:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Forward pass of the transformer block.</span>
+
+<span class="sd">        :param x: Input tensor of shape :math:`(B, N, D)`.</span>
+<span class="sd">        :type x: torch.Tensor</span>
+
+<span class="sd">        :param attn_mask: Attention mask for the Attention block.</span>
+<span class="sd">        :type attn_mask: torch.Tensor, optional</span>
+
+<span class="sd">        :param pos: Position indices for Positional Encoding (RoPE, PartialRoPE, etc.).</span>
+<span class="sd">            Shape :math:`(N,)` or :math:`(B, N)`.</span>
+<span class="sd">        :type pos: torch.Tensor, optional</span>
+
+<span class="sd">        :param flash_attn: Tuple of Arguments for Flash Attention.</span>
+<span class="sd">        :type flash_attn: Tuple[bool, Union[list[torch.nn.attention.SDPBackend], torch.nn.attention.SDPBackend], bool], optional</span>
+
+<span class="sd">        :param return_states: If True, return a dictionary of intermediate outputs. Default: False</span>
+<span class="sd">        :type return_states: bool, optional</span>
+
+<span class="sd">        :param cache: Optional KV cache tuple `(k_prev, v_prev)` for incremental decoding.</span>
+<span class="sd">            Only used by MHA and GQA attention types.</span>
+<span class="sd">        :type cache: Tuple[torch.Tensor, torch.Tensor], optional</span>
+
+<span class="sd">        :param encoder_hidden_states: Encoder output tensor of shape :math:`(B, L_{enc}, D)`.</span>
+<span class="sd">            Only used when this block has CrossAttention.</span>
+<span class="sd">        :type encoder_hidden_states: torch.Tensor, optional</span>
+
+<span class="sd">        :param encoder_attn_mask: Attention mask for cross-attention to encoder.</span>
+<span class="sd">        :type encoder_attn_mask: torch.Tensor, optional</span>
+
+<span class="sd">        :param encoder_pos: Position indices for encoder hidden states (used by CrossAttention).</span>
+<span class="sd">        :type encoder_pos: torch.Tensor, optional</span>
+
+<span class="sd">        :param use_cache: Whether to return KV cache. Defaults to None which uses config setting.</span>
+<span class="sd">        :type use_cache: bool, optional</span>
+
+<span class="sd">        :return: Output tensor of shape :math:`(B, N, D)` if not return_states and no cache,</span>
+<span class="sd">            else a dict containing the keys: &quot;output&quot;, &quot;attn_output&quot; and &quot;ffn_output&quot;.</span>
+<span class="sd">            If use_cache is True or cache is provided, returns a tuple `(output, new_cache)`.</span>
+<span class="sd">        :rtype: Union[torch.Tensor, Tuple[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]], Dict]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">extract</span><span class="p">(</span><span class="n">out</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Helper to extract output tensor from module return (handles dict vs tensor)&quot;&quot;&quot;</span>
+            <span class="k">return</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">return_states</span> <span class="k">else</span> <span class="n">out</span>
+
+        <span class="n">attn</span><span class="p">,</span> <span class="n">ffn</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="n">attn_new_cache</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">should_return_cache</span> <span class="o">=</span> <span class="n">use_cache</span> <span class="ow">or</span> <span class="n">cache</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_cross_attention</span><span class="p">:</span>
+            <span class="c1"># CrossAttention uses (queries, kv) interface with pos_q/pos_k</span>
+            <span class="c1"># Convert encoder_attn_mask from (B, Lk) to proper cross-attention mask format</span>
+            <span class="n">cross_attn_mask</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">encoder_attn_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># encoder_attn_mask is (B, Lk) where True means masked/padding</span>
+                <span class="c1"># We need to expand it to (B, 1, Lq, Lk) for broadcast across heads</span>
+                <span class="n">B_enc</span><span class="p">,</span> <span class="n">Lk</span> <span class="o">=</span> <span class="n">encoder_attn_mask</span><span class="o">.</span><span class="n">shape</span>
+                <span class="n">Lq</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="c1"># Expand to (B, 1, 1, Lk) then broadcast to (B, 1, Lq, Lk)</span>
+                <span class="n">cross_attn_mask</span> <span class="o">=</span> <span class="n">encoder_attn_mask</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># (B, 1, 1, Lk)</span>
+            <span class="n">attn_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;mask&quot;</span><span class="p">:</span> <span class="n">cross_attn_mask</span><span class="p">,</span> <span class="s2">&quot;flash_attn&quot;</span><span class="p">:</span> <span class="n">flash_attn</span><span class="p">}</span>
+            <span class="k">if</span> <span class="n">encoder_hidden_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># Pass decoder positions as pos_q and encoder positions as pos_k</span>
+                <span class="n">attn_kwargs</span><span class="p">[</span><span class="s2">&quot;pos_q&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pos</span>
+                <span class="n">attn_kwargs</span><span class="p">[</span><span class="s2">&quot;pos_k&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">encoder_pos</span> <span class="k">if</span> <span class="n">encoder_pos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span>
+                    <span class="n">encoder_hidden_states</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">device</span>
+                <span class="p">)</span>
+                <span class="n">attn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attn</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">norm_attn</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+                    <span class="n">encoder_hidden_states</span><span class="p">,</span>
+                    <span class="n">return_states</span><span class="o">=</span><span class="n">return_states</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">attn_kwargs</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;encoder_hidden_states required for CrossAttention&quot;</span><span class="p">)</span>
+            <span class="n">attn_output</span> <span class="o">=</span> <span class="n">attn</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attn</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="k">else</span> <span class="n">attn</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">attn_new_cache</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">extract</span><span class="p">(</span><span class="n">attn_output</span><span class="p">)</span>
+
+            <span class="n">ffn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ffn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norm_ffn</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">return_states</span><span class="o">=</span><span class="n">return_states</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">extract</span><span class="p">(</span><span class="n">ffn</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_design</span> <span class="o">==</span> <span class="s2">&quot;pre_norm&quot;</span><span class="p">:</span>
+            <span class="n">attn_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;mask&quot;</span><span class="p">:</span> <span class="n">attn_mask</span><span class="p">,</span> <span class="s2">&quot;pos&quot;</span><span class="p">:</span> <span class="n">pos</span><span class="p">,</span> <span class="s2">&quot;flash_attn&quot;</span><span class="p">:</span> <span class="n">flash_attn</span><span class="p">,</span> <span class="s2">&quot;cache&quot;</span><span class="p">:</span> <span class="n">cache</span><span class="p">}</span>
+            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">attn</span><span class="p">,</span> <span class="s2">&quot;supports_cache&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+                <span class="n">attn_kwargs</span><span class="p">[</span><span class="s2">&quot;return_cache&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">should_return_cache</span>
+            <span class="n">attn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attn</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">norm_attn</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+                <span class="n">return_states</span><span class="o">=</span><span class="n">return_states</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">attn_kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attn</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+                <span class="n">attn_output</span><span class="p">,</span> <span class="n">attn_new_cache</span> <span class="o">=</span> <span class="n">attn</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">attn_output</span> <span class="o">=</span> <span class="n">attn</span>
+                <span class="n">attn_new_cache</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">extract</span><span class="p">(</span><span class="n">attn_output</span><span class="p">)</span>
+
+            <span class="n">ffn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ffn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norm_ffn</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">return_states</span><span class="o">=</span><span class="n">return_states</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">extract</span><span class="p">(</span><span class="n">ffn</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_design</span> <span class="o">==</span> <span class="s2">&quot;post_norm&quot;</span><span class="p">:</span>
+            <span class="n">attn_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;mask&quot;</span><span class="p">:</span> <span class="n">attn_mask</span><span class="p">,</span> <span class="s2">&quot;pos&quot;</span><span class="p">:</span> <span class="n">pos</span><span class="p">,</span> <span class="s2">&quot;flash_attn&quot;</span><span class="p">:</span> <span class="n">flash_attn</span><span class="p">,</span> <span class="s2">&quot;cache&quot;</span><span class="p">:</span> <span class="n">cache</span><span class="p">}</span>
+            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">attn</span><span class="p">,</span> <span class="s2">&quot;supports_cache&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+                <span class="n">attn_kwargs</span><span class="p">[</span><span class="s2">&quot;return_cache&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">should_return_cache</span>
+            <span class="n">attn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">return_states</span><span class="o">=</span><span class="n">return_states</span><span class="p">,</span> <span class="o">**</span><span class="n">attn_kwargs</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attn</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+                <span class="n">attn_output</span><span class="p">,</span> <span class="n">attn_new_cache</span> <span class="o">=</span> <span class="n">attn</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">attn_output</span> <span class="o">=</span> <span class="n">attn</span>
+                <span class="n">attn_new_cache</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_attn</span><span class="p">(</span><span class="n">extract</span><span class="p">(</span><span class="n">attn_output</span><span class="p">))</span>
+
+            <span class="n">ffn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ffn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">return_states</span><span class="o">=</span><span class="n">return_states</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_ffn</span><span class="p">(</span><span class="n">extract</span><span class="p">(</span><span class="n">ffn</span><span class="p">))</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_design</span> <span class="o">==</span> <span class="s2">&quot;both&quot;</span><span class="p">:</span>
+            <span class="n">attn_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;mask&quot;</span><span class="p">:</span> <span class="n">attn_mask</span><span class="p">,</span> <span class="s2">&quot;pos&quot;</span><span class="p">:</span> <span class="n">pos</span><span class="p">,</span> <span class="s2">&quot;flash_attn&quot;</span><span class="p">:</span> <span class="n">flash_attn</span><span class="p">,</span> <span class="s2">&quot;cache&quot;</span><span class="p">:</span> <span class="n">cache</span><span class="p">}</span>
+            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">attn</span><span class="p">,</span> <span class="s2">&quot;supports_cache&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+                <span class="n">attn_kwargs</span><span class="p">[</span><span class="s2">&quot;return_cache&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">should_return_cache</span>
+            <span class="n">attn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attn</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pre_norm_attn</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+                <span class="n">return_states</span><span class="o">=</span><span class="n">return_states</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">attn_kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attn</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+                <span class="n">attn_output</span><span class="p">,</span> <span class="n">attn_new_cache</span> <span class="o">=</span> <span class="n">attn</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">attn_output</span> <span class="o">=</span> <span class="n">attn</span>
+                <span class="n">attn_new_cache</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">post_norm_attn</span><span class="p">(</span><span class="n">extract</span><span class="p">(</span><span class="n">attn_output</span><span class="p">))</span>
+
+            <span class="n">ffn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ffn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pre_norm_ffn</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">return_states</span><span class="o">=</span><span class="n">return_states</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">post_norm_ffn</span><span class="p">(</span><span class="n">extract</span><span class="p">(</span><span class="n">ffn</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid norm_design: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">norm_design</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Return cache if attention provided one (either from existing cache or newly built)</span>
+        <span class="k">if</span> <span class="n">attn_new_cache</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">return_states</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="s2">&quot;attn_output&quot;</span><span class="p">:</span> <span class="n">attn</span><span class="p">,</span> <span class="s2">&quot;ffn_output&quot;</span><span class="p">:</span> <span class="n">ffn</span><span class="p">}</span>
+                <span class="k">return</span> <span class="n">result</span><span class="p">,</span> <span class="n">attn_new_cache</span>
+            <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">attn_new_cache</span>
+
+        <span class="k">if</span> <span class="n">return_states</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="s2">&quot;attn_output&quot;</span><span class="p">:</span> <span class="n">attn</span><span class="p">,</span> <span class="s2">&quot;ffn_output&quot;</span><span class="p">:</span> <span class="n">ffn</span><span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">x</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Transformer">
+<a class="viewcode-back" href="../../api.html#transformer.transformer.Transformer">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Transformer</span><span class="p">(</span><span class="n">PreTrainedModel</span><span class="p">,</span> <span class="n">GenerationMixin</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Transformer language model, compatible with the HuggingFace interface.</span>
+
+<span class="sd">    :param config: Model configuration.</span>
+<span class="sd">    :type config: TransformerConfig</span>
+
+<span class="sd">    :param attn_kwargs: Additional Keyword Arguments passed to the Attention Module. Default: ``{&quot;pos_encoding_kwargs&quot;: **pos_encoding_kwargs}``</span>
+<span class="sd">    :type attn_kwargs: Dict, optional</span>
+
+<span class="sd">    :param pos_encoding_kwargs: Additional Arguments for Positional Encoding. Default: ``{}``</span>
+<span class="sd">        Example: ``{&quot;rope_base&quot;: 12000, &quot;persistent&quot;: False}``</span>
+<span class="sd">    :type pos_encoding_kwargs: Dict, optional</span>
+
+<span class="sd">    :param ffn_kwargs: Additional Keyword Arguments passed to the Feed-Forward Module. Default: ``{}``</span>
+<span class="sd">    :type ffn_kwargs: Dict, optional</span>
+
+<span class="sd">    :param norm_kwargs: Additional Keyword Arguments passed to the Normalization Layer. Default: ``{}``</span>
+<span class="sd">    :type norm_kwargs: Dict, optional</span>
+
+<span class="sd">    :param patch_size: Patch size for Vision Transformer (ViT) compatibility. If specified, adds a patch embedding layer.</span>
+<span class="sd">    :type patch_size: Optional[int], optional</span>
+
+<span class="sd">    :param img_size: Image size for ViT compatibility. Used with patch_size to compute number of patches.</span>
+<span class="sd">    :type img_size: Optional[Union[int, Tuple[int, int]]], optional</span>
+
+<span class="sd">    :param num_channels: Number of input channels for ViT. Default: 3 (RGB).</span>
+<span class="sd">    :type num_channels: int, optional</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">config_class</span> <span class="o">=</span> <span class="n">TransformerConfig</span>
+    <span class="n">base_model_prefix</span> <span class="o">=</span> <span class="s2">&quot;transformer&quot;</span>
+
+    <span class="n">supports_gradient_checkpointing</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">_supports_flash_attn</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">_supports_sdpa</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="n">input_modalities</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="s2">&quot;image&quot;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="Transformer.__init__">
+<a class="viewcode-back" href="../../api.html#transformer.transformer.Transformer.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">config</span><span class="p">,</span>
+        <span class="n">attn_kwargs</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="p">{},</span>
+        <span class="n">pos_encoding_kwargs</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="p">{},</span>
+        <span class="n">ffn_kwargs</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="p">{},</span>
+        <span class="n">norm_kwargs</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="p">{},</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">d_model</span>
+        <span class="c1"># Vision Transformer (ViT) support - read parameters from config</span>
+        <span class="n">patch_size</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s1">&#39;patch_size&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">img_size</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s1">&#39;img_size&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">num_channels</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s1">&#39;in_channels&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">patch_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">img_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">img_size</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                <span class="n">img_size</span> <span class="o">=</span> <span class="p">(</span><span class="n">img_size</span><span class="p">,</span> <span class="n">img_size</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_patches</span> <span class="o">=</span> <span class="p">(</span><span class="n">img_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="n">patch_size</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">img_size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">//</span> <span class="n">patch_size</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">patch_embed</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">num_channels</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="n">patch_size</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="n">patch_size</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cls_token</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">d_model</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pos_embed</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_patches</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">d_model</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">patch_embed</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cls_token</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pos_embed</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_patches</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">emb</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Embedding</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">vocab_size</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">d_model</span><span class="p">)</span>
+        <span class="n">block_class</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">block_class</span> <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">block_class</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">TransformerBlock</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">block_class</span><span class="p">(</span>
+                    <span class="n">config</span><span class="p">,</span>
+                    <span class="p">(</span>
+                        <span class="n">attn_kwargs</span>
+                        <span class="k">if</span> <span class="n">attn_kwargs</span> <span class="o">!=</span> <span class="p">{}</span>
+                        <span class="k">else</span> <span class="p">{</span>
+                            <span class="s2">&quot;pos_encoding_kwargs&quot;</span><span class="p">:</span> <span class="p">(</span>
+                                <span class="n">pos_encoding_kwargs</span> <span class="k">if</span> <span class="n">pos_encoding_kwargs</span> <span class="o">!=</span> <span class="p">{}</span> <span class="k">else</span> <span class="p">{</span><span class="s2">&quot;rope_base&quot;</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">rope_base</span><span class="p">}</span>
+                            <span class="p">)</span>
+                        <span class="p">}</span>
+                    <span class="p">),</span>
+                    <span class="n">ffn_kwargs</span><span class="p">,</span>
+                    <span class="n">norm_kwargs</span><span class="p">,</span>
+                    <span class="n">i</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">n_layer</span><span class="p">)</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm_out</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">RMSNorm</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">d_model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lm_head</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">vocab_size</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">lm_head_bias</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">tied_weights</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lm_head</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">emb</span><span class="o">.</span><span class="n">weight</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lm_head</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">normal_</span><span class="p">(</span><span class="n">mean</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="mf">0.025</span><span class="p">)</span>
+
+        <span class="c1"># Initialize ViT-specific parameters</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">patch_embed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">normal_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cls_token</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="mf">0.02</span><span class="p">)</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">normal_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos_embed</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="mf">0.02</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">post_init</span><span class="p">()</span></div>
+
+
+    <span class="nd">@torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">()</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the weights.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">)):</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">normal_</span><span class="p">(</span><span class="n">module</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="mf">0.025</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">module</span><span class="o">.</span><span class="n">bias</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">zeros_</span><span class="p">(</span><span class="n">module</span><span class="o">.</span><span class="n">bias</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">nn</span><span class="o">.</span><span class="n">Embedding</span><span class="p">):</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">normal_</span><span class="p">(</span><span class="n">module</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="mf">0.025</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Transformer.forward">
+<a class="viewcode-back" href="../../api.html#transformer.transformer.Transformer.forward">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">input_ids</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">LongTensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">images</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">labels</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">LongTensor</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">is_causal</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">attn_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">pos</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">flash_attn</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">attention</span><span class="o">.</span><span class="n">SDPBackend</span><span class="p">],</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">attention</span><span class="o">.</span><span class="n">SDPBackend</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="kc">False</span><span class="p">,</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">attention</span><span class="o">.</span><span class="n">SDPBackend</span><span class="o">.</span><span class="n">FLASH_ATTENTION</span><span class="p">,</span>
+            <span class="kc">False</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">return_states</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">loss_kwargs</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="p">{},</span>
+        <span class="n">past_key_values</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">use_cache</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">encoder_hidden_states</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">encoder_attn_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CausalLMOutput</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Forward pass of the Transformer model.</span>
+
+<span class="sd">        :param input_ids: Token indices of shape :math:`(B, N)` for text input. Required for text modality.</span>
+<span class="sd">        :type input_ids: torch.LongTensor, optional</span>
+
+<span class="sd">        :param images: Image tensor of shape :math:`(B, C, H, W)` for vision input. Required for image modality.</span>
+<span class="sd">        :type images: torch.Tensor, optional</span>
+
+<span class="sd">        :param labels: Target token indices for loss computation, same shape as input_ids.</span>
+<span class="sd">        :type labels: torch.LongTensor, optional</span>
+
+<span class="sd">        :param is_causal: If True, create a causal attention mask. Default: True</span>
+<span class="sd">        :type is_causal: bool, optional</span>
+
+<span class="sd">        :param attn_mask: Custom attention mask. If None and is_causal, a upper triangular causal mask is generated.</span>
+<span class="sd">        :type attn_mask: torch.Tensor, optional</span>
+
+<span class="sd">        :param pos: Position indices. If None, computed from sequence length or cache length.</span>
+<span class="sd">        :type pos: torch.Tensor, optional</span>
+
+<span class="sd">        :param flash_attn: Tuple of Arguments for Flash Attention.</span>
+<span class="sd">        :type flash_attn: Tuple[bool, Union[list[torch.nn.attention.SDPBackend], torch.nn.attention.SDPBackend], bool], optional</span>
+
+<span class="sd">        :param return_states: If True, return hidden states of all layers. Default: False</span>
+<span class="sd">        :type return_states: bool, optional</span>
+
+<span class="sd">        :param loss_kwargs: Additional keyword arguments passed to `F.cross_entropy` for loss computation.</span>
+<span class="sd">        :type loss_kwargs: Dict, optional</span>
+
+<span class="sd">        :param past_key_values: Pre-computed KV cache from previous generation steps.</span>
+<span class="sd">            Tuple of tuples, one per layer, each containing (key, value) tensors of shape (B, H, L, d).</span>
+<span class="sd">        :type past_key_values: Tuple[Tuple[torch.Tensor, torch.Tensor], ...], optional</span>
+
+<span class="sd">        :param use_cache: Whether to use KV cache. Defaults to config.use_cache if not specified.</span>
+<span class="sd">        :type use_cache: bool, optional</span>
+
+<span class="sd">        :param encoder_hidden_states: Encoder output for encoder-decoder models.</span>
+<span class="sd">        :type encoder_hidden_states: torch.Tensor, optional</span>
+
+<span class="sd">        :param encoder_attn_mask: Mask for encoder hidden states.</span>
+<span class="sd">        :type encoder_attn_mask: torch.Tensor, optional</span>
+
+<span class="sd">        :param kwargs: Additional keyword arguments</span>
+<span class="sd">        :type kwargs: Dict, optional</span>
+
+<span class="sd">        :return: CausalLMOutput containing loss (if labels given), logits, and optionally past_key_values and hidden_states.</span>
+<span class="sd">        :rtype: CausalLMOutput</span>
+<span class="sd">        .. note::</span>
+<span class="sd">            Either ``input_ids`` (for text) or ``images`` (for vision) must be provided. </span>
+<span class="sd">            The model automatically detects the modality based on which input is provided.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Validate input: exactly one of input_ids or images must be provided</span>
+        <span class="k">if</span> <span class="n">input_ids</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">images</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Either input_ids (for text) or images (for vision) must be provided&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">input_ids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">images</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Only one of input_ids or images should be provided at a time&quot;</span><span class="p">)</span>
+        <span class="n">B</span> <span class="o">=</span> <span class="p">(</span><span class="n">input_ids</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">input_ids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">images</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">use_cache</span> <span class="o">=</span> <span class="n">use_cache</span> <span class="k">if</span> <span class="n">use_cache</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">use_cache</span>
+
+        <span class="c1"># Handle ViT image input if patch_embed is available and images are provided</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">patch_embed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">images</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Input is an image tensor of shape (B, C, H, W)</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">patch_embed</span><span class="p">(</span><span class="n">images</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># (B, num_patches, D)</span>
+            <span class="n">cls_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cls_token</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">cls_tokens</span><span class="p">,</span> <span class="n">x</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># (B, num_patches+1, D)</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos_embed</span>
+            <span class="n">N</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># Sequence length for images</span>
+            <span class="n">input_embs</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="n">input_ids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Standard text input</span>
+            <span class="n">input_embs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">emb</span><span class="p">(</span><span class="n">input_ids</span><span class="p">)</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">input_embs</span>
+            <span class="n">N</span> <span class="o">=</span> <span class="n">input_ids</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># Sequence length for text</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Image input requires patch_embed to be configured (patch_size and img_size must be set)&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Compute position indices considering cache length</span>
+        <span class="k">if</span> <span class="n">past_key_values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">past_key_values</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">cache_len</span> <span class="o">=</span> <span class="n">past_key_values</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>  <span class="c1"># Get cached sequence length from first layer&#39;s key</span>
+            <span class="n">total_len</span> <span class="o">=</span> <span class="n">cache_len</span> <span class="o">+</span> <span class="n">N</span>
+            <span class="k">if</span> <span class="n">pos</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">pos</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">cache_len</span><span class="p">,</span> <span class="n">total_len</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">out</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cache_len</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="n">pos</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">pos</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">out</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
+        <span class="c1"># Generate causal mask covering full sequence length (cached + new)</span>
+        <span class="c1"># For incremental decoding with N=1 query token and L_total cached tokens,</span>
+        <span class="c1"># the mask should be (N, L_total) to mask out future positions from each query</span>
+        <span class="n">full_seq_len</span> <span class="o">=</span> <span class="n">cache_len</span> <span class="o">+</span> <span class="n">N</span>
+        <span class="k">if</span> <span class="n">attn_mask</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">is_causal</span><span class="p">:</span>
+            <span class="c1"># Create mask of shape (N, full_seq_len) where True means &quot;mask this position&quot;</span>
+            <span class="c1"># For causal masking, query at position i can only attend to positions &lt;= i</span>
+            <span class="n">attn_mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">full_seq_len</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">out</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+                <span class="c1"># Query at position (cache_len + i) can attend to positions 0 through (cache_len + i)</span>
+                <span class="c1"># So we mask positions (cache_len + i + 1) onwards</span>
+                <span class="n">attn_mask</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">cache_len</span> <span class="o">+</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">hidden_states</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">return_states</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="c1"># Initialize new_past_key_values list if use_cache is enabled</span>
+        <span class="n">new_past_key_values</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">use_cache</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">block</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blocks</span><span class="p">):</span>
+            <span class="n">layer_cache</span> <span class="o">=</span> <span class="n">past_key_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">if</span> <span class="n">past_key_values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+
+            <span class="c1"># When building cache (first pass), we still need cache returned</span>
+            <span class="c1"># Pass a special flag or handle differently</span>
+            <span class="n">build_cache</span> <span class="o">=</span> <span class="n">use_cache</span> <span class="ow">and</span> <span class="n">layer_cache</span> <span class="ow">is</span> <span class="kc">None</span>
+
+            <span class="n">block_out</span> <span class="o">=</span> <span class="n">block</span><span class="p">(</span>
+                <span class="n">out</span><span class="p">,</span>
+                <span class="n">attn_mask</span><span class="o">=</span><span class="n">attn_mask</span><span class="p">,</span>
+                <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span>
+                <span class="n">flash_attn</span><span class="o">=</span><span class="n">flash_attn</span><span class="p">,</span>
+                <span class="n">return_states</span><span class="o">=</span><span class="n">return_states</span><span class="p">,</span>
+                <span class="n">cache</span><span class="o">=</span><span class="n">layer_cache</span><span class="p">,</span>
+                <span class="n">encoder_hidden_states</span><span class="o">=</span><span class="n">encoder_hidden_states</span><span class="p">,</span>
+                <span class="n">encoder_attn_mask</span><span class="o">=</span><span class="n">encoder_attn_mask</span><span class="p">,</span>
+                <span class="n">use_cache</span><span class="o">=</span><span class="n">use_cache</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">use_cache</span><span class="p">:</span>
+                <span class="c1"># Block should return (output, new_cache) when use_cache is True</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">block_out</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">block_out</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">out</span><span class="p">,</span> <span class="n">new_cache</span> <span class="o">=</span> <span class="n">block_out</span>
+                    <span class="n">new_past_key_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_cache</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">out</span> <span class="o">=</span> <span class="n">block_out</span>
+
+            <span class="k">if</span> <span class="n">return_states</span><span class="p">:</span>
+                <span class="c1"># Extract output tensor from block_out consistently</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">block_out</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">block_out</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="c1"># Cache was returned, extract output from first element</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">block_out</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
+                        <span class="n">hidden_states</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">block_out</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;output&quot;</span><span class="p">])</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">hidden_states</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">block_out</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">block_out</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                    <span class="n">hidden_states</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">block_out</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">hidden_states</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_out</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+        <span class="n">logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lm_head</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+        <span class="n">loss</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">labels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">cross_entropy</span><span class="p">(</span><span class="n">logits</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">logits</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)),</span> <span class="n">labels</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="o">**</span><span class="n">loss_kwargs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">CausalLMOutput</span><span class="p">(</span>
+            <span class="n">loss</span><span class="o">=</span><span class="n">loss</span><span class="p">,</span>
+            <span class="n">logits</span><span class="o">=</span><span class="n">logits</span><span class="p">,</span>
+            <span class="n">past_key_values</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">new_past_key_values</span><span class="p">)</span> <span class="k">if</span> <span class="n">new_past_key_values</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">hidden_states</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">hidden_states</span><span class="p">)</span> <span class="k">if</span> <span class="n">return_states</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Transformer.get_input_embeddings">
+<a class="viewcode-back" href="../../api.html#transformer.transformer.Transformer.get_input_embeddings">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_input_embeddings</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nn</span><span class="o">.</span><span class="n">Embedding</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the input embeddings layer.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">emb</span></div>
+
+
+<div class="viewcode-block" id="Transformer.set_input_embeddings">
+<a class="viewcode-back" href="../../api.html#transformer.transformer.Transformer.set_input_embeddings">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_input_embeddings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">embeddings</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Embedding</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the input embeddings layer.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">emb</span> <span class="o">=</span> <span class="n">embeddings</span></div>
+
+
+<div class="viewcode-block" id="Transformer.get_num_params">
+<a class="viewcode-back" href="../../api.html#transformer.transformer.Transformer.get_num_params">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_num_params</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the number of trainable parameters.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">()</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">requires_grad</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Transformer.from_pretrained">
+<a class="viewcode-back" href="../../api.html#transformer.transformer.Transformer.from_pretrained">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_pretrained</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">pretrained_model_name_or_path</span><span class="p">,</span> <span class="o">*</span><span class="n">model_args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load a pretrained model from a local directory or HuggingFace Hub.</span>
+
+<span class="sd">        :param pretrained_model_name_or_path: Path to local model directory or HF Hub model ID.</span>
+<span class="sd">        :type pretrained_model_name_or_path: str</span>
+
+<span class="sd">        :param model_args: Additional positional arguments passed to PreTrainedModel.from_pretrained.</span>
+<span class="sd">        :type model_args: tuple</span>
+
+<span class="sd">        :param kwargs: Additional keyword arguments passed to PreTrainedModel.from_pretrained.</span>
+<span class="sd">        :type kwargs: dict</span>
+
+<span class="sd">        :return: Loaded Transformer model.</span>
+<span class="sd">        :rtype: Transformer</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Use parent class method from PreTrainedModel</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">pretrained_model_name_or_path</span><span class="p">,</span> <span class="o">*</span><span class="n">model_args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Transformer.push_to_hub">
+<a class="viewcode-back" href="../../api.html#transformer.transformer.Transformer.push_to_hub">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">push_to_hub</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">repo_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">commit_message</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Push model to hub&quot;</span><span class="p">,</span>
+        <span class="n">private</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">token</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_shard_size</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;5GB&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Push the model and its configuration to the HuggingFace Hub.</span>
+
+<span class="sd">        :param repo_id: Repository ID on the Hub (e.g., \&quot;username/my-model\&quot;).</span>
+<span class="sd">        :type repo_id: str</span>
+
+<span class="sd">        :param config: Optional config object. If None, uses self.config.</span>
+<span class="sd">        :type config: PretrainedConfig, optional</span>
+
+<span class="sd">        :param commit_message: Commit message for the upload. Default: \&quot;Push model to hub\&quot;</span>
+<span class="sd">        :type commit_message: str, optional</span>
+
+<span class="sd">        :param private: Whether to create a private repository. Default: False</span>
+<span class="sd">        :type private: bool, optional</span>
+
+<span class="sd">        :param token: HuggingFace API token. If None, uses cached token.</span>
+<span class="sd">        :type token: str, optional</span>
+
+<span class="sd">        :param max_shard_size: Maximum size per shard when sharding. Default: \&quot;5GB\&quot;</span>
+<span class="sd">        :type max_shard_size: str, optional</span>
+
+<span class="sd">        :param kwargs: Additional keyword arguments passed to PreTrainedModel.push_to_hub.</span>
+<span class="sd">        :type kwargs: dict</span>
+
+<span class="sd">        :return: URL to the uploaded model repository.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">push_to_hub</span><span class="p">(</span>
+            <span class="n">repo_id</span><span class="o">=</span><span class="n">repo_id</span><span class="p">,</span>
+            <span class="n">config</span><span class="o">=</span><span class="n">config</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span>
+            <span class="n">commit_message</span><span class="o">=</span><span class="n">commit_message</span><span class="p">,</span>
+            <span class="n">private</span><span class="o">=</span><span class="n">private</span><span class="p">,</span>
+            <span class="n">token</span><span class="o">=</span><span class="n">token</span><span class="p">,</span>
+            <span class="n">max_shard_size</span><span class="o">=</span><span class="n">max_shard_size</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span></div>
+</div>
+
+
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, Leinier Orama Fernández
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="../../_static/documentation_options.js?v=1dd76d02"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>
