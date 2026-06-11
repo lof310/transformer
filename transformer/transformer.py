@@ -271,7 +271,6 @@ class TransformerBlock(GradientCheckpointingLayer):
                 Lq = x.shape[1]
                 # Expand to (B, 1, 1, Lk) then broadcast to (B, 1, Lq, Lk)
                 cross_attn_mask = encoder_attn_mask.unsqueeze(1).unsqueeze(2)  # (B, 1, 1, Lk)
-            
             attn_kwargs = {"mask": cross_attn_mask, "flash_attn": flash_attn}
             if encoder_hidden_states is not None:
                 # Pass decoder positions as pos_q and encoder positions as pos_k
@@ -412,12 +411,10 @@ class Transformer(PreTrainedModel, GenerationMixin):
         super().__init__(config)
         self.config = config
         self.d_model = config.d_model
-        
         # Vision Transformer (ViT) support - read parameters from config
         patch_size = getattr(config, 'patch_size', None)
         img_size = getattr(config, 'img_size', None)
         num_channels = getattr(config, 'in_channels', 3)
-        
         if patch_size is not None and img_size is not None:
             if isinstance(img_size, int):
                 img_size = (img_size, img_size)
@@ -548,7 +545,6 @@ class Transformer(PreTrainedModel, GenerationMixin):
 
         :return: CausalLMOutput containing loss (if labels given), logits, and optionally past_key_values and hidden_states.
         :rtype: CausalLMOutput
-        
         .. note::
             Either ``input_ids`` (for text) or ``images`` (for vision) must be provided. 
             The model automatically detects the modality based on which input is provided.
@@ -558,7 +554,6 @@ class Transformer(PreTrainedModel, GenerationMixin):
             raise ValueError("Either input_ids (for text) or images (for vision) must be provided")
         if input_ids is not None and images is not None:
             raise ValueError("Only one of input_ids or images should be provided at a time")
-        
         B = (input_ids.shape[0] if input_ids is not None else images.shape[0])
         use_cache = use_cache if use_cache is not None else self.config.use_cache
 

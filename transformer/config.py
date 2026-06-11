@@ -174,7 +174,6 @@ class TransformerConfig(PretrainedConfig):
 
         self.use_cache = use_cache
         self.is_decoder = is_decoder
-        
         # Vision Transformer (ViT) parameters
         self.patch_size = patch_size
         self.img_size = img_size
